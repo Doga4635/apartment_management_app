@@ -1,5 +1,6 @@
 import 'package:apartment_management_app/models/user_model.dart';
-import 'package:apartment_management_app/screens/login_screen.dart';
+import 'package:apartment_management_app/screens/code_enter_screen.dart';
+import 'package:apartment_management_app/screens/register_screen.dart';
 import 'package:apartment_management_app/screens/wrapper.dart';
 import 'package:apartment_management_app/services/auth.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       value: AuthService().user,
       initialData: null,
       child: const MaterialApp(
-          home: LoginScreen(),
+          home: RegisterScreen(),
       ),
     );
   }
