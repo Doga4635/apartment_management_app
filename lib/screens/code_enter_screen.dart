@@ -1,11 +1,15 @@
+import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/register_flat_screen.dart';
-import 'package:apartment_management_app/screens/register_screen.dart';
+import 'package:apartment_management_app/services/auth_supplier.dart';
+import 'package:apartment_management_app/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_management_app/constants.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pinput/pinput.dart';
+import 'package:provider/provider.dart';
 
 class CodeEnterScreen extends StatefulWidget {
-  const CodeEnterScreen({super.key});
+  final String verificationId;
+  const CodeEnterScreen({super.key, required this.verificationId});
 
   @override
   _CodeEnterScreenState createState() => _CodeEnterScreenState();
@@ -18,28 +22,36 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
     super.initState();
   }
 
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  String? otpCode;
 
   @override
   Widget build(BuildContext context) {
+    final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
+        child: isLoading == true ? const Center(child: CircularProgressIndicator(
+          color: Colors.teal,
+        )) :
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
+            Padding(
+              padding: const EdgeInsets.only(left: 30.0),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(Icons.arrow_back),
+                ),
+              ),
+            ),
+            const Icon(
               Icons.sms,
               size: 120,
               color: Colors.teal,
             ),
-            Text(
+            const Text(
               'Enter the SMS Code',
               style: TextStyle(
                 color: customTealShade900,
@@ -47,94 +59,109 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(
-              height: 15.0,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Card containing TextField
-                Card(
-                  margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 25.0),
-                  child: Container(
-                    width: 250, // Adjust the width as needed
-                    child: TextField(
-                      style: TextStyle(
-                        color: customTealShade900,
-                        fontSize: 20.0,
-                        fontFamily: 'Source Sans Pro',
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Registration Code',
-                        labelStyle: TextStyle(color: customTealShade900),
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: customTealShade900,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: customTealShade900),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        print(value);
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10.0), // Spacer between Card and button
-                // Button
-                TextButton(
-                  child: Text(
-                      'Resend a Code',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                  onPressed: _incrementCounter,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                  ),
-                ),
-              ],
-            ),
-            Text(
-              'Enter the code sent to your phone via SMS.',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 16.0,
+            const Padding(
+              padding: EdgeInsets.only(top: 10,bottom: 15),
+              child: Text(
+                'Enter the code sent to your phone via SMS.',
+                style: greyTextStyle,
               ),
             ),
-            SizedBox(
-              height: 15.0,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Pinput(
+                length: 6,
+                showCursor: true,
+                defaultPinTheme: PinTheme(
+                  width: 50,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.teal.shade200,
+                    )
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600,
+                  )
+                ),
+                onCompleted: (value) {
+                  setState(() {
+                    otpCode = value;
+                  });
+                },
+              ),
             ),
-            ElevatedButton(
-              child: Text('Submit'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const RegisterFlatScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  if(otpCode != null) {
+                    verifyOTP(context, otpCode!);
+                  }
+                  else {
+                    showSnackBar(context, "Enter 6-Digit code");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
+                ),
+                child: const Text('Submit'),
+              ),
+            ),
+            const Padding(
+                padding: EdgeInsets.all(8.0),
+            child: Text(
+              "Didn't receive any code?",
+              style: greyTextStyle,
+            ),
+            ),
+            const Text(
+              "Resend New Code",
+              style: TextStyle(
+                color: Colors.teal,
+                fontSize: 16.0,
               ),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: () {},
         tooltip: 'Help',
-        child: const Icon(Icons.question_mark),
         backgroundColor: Colors.teal,
+        child: const Icon(Icons.question_mark),
       ),
     );
   }
+
+void verifyOTP(BuildContext context,String userOtp) {
+    final ap = Provider.of<AuthSupplier>(context,listen: false);
+    ap.verifyOtp(
+        context: context,
+        verificationId: widget.verificationId,
+        userOtp: userOtp,
+        onSuccess: () {
+          ap.checkExistingUser().then((value) async {
+            if(value == true) {
+              ap.getDataFromFirestore().then((value) => 
+                  ap.saveUserDataToSP().then((value) => 
+                      ap.setSignIn().then((value) => 
+                          Navigator.pushAndRemoveUntil(
+                              context, 
+                              MaterialPageRoute(
+                                  builder: (context) => const MainScreen()),
+                                  (route) => false))));
+            }
+            else {
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const RegisterFlatScreen()),
+                      (route) => false);
+            }
+          });
+
+        }
+    );
+}
 
 }
