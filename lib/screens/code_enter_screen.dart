@@ -107,7 +107,7 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
                 ),
-                child: const Text('Submit'),
+                child: const Text('Submit' , style: TextStyle(color: Colors.white),),
               ),
             ),
             const Padding(
@@ -131,7 +131,8 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
         onPressed: () {},
         tooltip: 'Help',
         backgroundColor: Colors.teal,
-        child: const Icon(Icons.question_mark),
+        child: const Icon(Icons.question_mark,
+        color: Colors.white,),
       ),
     );
   }

@@ -75,6 +75,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 ),
                 child: const Text(
                   'Get started',
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],

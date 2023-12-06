@@ -51,14 +51,15 @@ class _MainScreenState extends State<MainScreen> {
 
               const SizedBox(height: 16.0),
               const Text(
-                'Name-Surname: John Doe',
+                'John Doe',
                 style: TextStyle(fontSize: 18),
               ),
+              const SizedBox(height: 8.0),
               // User role
           Text(ap.userModel.role,
                 style: TextStyle(fontSize: 18),
               ),
-              const SizedBox(height: 8.0),
+              
               // Name-Surname
               const SizedBox(height: 8.0),
               // Apartment name
@@ -72,21 +73,23 @@ class _MainScreenState extends State<MainScreen> {
               ),
               ElevatedButton(
                 onPressed: () {},
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
                 child: const Text(
                   "Edit Profile",
                   style: TextStyle(
                       fontSize: 25,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontWeight: FontWeight.w400),
                 ),
               ),
               ElevatedButton(
                 onPressed: () {},
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
                 child: const Text(
                   "Add Address",
                   style: TextStyle(
                       fontSize: 25,
-                      color: Colors.black,
+                      color: Colors.white,
                       fontWeight: FontWeight.w400),
                 ),
               ),

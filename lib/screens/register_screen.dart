@@ -136,6 +136,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   child: Text(
                     'Continue',
+                    style: TextStyle(color: Colors.white),
                   ),
                   onPressed:  () => sendPhoneNumber(),
                   // {
@@ -157,7 +158,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         onPressed: () {},
         tooltip: 'Help',
         backgroundColor: Colors.teal,
-        child: const Icon(Icons.question_mark),
+        child: const Icon(Icons.question_mark,
+       color: Colors.white,),
       ),
           );
   }
