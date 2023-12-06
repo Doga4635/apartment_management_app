@@ -22,15 +22,14 @@ class _MainScreenState extends State<MainScreen> {
     final ap = Provider.of<AuthSupplier>(context,listen: false);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal,
-        title: const Text("Apartment Management App"),
+        title: const Text('Profile'),
         actions: [
           IconButton(
               onPressed: () {
                 ap.userSignOut().then((value) => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const WelcomeScreen(),
-                    ),
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen(),
+                  ),
                 ),
                 );
               },
@@ -38,18 +37,67 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(ap.userModel.role),
-            Text(ap.userModel.apartmentName),
-            Text(ap.userModel.flatNumber),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Profile picture
+              const CircleAvatar(
+                radius: 60,
+                backgroundImage: AssetImage(''),
+              ),
+
+              const SizedBox(height: 16.0),
+              const Text(
+                'Name-Surname: John Doe',
+                style: TextStyle(fontSize: 18),
+              ),
+              // User role
+          Text(ap.userModel.role,
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8.0),
+              // Name-Surname
+              const SizedBox(height: 8.0),
+              // Apartment name
+              Text(ap.userModel.apartmentName,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8.0),
+              // Flat Number
+              Text(ap.userModel.flatNumber,
+                style: const TextStyle(fontSize: 18),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                child: const Text(
+                  "Edit Profile",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                child: const Text(
+                  "Add Address",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
-
   }
+
+  EditProfileButton({required Null Function() onPressed}) {}
+
 
 }
