@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
+import 'package:apartment_management_app/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -11,19 +15,34 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  File? image;
 
   @override
   void initState() {
     super.initState();
   }
 
+  void selectImage() async {
+    image = await pickImage(context);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
     final ap = Provider.of<AuthSupplier>(context,listen: false);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const Text('Profile',style: TextStyle(
+          fontSize: 28,
+        ),),
+        leading: IconButton(onPressed: () {},icon: const Icon(FontAwesomeIcons.angleLeft),),
+
         actions: [
+          IconButton(
+              onPressed: () {},
+              icon: Icon(isDark ? LineAwesomeIcons.sun : LineAwesomeIcons.moon)
+          ),
           IconButton(
               onPressed: () {
                 ap.userSignOut().then((value) => Navigator.push(
@@ -43,12 +62,23 @@ class _MainScreenState extends State<MainScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Profile picture
-              const CircleAvatar(
-                radius: 60,
-                backgroundImage: AssetImage(''),
+              InkWell(
+                onTap: () => selectImage(),
+                child: image == null ? const CircleAvatar(
+                  backgroundColor: Colors.teal,
+                  radius: 60,
+                  child: Icon(
+                    Icons.account_circle,
+                    size: 70,
+                    color: Colors.white,
+                  ),
+                )
+              : CircleAvatar(
+                  backgroundImage: FileImage(image!),
+                  radius: 60,
+                )
               ),
-
+              // Profile picture
               const SizedBox(height: 16.0),
               const Text(
                 'John Doe',
@@ -57,9 +87,9 @@ class _MainScreenState extends State<MainScreen> {
               const SizedBox(height: 8.0),
               // User role
           Text(ap.userModel.role,
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
-              
+
               // Name-Surname
               const SizedBox(height: 8.0),
               // Apartment name
@@ -100,7 +130,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  EditProfileButton({required Null Function() onPressed}) {}
+  editProfileButton({required Null Function() onPressed}) {}
 
 
 }
