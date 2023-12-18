@@ -40,10 +40,12 @@ class _RegisterFlatScreenState extends State<RegisterFlatScreen> {
     '5',
   ];
 
+  //String enteredName='Name';
   String selectedRoleValue = 'Role';
   String selectedApartmentName = 'Apartment Name';
   String selectedFlatNumber = 'Flat Number';
 
+  final TextEditingController nameController = TextEditingController();
   final roleController = TextEditingController();
   final apartmentController = TextEditingController();
   final flatNumberController = TextEditingController();
@@ -51,6 +53,7 @@ class _RegisterFlatScreenState extends State<RegisterFlatScreen> {
   @override
   void dispose() {
     super.dispose();
+    nameController.dispose();
     roleController.dispose();
     apartmentController.dispose();
     flatNumberController.dispose();
@@ -63,147 +66,192 @@ Widget build(BuildContext context) {
     body: SafeArea(
       child: isLoading == true ? const Center(child: CircularProgressIndicator(
         color: Colors.teal,
-      )) : Padding(
-        padding: const EdgeInsets.only(left: 40.0,right: 50.0),
-        child: Column(
-          children: [
-            const Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Icon(
-                    Icons.person,
-                    size: 80.0,),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Choose your Role",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'What is your role in the apartment?',
+      )) : SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Icon(
+                      Icons.person,
+                      size: 60.0,),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 8.0,top: 8.0,right: 8.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Enter your Name",
                           style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.grey,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'What is your name?',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            CustomDropdown<String>.search(
-                hintText: selectedRoleValue,
-                items: _roleList,
-                excludeSelected: false,
-              onChanged: (value) {
-                selectedRoleValue = value;
-              },
-            ),
-            const Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Icon(
-                    Icons.apartment,
-                    size: 80.0,),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 24.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Choose the Apartment",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Which one is your apartment?',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            CustomDropdown<String>.search(
-              hintText: selectedApartmentName,
-              items: _apartmentList,
-              excludeSelected: false,
-              onChanged: (value) {
-                selectedApartmentName = value;
-              },
-            ),
-            const Row(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Icon(
-                    Icons.home_filled,
-                    size: 80.0,),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 24.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        "Select your Flat Number",
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          'Which one is your flat number?',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            CustomDropdown<String>.search(
-              hintText: selectedFlatNumber,
-              items: _flatNumberList,
-              excludeSelected: false,
-              onChanged: (value) {
-                selectedFlatNumber = value;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed:  () => storeData(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
-                ),
-                child: const Text(
-                  'Continue',
+                ],
+              ),
+              TextField(
+                keyboardType: TextInputType.name,
+                controller: nameController,
+                decoration: const InputDecoration(
+                  hintText: 'Name',
                 ),
               ),
-            ),
-          ],
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Icon(
+                      Icons.person_search,
+                      size: 60.0,),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Choose your Role",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Text(
+                            'What is your role in the apartment?',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              CustomDropdown<String>.search(
+                  hintText: selectedRoleValue,
+                  items: _roleList,
+                  excludeSelected: false,
+                onChanged: (value) {
+                  selectedRoleValue = value;
+                },
+              ),
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Icon(
+                      Icons.apartment,
+                      size: 60.0,),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 24.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Choose the Apartment",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Which one is your apartment?',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              CustomDropdown<String>.search(
+                hintText: selectedApartmentName,
+                items: _apartmentList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  selectedApartmentName = value;
+                },
+              ),
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Icon(
+                      Icons.home_filled,
+                      size: 60.0,),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 24.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Select your Flat Number",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Which one is your flat number?',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              CustomDropdown<String>.search(
+                hintText: selectedFlatNumber,
+                items: _flatNumberList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  selectedFlatNumber = value;
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed:  () => storeData(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
+                  ),
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -221,11 +269,15 @@ Widget build(BuildContext context) {
 
     UserModel userModel = UserModel(
         uid: "",
+        name: nameController.text.trim(),
         role: selectedRoleValue,
         apartmentName: selectedApartmentName,
         flatNumber: selectedFlatNumber);
 
-    if(selectedRoleValue == "Role") {
+    if(nameController.text.trim() == "") {
+      showSnackBar(context, "Please enter your name.");
+    }
+    else if(selectedRoleValue == "Role") {
       showSnackBar(context, "Please select a role.");
     }
     else if(selectedApartmentName == 'Apartment Name') {
@@ -253,6 +305,9 @@ Widget build(BuildContext context) {
 
   }
 
-
 }
+
+
+
+
 

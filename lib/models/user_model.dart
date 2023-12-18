@@ -1,6 +1,8 @@
+import 'dart:io';
 
 class UserModel {
   String uid;
+  String name;
   String? profilePic;
   String role;
   String apartmentName;
@@ -8,6 +10,7 @@ class UserModel {
 
   UserModel({
     required this.uid,
+    required this.name,
     this.profilePic,
     required this.role,
     required this.apartmentName,
@@ -17,6 +20,7 @@ class UserModel {
   factory UserModel.fromMap(Map<String,dynamic> map) {
     return UserModel(
         uid: map['uid'] ?? '',
+        name: map['name'] ?? '',
         profilePic: map['profilePic'] ?? '',
         role: map['role'] ?? '',
         apartmentName: map['apartmentName'] ?? '',
@@ -26,6 +30,7 @@ class UserModel {
   Map<String,dynamic> toMap() {
     return {
       "uid": uid,
+      "name": name,
       "profilePic": profilePic,
       "role": role,
       "apartmentName": apartmentName,

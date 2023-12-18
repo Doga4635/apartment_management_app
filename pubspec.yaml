@@ -30,6 +30,7 @@ dependencies:
   pinput: ^3.0.1
   animated_custom_dropdown: ^2.0.0
   image_picker: ^1.0.4
+  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:

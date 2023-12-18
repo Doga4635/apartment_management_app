@@ -41,6 +41,7 @@ class AuthSupplier extends ChangeNotifier {
 
   void signInWithPhone(BuildContext context, String phoneNumber) async {
     try {
+      await _firebaseAuth.setSettings(appVerificationDisabledForTesting: true);
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
           verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
@@ -132,6 +133,7 @@ class AuthSupplier extends ChangeNotifier {
     await _firebaseFirestore.collection("users").doc(_firebaseAuth.currentUser!.uid).get().then((DocumentSnapshot snapshot) {
       _userModel = UserModel(
           uid: snapshot['uid'],
+          name: snapshot['name'],
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
           flatNumber: snapshot['flatNumber']

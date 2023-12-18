@@ -11,10 +11,10 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   File? image;
 
   @override
@@ -80,9 +80,9 @@ class _MainScreenState extends State<MainScreen> {
               ),
               // Profile picture
               const SizedBox(height: 16.0),
-              const Text(
-                'John Doe',
-                style: TextStyle(fontSize: 18),
+              Text(
+                ap.userModel.name,
+                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 8.0),
               // User role
