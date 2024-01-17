@@ -10,10 +10,10 @@ class RegisterFlatScreen extends StatefulWidget {
   const RegisterFlatScreen({super.key});
 
   @override
-  _RegisterFlatScreenState createState() => _RegisterFlatScreenState();
+  RegisterFlatScreenState createState() => RegisterFlatScreenState();
 }
 
-class _RegisterFlatScreenState extends State<RegisterFlatScreen> {
+class RegisterFlatScreenState extends State<RegisterFlatScreen> {
 
   @override
   void initState() {
@@ -21,9 +21,9 @@ class _RegisterFlatScreenState extends State<RegisterFlatScreen> {
   }
 
    final List<String> _roleList = [
-    'Resident',
-    'Doorman',
-    'Manager',
+    'Apartman Sakini',
+    'Kapıcı',
+    'Apartman Yöneticisi',
   ];
 
   final List<String> _apartmentList = [
@@ -40,10 +40,9 @@ class _RegisterFlatScreenState extends State<RegisterFlatScreen> {
     '5',
   ];
 
-  //String enteredName='Name';
-  String selectedRoleValue = 'Role';
-  String selectedApartmentName = 'Apartment Name';
-  String selectedFlatNumber = 'Flat Number';
+  String selectedRoleValue = 'Rol';
+  String selectedApartmentName = 'Apartman Adı';
+  String selectedFlatNumber = 'Daire Numarası';
 
   final TextEditingController nameController = TextEditingController();
   final roleController = TextEditingController();
@@ -80,11 +79,11 @@ Widget build(BuildContext context) {
                       size: 60.0,),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 8.0,top: 8.0,right: 8.0),
+                    padding: EdgeInsets.only(left: 36.0,top: 8.0,right: 8.0),
                     child: Column(
                       children: [
                         Text(
-                          "Enter your Name",
+                          "Adınızı Giriniz",
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,),
@@ -92,7 +91,7 @@ Widget build(BuildContext context) {
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            'What is your name?',
+                            'Adınız Nedir?',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.grey,
@@ -108,7 +107,7 @@ Widget build(BuildContext context) {
                 keyboardType: TextInputType.name,
                 controller: nameController,
                 decoration: const InputDecoration(
-                  hintText: 'Name',
+                  hintText: 'Ad',
                 ),
               ),
               const Row(
@@ -124,7 +123,7 @@ Widget build(BuildContext context) {
                     child: Column(
                       children: [
                         Text(
-                          "Choose your Role",
+                          "Rolünüzü Seçin",
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,),
@@ -132,7 +131,7 @@ Widget build(BuildContext context) {
                         Padding(
                           padding: EdgeInsets.all(4.0),
                           child: Text(
-                            'What is your role in the apartment?',
+                            'Apartmandaki rolünüz nedir?',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.grey,
@@ -165,7 +164,7 @@ Widget build(BuildContext context) {
                     child: Column(
                       children: [
                         Text(
-                          "Choose the Apartment",
+                          "Apartmanınızı Seçiniz",
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,),
@@ -173,7 +172,7 @@ Widget build(BuildContext context) {
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            'Which one is your apartment?',
+                            'Hangisi sizin apartmanınız?',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.grey,
@@ -206,7 +205,7 @@ Widget build(BuildContext context) {
                     child: Column(
                       children: [
                         Text(
-                          "Select your Flat Number",
+                          "Daire Numaranızı Seçiniz",
                           style: TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,),
@@ -214,7 +213,7 @@ Widget build(BuildContext context) {
                         Padding(
                           padding: EdgeInsets.all(8.0),
                           child: Text(
-                            'Which one is your flat number?',
+                            'Hangisi sizin daire numaranız?',
                             style: TextStyle(
                               fontSize: 16.0,
                               color: Colors.grey,
@@ -243,7 +242,7 @@ Widget build(BuildContext context) {
                     padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
                   ),
                   child: const Text(
-                    'Continue',
+                    'Devam Et',
                     style: TextStyle(
                       color: Colors.white,
                     ),
@@ -257,9 +256,11 @@ Widget build(BuildContext context) {
     ),
     floatingActionButton: FloatingActionButton(
       onPressed: () {},
-      tooltip: 'Help',
+      tooltip: 'Yardım',
       backgroundColor: Colors.teal,
-      child: const Icon(Icons.question_mark),
+      child: const Icon(Icons.question_mark,
+      color: Colors.white,
+      ),
     ),
   );
 }
@@ -275,16 +276,16 @@ Widget build(BuildContext context) {
         flatNumber: selectedFlatNumber);
 
     if(nameController.text.trim() == "") {
-      showSnackBar(context, "Please enter your name.");
+      showSnackBar("Lütfen adınızı giriniz.");
     }
-    else if(selectedRoleValue == "Role") {
-      showSnackBar(context, "Please select a role.");
+    else if(selectedRoleValue == "Rol") {
+      showSnackBar("Lütfen rolünüzü seçiniz.");
     }
-    else if(selectedApartmentName == 'Apartment Name') {
-      showSnackBar(context, "Please select an apartment name.");
+    else if(selectedApartmentName == 'Apartman Adı') {
+      showSnackBar("Lütfen apartman adınızı seçiniz.");
     }
     else if(selectedApartmentName == 'Flat Number') {
-      showSnackBar(context, "Please select a flat number.");
+      showSnackBar("Lütfen daire numaranızı seçiniz.");
     }
     else {
       ap.saveUserDataToFirebase(

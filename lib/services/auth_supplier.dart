@@ -57,7 +57,7 @@ class AuthSupplier extends ChangeNotifier {
           },
           codeAutoRetrievalTimeout: (verificationId) {} );
     } on FirebaseAuthException catch(e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
     }
   }
 
@@ -77,15 +77,13 @@ class AuthSupplier extends ChangeNotifier {
           smsCode: userOtp);
       User user = (await _firebaseAuth.signInWithCredential(creds)).user!;
 
-      if(user != null) {
         _uid = user.uid;
         onSuccess();
-      }
 
       _isLoading = false;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
       _isLoading = false;
       notifyListeners();
     }
@@ -95,11 +93,9 @@ class AuthSupplier extends ChangeNotifier {
   Future<bool> checkExistingUser() async {
     DocumentSnapshot snapshot = await _firebaseFirestore.collection("users").doc(_uid).get();
     if(snapshot.exists) {
-      print("User exists");
       return true;
     }
     else {
-      print("New User");
       return false;
     }
   }
@@ -122,7 +118,7 @@ class AuthSupplier extends ChangeNotifier {
 
       });
     } on FirebaseAuthException catch(e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
       _isLoading = false;
       notifyListeners();
     }
