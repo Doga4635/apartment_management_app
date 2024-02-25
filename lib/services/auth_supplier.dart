@@ -111,7 +111,7 @@ class AuthSupplier extends ChangeNotifier {
       userModel.uid = _firebaseAuth.currentUser!.uid;
       _userModel = userModel;
 
-      await _firebaseFirestore.collection("users").doc(_uid).set(userModel.toMap()).then((value) {
+      await _firebaseFirestore.collection("users").doc(userModel.uid).set(userModel.toMap()).then((value) {
       onSuccess();
       _isLoading = false;
       notifyListeners();
@@ -132,7 +132,8 @@ class AuthSupplier extends ChangeNotifier {
           name: snapshot['name'],
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
-          flatNumber: snapshot['flatNumber']
+          flatNumber: snapshot['flatNumber'],
+          garbage: snapshot['garbage']
       );
       _uid = userModel.uid;
     });

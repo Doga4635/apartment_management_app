@@ -273,7 +273,9 @@ Widget build(BuildContext context) {
         name: nameController.text.trim(),
         role: selectedRoleValue,
         apartmentName: selectedApartmentName,
-        flatNumber: selectedFlatNumber);
+        flatNumber: selectedFlatNumber,
+        garbage: false,
+    );
 
     if(nameController.text.trim() == "") {
       showSnackBar("Lütfen adınızı giriniz.");

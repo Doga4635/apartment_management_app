@@ -1,8 +1,11 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+import 'package:apartment_management_app/utils/utils.dart';
 
 import '../services/auth_supplier.dart';
 
@@ -15,8 +18,11 @@ class FirstModuleScreen extends StatefulWidget {
 
 class FirstModuleScreenState extends State<FirstModuleScreen> {
 
+  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
+    final toggleSwitchProvider = Provider.of<ToggleSwitchProvider>(context, listen: false);
     final ap = Provider.of<AuthSupplier>(context,listen: false);
     return Scaffold(
       appBar: AppBar(
@@ -100,12 +106,29 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                     activeFgColor: Colors.white,
                     inactiveBgColor: Colors.grey,
                     inactiveFgColor: Colors.white,
-                    initialLabelIndex: 1,
+                    initialLabelIndex: toggleSwitchProvider.currentIndex,
                     totalSwitches: 2,
                     labels: const ['Evet', 'Hayır'],
                     radiusStyle: true,
-                    onToggle: (index) {
-
+                    onToggle: (index) async {
+                      toggleSwitchProvider.setCurrentIndex(index!);
+                      if(index == 0) {
+                        try {
+                          await _firebaseFirestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update(
+                              {'garbage': true});
+                          showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
+                        } catch (e) {
+                          showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
+                        }
+                      }
+                      else {
+                        try {
+                          await _firebaseFirestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update(
+                              {'garbage': false});
+                        } catch (e) {
+                          showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
+                        }
+                      }
                     },
                   ),
                 ],
@@ -122,6 +145,17 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
         ),
       ),
     );
+  }
+}
+
+class ToggleSwitchProvider with ChangeNotifier {
+  int _currentIndex = 1;
+
+  int get currentIndex => _currentIndex;
+
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
   }
 }
 

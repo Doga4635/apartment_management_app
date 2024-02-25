@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
+import 'package:apartment_management_app/screens/first_module_screen.dart';
 
 
 void main() async{
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers:[
           ChangeNotifierProvider(create: (_) => AuthSupplier()),
+          ChangeNotifierProvider(create: (_) => ToggleSwitchProvider()),
         ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -115,7 +115,7 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                   minimumSize: const Size(210, 40),
                 ),
                 child: const Text(
-                  "Adres Ekle",
+                  "Daire Ekle",
                   style: TextStyle(
                       fontSize: 25,
                       color: Colors.white,
