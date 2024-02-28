@@ -152,6 +152,14 @@ class AuthSupplier extends ChangeNotifier {
     notifyListeners();
   }
 
+    Future<String> getField(String data) async {
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+        'users').doc(FirebaseAuth.instance.currentUser!.uid);
+    DocumentSnapshot snapshot1 = await userDocRef.get();
+    String value = snapshot1[data];
+    return value;
+  }
+
   Future userSignOut() async {
     SharedPreferences s = await SharedPreferences.getInstance();
     await _firebaseAuth.signOut();
