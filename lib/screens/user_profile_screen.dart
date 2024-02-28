@@ -1,36 +1,143 @@
+import 'dart:io';
+import 'package:apartment_management_app/screens/welcome_screen.dart';
+import 'package:apartment_management_app/services/auth_supplier.dart';
+import 'package:apartment_management_app/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
   @override
-  State<UserProfileScreen> createState() => _UserProfileScreenState();
+  UserProfileScreenState createState() => UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
-  final roleController = TextEditingController();
-  final apartmentController = TextEditingController();
-  final flatNumberController = TextEditingController();
+class UserProfileScreenState extends State<UserProfileScreen> {
+  File? image;
 
   @override
-  void dispose() {
-    super.dispose();
-    roleController.dispose();
-    apartmentController.dispose();
-    flatNumberController.dispose();
+  void initState() {
+    super.initState();
+  }
+
+  void selectImage() async {
+    image = await pickImage(context);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final ap = Provider.of<AuthSupplier>(context,listen: false);
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(10),
-          child: Column(
+      appBar: AppBar(
+        title: const Text('Profil',style: TextStyle(
+          fontSize: 28,
+        ),),
+        leading: IconButton(onPressed: () {
+          Navigator.pop(context);
+        },icon: const Icon(FontAwesomeIcons.angleLeft),),
 
+        actions: [
+          IconButton(
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen(),
+                  ),
+                ),
+                );
+              },
+              icon: const Icon(Icons.exit_to_app)),
+        ],
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
+                  onTap: () => selectImage(),
+                  child: image == null ? const CircleAvatar(
+                    backgroundColor: Colors.teal,
+                    radius: 60,
+                    child: Icon(
+                      Icons.account_circle,
+                      size: 70,
+                      color: Colors.white,
+                    ),
+                  )
+                      : CircleAvatar(
+                    backgroundImage: FileImage(image!),
+                    radius: 60,
+                  )
+              ),
+              // Profile picture
+              const SizedBox(height: 16.0),
+              Text(
+                ap.userModel.name,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8.0),
+              // User role
+              Text(ap.userModel.role,
+                style: const TextStyle(fontSize: 18),
+              ),
+
+              // Name-Surname
+              const SizedBox(height: 8.0),
+              // Apartment name
+              Text(ap.userModel.apartmentName,
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 8.0),
+              // Flat Number
+              Text(ap.userModel.flatNumber,
+                style: const TextStyle(fontSize: 18),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                child: const Text(
+                  "Profili Düzenle",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  minimumSize: const Size(210, 40),
+                ),
+                child: const Text(
+                  "Daire Ekle",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        tooltip: 'Yardım',
+        backgroundColor: Colors.teal,
+        child: const Icon(Icons.question_mark,
+          color: Colors.white,
         ),
       ),
     );
   }
+
+  editProfileButton({required Null Function() onPressed}) {}
+
+
 }

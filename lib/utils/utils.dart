@@ -1,15 +1,13 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-void showSnackBar(BuildContext context, String content) {
-  ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(content),
-      ),
-  );
+final GlobalKey<ScaffoldMessengerState> snackbarKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void showSnackBar(String content) {
+  final SnackBar snackBar = SnackBar(content: Text(content));
+  snackbarKey.currentState?.showSnackBar(snackBar);
 }
 
 Future<File?> pickImage(BuildContext context) async {
@@ -20,7 +18,7 @@ Future<File?> pickImage(BuildContext context) async {
       image = File(pickedImage.path);
     }
   } catch(e) {
-    showSnackBar(context, e.toString());
+    showSnackBar(e.toString());
   }
 
   return image;
