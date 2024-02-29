@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/screens/trash_tracking_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -102,6 +103,8 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                       ? ElevatedButton(
                     onPressed: () {
                       // Handle button tap for Doorman
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
