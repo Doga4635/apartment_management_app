@@ -6,7 +6,6 @@ class UserModel {
   String role;
   String apartmentName;
   String flatNumber;
-  bool garbage;
 
   UserModel({
     required this.uid,
@@ -15,7 +14,6 @@ class UserModel {
     required this.role,
     required this.apartmentName,
     required this.flatNumber,
-    required this.garbage,
   });
 
   factory UserModel.fromMap(Map<String,dynamic> map) {
@@ -26,7 +24,6 @@ class UserModel {
         role: map['role'] ?? '',
         apartmentName: map['apartmentName'] ?? '',
         flatNumber: map['flatNumber'] ?? '',
-        garbage: map['garbage'] ?? '',
     );
   }
 
@@ -38,7 +35,6 @@ class UserModel {
       "role": role,
       "apartmentName": apartmentName,
       "flatNumber": flatNumber,
-      "garbage": garbage,
     };
   }
 

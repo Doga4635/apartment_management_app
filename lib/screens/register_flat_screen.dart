@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
@@ -32,7 +33,7 @@ class RegisterFlatScreenState extends State<RegisterFlatScreen> {
     'Tufan Bey Apt.',
   ];
 
-  final List<String> _flatNumberList = [
+  final List<String> _numberList = [
     '1',
     '2',
     '3',
@@ -40,13 +41,17 @@ class RegisterFlatScreenState extends State<RegisterFlatScreen> {
     '5',
   ];
 
+  String randomFlatId = "";
+
   String selectedRoleValue = 'Rol';
   String selectedApartmentName = 'Apartman Adı';
+  String selectedFloorNumber = 'Kat Numarası';
   String selectedFlatNumber = 'Daire Numarası';
 
   final TextEditingController nameController = TextEditingController();
   final roleController = TextEditingController();
   final apartmentController = TextEditingController();
+  final floorNumberController = TextEditingController();
   final flatNumberController = TextEditingController();
 
   @override
@@ -55,6 +60,7 @@ class RegisterFlatScreenState extends State<RegisterFlatScreen> {
     nameController.dispose();
     roleController.dispose();
     apartmentController.dispose();
+    floorNumberController.dispose();
     flatNumberController.dispose();
   }
 
@@ -197,6 +203,47 @@ Widget build(BuildContext context) {
                   Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Icon(
+                      Icons.home_work,
+                      size: 60.0,),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 24.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Kat Numaranızı Seçiniz",
+                          style: TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text(
+                            'Hangisi sizin kat numaranız?',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              CustomDropdown<String>.search(
+                hintText: selectedFloorNumber,
+                items: _numberList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  selectedFloorNumber = value;
+                },
+              ),
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: Icon(
                       Icons.home_filled,
                       size: 60.0,),
                   ),
@@ -227,7 +274,7 @@ Widget build(BuildContext context) {
               ),
               CustomDropdown<String>.search(
                 hintText: selectedFlatNumber,
-                items: _flatNumberList,
+                items: _numberList,
                 excludeSelected: false,
                 onChanged: (value) {
                   selectedFlatNumber = value;
@@ -267,6 +314,7 @@ Widget build(BuildContext context) {
 
   void storeData() async {
     final ap = Provider.of<AuthSupplier>(context,listen: false);
+    randomFlatId = generateRandomId(10);
 
     UserModel userModel = UserModel(
         uid: "",
@@ -274,7 +322,16 @@ Widget build(BuildContext context) {
         role: selectedRoleValue,
         apartmentName: selectedApartmentName,
         flatNumber: selectedFlatNumber,
-        garbage: false,
+    );
+
+    FlatModel flatModel = FlatModel(
+      uid: "",
+      flatId: randomFlatId,
+      apartmentId: '0',
+      floorNo: selectedFloorNumber,
+      flatNo: selectedFlatNumber,
+      role: selectedRoleValue,
+      garbage: false,
     );
 
     if(nameController.text.trim() == "") {
@@ -290,6 +347,10 @@ Widget build(BuildContext context) {
       showSnackBar("Lütfen daire numaranızı seçiniz.");
     }
     else {
+      ap.saveFlatDataToFirebase(
+          context: context,
+          flatModel: flatModel,
+          onSuccess: () {});
       ap.saveUserDataToFirebase(
         context: context,
         userModel: userModel,

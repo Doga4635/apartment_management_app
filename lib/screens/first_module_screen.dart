@@ -154,7 +154,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                             toggleSwitchProvider.setCurrentIndex(index!);
                             if(index == 0) {
                               try {
-                                await _firebaseFirestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update(
+                                await _firebaseFirestore.collection('flats').doc(FirebaseAuth.instance.currentUser!.uid).update(
                                     {'garbage': true});
                                 showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
                               } catch (e) {
