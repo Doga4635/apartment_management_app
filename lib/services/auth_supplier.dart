@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/code_enter_screen.dart';
 import 'package:apartment_management_app/utils/utils.dart';
@@ -112,9 +113,33 @@ class AuthSupplier extends ChangeNotifier {
       _userModel = userModel;
 
       await _firebaseFirestore.collection("users").doc(userModel.uid).set(userModel.toMap()).then((value) {
-      onSuccess();
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
       _isLoading = false;
       notifyListeners();
+    }
+
+  }
+
+  void saveFlatDataToFirebase ({
+    required BuildContext context,
+    required FlatModel flatModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      flatModel.uid = _firebaseAuth.currentUser!.uid;
+
+      await _firebaseFirestore.collection("flats").doc(flatModel.uid).set(flatModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
 
       });
     } on FirebaseAuthException catch(e) {
@@ -133,7 +158,6 @@ class AuthSupplier extends ChangeNotifier {
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
           flatNumber: snapshot['flatNumber'],
-          garbage: snapshot['garbage']
       );
       _uid = userModel.uid;
     });
