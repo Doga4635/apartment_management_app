@@ -9,6 +9,7 @@ import 'package:toggle_switch/toggle_switch.dart';
 import 'package:apartment_management_app/utils/utils.dart';
 
 import '../services/auth_supplier.dart';
+import 'alisveris_listesi_screen.dart';
 
 class FirstModuleScreen extends StatefulWidget {
   const FirstModuleScreen({Key? key}) : super(key: key);
@@ -82,13 +83,16 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                   const SizedBox(height: 80),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle button tap
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                     ),
                     child: const Text(
-                      "Kapıcıya Alışveriş Listesi",
+                      'Kapıcıya Alışveriş Listesi',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,
@@ -203,4 +207,3 @@ class ToggleSwitchProvider with ChangeNotifier {
     notifyListeners();
   }
 }
-
