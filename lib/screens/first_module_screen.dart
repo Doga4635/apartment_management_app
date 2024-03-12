@@ -20,7 +20,6 @@ class FirstModuleScreen extends StatefulWidget {
 
 class FirstModuleScreenState extends State<FirstModuleScreen> {
 
-  final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -157,21 +156,10 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                           onToggle: (index) async {
                             toggleSwitchProvider.setCurrentIndex(index!);
                             if(index == 0) {
-                              try {
-                                await _firebaseFirestore.collection('flats').doc(FirebaseAuth.instance.currentUser!.uid).update(
-                                    {'garbage': true});
-                                showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
-                              } catch (e) {
-                                showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
-                              }
+                              _applyGarbage();
                             }
                             else {
-                              try {
-                                await _firebaseFirestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update(
-                                    {'garbage': false});
-                              } catch (e) {
-                                showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
-                              }
+                              _removeGarbage();
                             }
                           },
                         ),
@@ -197,7 +185,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
   }
 }
 
-class ToggleSwitchProvider with ChangeNotifier {
+  class ToggleSwitchProvider with ChangeNotifier {
   int _currentIndex = 1;
 
   int get currentIndex => _currentIndex;
@@ -205,5 +193,53 @@ class ToggleSwitchProvider with ChangeNotifier {
   void setCurrentIndex(int index) {
     _currentIndex = index;
     notifyListeners();
+  }
+}
+
+void _applyGarbage() async{
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  try {
+    await firestore
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+    // buraya selectedFlat eklenecek
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((doc) async {
+        // Update the garbage field
+        await firestore
+            .collection('flats')
+            .doc(doc.id)
+            .update({'garbage': true});
+      });
+    });
+    showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
+  }
+  catch (e) {
+    showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
+  }
+}
+
+void _removeGarbage() async{
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  try {
+    await firestore
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+    // buraya selectedFlat eklenecek
+        .get()
+        .then((querySnapshot) {
+      querySnapshot.docs.forEach((doc) async {
+        // Update the garbage field
+        await firestore
+            .collection('flats')
+            .doc(doc.id)
+            .update({'garbage': false});
+      });
+    });
+    showSnackBar('Çöpünüzün olmadığı kapıcıya bildirildi.');
+  }
+  catch (e) {
+    showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
   }
 }

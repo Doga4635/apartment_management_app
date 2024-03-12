@@ -134,7 +134,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                       title: Text('Daire ${flat.flatNo}'),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_forever),
-                        onPressed: () => _removeGarbage(flat.uid),
+                        onPressed: () => _removeGarbage(flat.flatId),
                       ),
                     );
                   }).toList(),
@@ -147,8 +147,8 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     );
   }
 
-  void _removeGarbage(String uid) {
-    FirebaseFirestore.instance.collection('flats').doc(uid).update({
+  void _removeGarbage(String flatId) {
+    FirebaseFirestore.instance.collection('flats').doc(flatId).update({
       'garbage': false,
     }).then((value) {
       Navigator.pop(context);

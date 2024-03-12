@@ -136,7 +136,7 @@ class AuthSupplier extends ChangeNotifier {
     try{
       flatModel.uid = _firebaseAuth.currentUser!.uid;
 
-      await _firebaseFirestore.collection("flats").doc(flatModel.uid).set(flatModel.toMap()).then((value) {
+      await _firebaseFirestore.collection("flats").doc(flatModel.flatId).set(flatModel.toMap()).then((value) {
         onSuccess();
         _isLoading = false;
         notifyListeners();
