@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -30,4 +31,24 @@ String generateRandomId(int length) {
   final random = Random();
   return String.fromCharCodes(Iterable.generate(
       length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+}
+
+Future<String?> getRoleForFlat(String flatUid) async {
+  String? role;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: flatUid)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      role = querySnapshot.docs.first['role'];
+    }
+  } catch (error) {
+    showSnackBar('Rolü görmede sorun oldu.');
+  }
+
+  return role;
 }

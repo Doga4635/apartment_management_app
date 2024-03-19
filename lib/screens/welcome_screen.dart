@@ -49,8 +49,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
-                  "Eğer bir apartmanda yaşıyorsan şimdi başla.",
-                  style: greyTextStyle
+                    "Eğer bir apartmanda yaşıyorsan şimdi başla.",
+                    style: greyTextStyle
                 ),
               ),
               ElevatedButton(
@@ -59,7 +59,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                     await ap.getDataFromSP().whenComplete(() => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                        builder: (context) => const MainScreen())));
+                            builder: (context) => const MainScreen())));
 
                   }
                   else {
@@ -85,4 +85,3 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 }
-
