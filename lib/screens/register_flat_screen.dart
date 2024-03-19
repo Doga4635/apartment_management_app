@@ -1,6 +1,7 @@
 import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
+import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
 import 'package:flutter/material.dart';
@@ -313,15 +314,15 @@ Widget build(BuildContext context) {
 }
 
   void storeData() async {
-    final ap = Provider.of<AuthSupplier>(context,listen: false);
+    final ap = Provider.of<AuthSupplier>(context, listen: false);
     randomFlatId = generateRandomId(10);
 
     UserModel userModel = UserModel(
-        uid: "",
-        name: nameController.text.trim(),
-        role: selectedRoleValue,
-        apartmentName: selectedApartmentName,
-        flatNumber: selectedFlatNumber,
+      uid: "",
+      name: nameController.text.trim(),
+      role: selectedRoleValue,
+      apartmentName: selectedApartmentName,
+      flatNumber: selectedFlatNumber,
     );
 
     FlatModel flatModel = FlatModel(
@@ -332,42 +333,53 @@ Widget build(BuildContext context) {
       flatNo: selectedFlatNumber,
       role: selectedRoleValue,
       garbage: false,
+      selectedFlat: true,
     );
 
-    if(nameController.text.trim() == "") {
+    if (nameController.text.trim() == "") {
       showSnackBar("Lütfen adınızı giriniz.");
-    }
-    else if(selectedRoleValue == "Rol") {
+    } else if (selectedRoleValue == "Rol") {
       showSnackBar("Lütfen rolünüzü seçiniz.");
-    }
-    else if(selectedApartmentName == 'Apartman Adı') {
+    } else if (selectedApartmentName == 'Apartman Adı') {
       showSnackBar("Lütfen apartman adınızı seçiniz.");
-    }
-    else if(selectedApartmentName == 'Flat Number') {
+    } else if (selectedApartmentName == 'Flat Number') {
       showSnackBar("Lütfen daire numaranızı seçiniz.");
-    }
-    else {
+    } else {
       ap.saveFlatDataToFirebase(
-          context: context,
-          flatModel: flatModel,
-          onSuccess: () {});
+        context: context,
+        flatModel: flatModel,
+        onSuccess: () {},
+      );
       ap.saveUserDataToFirebase(
         context: context,
         userModel: userModel,
         onSuccess: () {
           ap.saveUserDataToSP().then(
-                  (value) => ap.setSignIn().then(
-                          (value) => Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(builder: (context) => const MainScreen(),),
-                                      (route) => false),
-                  ),
+                (value) {
+              ap.setSignIn().then(
+                    (value) {
+                  if (selectedRoleValue == 'Kapıcı') {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FirstModuleScreen()),
+                          (route) => false,
+                    );
+                  } else {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainScreen()),
+                          (route) => false,
+                    );
+                  }
+                },
+              );
+            },
           );
         },
       );
     }
-
   }
+
 
 }
 

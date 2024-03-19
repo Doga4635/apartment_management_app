@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FlatModel {
@@ -9,6 +8,7 @@ class FlatModel {
   String flatNo;
   String role;
   bool garbage;
+  bool selectedFlat;
 
   FlatModel({
     required this.uid,
@@ -18,6 +18,7 @@ class FlatModel {
     required this.flatNo,
     required this.role,
     required this.garbage,
+    required this.selectedFlat,
   });
 
   factory FlatModel.fromMap(Map<String,dynamic> map) {
@@ -29,6 +30,7 @@ class FlatModel {
       flatNo: map['flatNo'] ?? '',
       role: map['role'] ?? '',
       garbage: map['garbage'] ?? '',
+      selectedFlat: map['selectedFlat'] ?? '',
     );
   }
 
@@ -41,6 +43,7 @@ class FlatModel {
       "flatNo": flatNo,
       "role": role,
       "garbage": garbage,
+      "selectedFlat": selectedFlat,
     };
   }
 
@@ -53,6 +56,7 @@ class FlatModel {
       flatNo: snapshot['flatNo'] ?? '',
       role: snapshot['role'] ?? '',
       garbage: snapshot['garbage'] ?? false,
+      selectedFlat: snapshot['selectedFlat'] ?? false,
     );
   }
 

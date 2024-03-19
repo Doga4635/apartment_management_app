@@ -72,18 +72,18 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
                 length: 6,
                 showCursor: true,
                 defaultPinTheme: PinTheme(
-                  width: 50,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.teal.shade200,
+                    width: 50,
+                    height: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.teal.shade200,
+                        )
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
                     )
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w600,
-                  )
                 ),
                 onCompleted: (value) {
                   setState(() {
@@ -111,11 +111,11 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
               ),
             ),
             const Padding(
-                padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Koda ulaşamadınız mı?",
-              style: greyTextStyle,
-            ),
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Koda ulaşamadınız mı?",
+                style: greyTextStyle,
+              ),
             ),
             const Text(
               "Kodu Yeniden Gönder",
@@ -132,12 +132,12 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
         tooltip: 'Help',
         backgroundColor: Colors.teal,
         child: const Icon(Icons.question_mark,
-        color: Colors.white,),
+          color: Colors.white,),
       ),
     );
   }
 
-void verifyOTP(BuildContext context,String userOtp) {
+  void verifyOTP(BuildContext context,String userOtp) {
     final ap = Provider.of<AuthSupplier>(context,listen: false);
     ap.verifyOtp(
         context: context,
@@ -146,11 +146,11 @@ void verifyOTP(BuildContext context,String userOtp) {
         onSuccess: () {
           ap.checkExistingUser().then((value) async {
             if(value == true) {
-              ap.getDataFromFirestore().then((value) => 
-                  ap.saveUserDataToSP().then((value) => 
-                      ap.setSignIn().then((value) => 
+              ap.getDataFromFirestore().then((value) =>
+                  ap.saveUserDataToSP().then((value) =>
+                      ap.setSignIn().then((value) =>
                           Navigator.pushAndRemoveUntil(
-                              context, 
+                              context,
                               MaterialPageRoute(
                                   builder: (context) => const MainScreen()),
                                   (route) => false))));
@@ -163,6 +163,6 @@ void verifyOTP(BuildContext context,String userOtp) {
 
         }
     );
-}
+  }
 
 }
