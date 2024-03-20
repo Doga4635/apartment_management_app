@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/screens/grocery_list_screen.dart';
 import 'package:apartment_management_app/screens/trash_tracking_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -82,10 +83,18 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                   const SizedBox(height: 80),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
-                      );
+                      if(userRole == "Kapıcı") {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
+                        );
+                      }
+                      else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
