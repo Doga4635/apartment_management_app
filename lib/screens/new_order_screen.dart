@@ -1,6 +1,7 @@
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:apartment_management_app/models/order_model.dart';
 import 'package:apartment_management_app/models/product_model.dart';
+import 'package:apartment_management_app/screens/grocery_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +51,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Yeni Liste'),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const GroceryListScreen()));
+          },
+        ),
       ),
+
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -120,6 +129,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed:  () => createOrder(),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('Listeye Ekle'),
             ),
             const SizedBox(height: 20),
@@ -130,13 +140,20 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            const ListTile(
+             ListTile(
               title: Text('Product Name'),
               subtitle: Text('Quantity: 1 - Details: Some details'),
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  _showEditDialog(context);
+                },
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed:  () => createOrder(),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('Listeyi Oluştur'),
             ),
             const SizedBox(height: 20),
@@ -165,5 +182,55 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         onSuccess: () {},
       );
   }
+
+  void _showEditDialog(BuildContext context) {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController quantityController = TextEditingController();
+    final TextEditingController detailsController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ürünü Düzenle'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Ürün İsmi'),
+              ),
+              TextField(
+                controller: quantityController,
+                decoration: InputDecoration(labelText: 'Miktar'),
+              ),
+              TextField(
+                controller: detailsController,
+                decoration: InputDecoration(labelText: 'Ayrıntılar'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Implement your update logic here
+                // You can access the entered values using
+                // nameController.text, quantityController.text, detailsController.text
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
 }

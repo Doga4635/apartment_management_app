@@ -12,6 +12,7 @@ class AlisverisListesiScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alışveriş Listesi'),
+        backgroundColor: Colors.teal,
       ),
       body: Center(
         child: Column(

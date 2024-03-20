@@ -1,3 +1,5 @@
+import 'package:apartment_management_app/screens/first_module_screen.dart';
+//import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/new_order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,7 +33,15 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Lists'),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const FirstModuleScreen()));
+          },
+        ),
       ),
+
       body: _user != null
           ? StreamBuilder(
         stream: FirebaseFirestore.instance
@@ -74,18 +84,34 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           : const Center(
         child: CircularProgressIndicator(),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const NewOrderScreen()),
-                (route) => false,
-          );
-        },
-        child: const Icon(Icons.add),
+      bottomNavigationBar: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          margin: EdgeInsets.all(20.0),
+          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+          decoration: BoxDecoration(
+            color: Colors.teal,
+            borderRadius: BorderRadius.circular(30.0),
+          ),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const NewOrderScreen()),
+                    (route) => false,
+              );
+            },
+            child: Text(
+              'Liste Oluştur',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18.0,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
+
 }
-
-

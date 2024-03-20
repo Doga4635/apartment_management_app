@@ -1,4 +1,5 @@
 import 'package:apartment_management_app/screens/grocery_list_screen.dart';
+import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/trash_tracking_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -43,6 +44,13 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                 style: TextStyle(
                   fontSize: 26,
                 ),
+              ),
+              backgroundColor: Colors.teal,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                },
               ),
               actions: [
                 IconButton(
