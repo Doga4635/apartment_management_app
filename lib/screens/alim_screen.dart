@@ -13,7 +13,7 @@ class AlimScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-          Container(
+          SizedBox(
           width: 200,
           height: 50,
           child: ElevatedButton(
@@ -51,7 +51,7 @@ class AlimScreen extends StatelessWidget {
         const SizedBox(
           height: 20.0,
         ),
-        Container(
+        SizedBox(
           width: 200,
           height: 50,
           child: ElevatedButton(
@@ -89,7 +89,7 @@ class AlimScreen extends StatelessWidget {
         const SizedBox(
           height: 20.0,
         ),
-        Container(
+        SizedBox(
           width: 200,
           height: 50,
           child: ElevatedButton(
@@ -127,7 +127,7 @@ class AlimScreen extends StatelessWidget {
         const SizedBox(
           height: 20.0,
         ),
-        Container(
+        SizedBox(
           width: 200,
           height: 50,
           child: ElevatedButton(

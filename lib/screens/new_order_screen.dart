@@ -19,6 +19,7 @@ class NewOrderScreen extends StatefulWidget {
 class NewOrderScreenState extends State<NewOrderScreen> {
   String _selectedProduct = 'Ürün adı gir';
   List<String> productList = [];
+  List<OrderModel> addedProducts = [];
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
@@ -53,7 +54,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         title: const Text('Yeni Liste'),
         backgroundColor: Colors.teal,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const GroceryListScreen()));
           },
@@ -87,19 +88,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                   },
                   icon: const Icon(Icons.remove),
                 ),
+                const SizedBox(width: 50,),
                 SizedBox(
                   width: 100,
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    initialValue: _quantity.toString(),
-                    onChanged: (value) {
-                      setState(() {
-                        _quantity = int.tryParse(value) ?? 1;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      labelText: 'Miktar',
-                      border: OutlineInputBorder(),
+                  child: Text(
+                    '$_quantity',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -115,46 +111,67 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             ),
             const SizedBox(height: 20),
             TextFormField(
-              maxLength: 24,
+              maxLength: 18,
               onChanged: (value) {
                 setState(() {
                   _details = value;
                 });
               },
               decoration: const InputDecoration(
-                labelText: 'Ayrıntılar',
+                labelText: 'Not',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed:  () => createOrder(),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: const Text('Listeye Ekle'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal,),
+              child: const Text('Listeye Ekle',
+                style: TextStyle(
+                  color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 20),
-            const Text(
-              'Ürünler',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-             ListTile(
-              title: Text('Product Name'),
-              subtitle: Text('Quantity: 1 - Details: Some details'),
-              trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () {
-                  _showEditDialog(context);
-                },
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                const Text(
+                  'Ürünler',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: addedProducts.length,
+                  itemBuilder: (context, index) {
+                    OrderModel product = addedProducts[index];
+                    return ListTile(
+                      title: Text(product.name),
+                      subtitle: Text('Miktar: ${product.amount}  -  Not: ${product.details}'),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          // Implement edit functionality
+                          _showEditDialog(context);
+                        },
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                // Other widgets...
+              ],
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed:  () => createOrder(),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: const Text('Listeyi Oluştur'),
+              child: const Text('Listeyi Oluştur',
+                style: TextStyle(
+                    color: Colors.white),),
             ),
             const SizedBox(height: 20),
           ],
@@ -179,7 +196,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       ap.saveOrderDataToFirebase(
         context: context,
         orderModel: orderModel,
-        onSuccess: () {},
+        onSuccess: () {
+          setState(() {
+            _selectedProduct = 'Ürün adı gir';
+            _quantity = 1;
+            _details = '';
+            addedProducts.add(orderModel);
+          });
+        },
       );
   }
 
@@ -192,21 +216,21 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Ürünü Düzenle'),
+          title: const Text('Ürünü Düzenle'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Ürün İsmi'),
+                decoration: const InputDecoration(labelText: 'Ürün İsmi'),
               ),
               TextField(
                 controller: quantityController,
-                decoration: InputDecoration(labelText: 'Miktar'),
+                decoration: const InputDecoration(labelText: 'Miktar'),
               ),
               TextField(
                 controller: detailsController,
-                decoration: InputDecoration(labelText: 'Ayrıntılar'),
+                decoration: const InputDecoration(labelText: 'Ayrıntılar'),
               ),
             ],
           ),
@@ -218,13 +242,13 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 // nameController.text, quantityController.text, detailsController.text
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
+              child: const Text('Kaydet'),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('İptal'),
             ),
           ],
         );
