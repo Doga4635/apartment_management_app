@@ -35,7 +35,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         title: const Text('Your Lists'),
         backgroundColor: Colors.teal,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const FirstModuleScreen()));
           },
@@ -87,8 +87,8 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       bottomNavigationBar: Align(
         alignment: Alignment.bottomCenter,
         child: Container(
-          margin: EdgeInsets.all(20.0),
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+          margin: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
           decoration: BoxDecoration(
             color: Colors.teal,
             borderRadius: BorderRadius.circular(30.0),
@@ -101,7 +101,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     (route) => false,
               );
             },
-            child: Text(
+            child: const Text(
               'Liste Oluştur',
               style: TextStyle(
                 color: Colors.white,

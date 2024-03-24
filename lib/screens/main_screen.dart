@@ -38,7 +38,7 @@ class MainScreenState extends State<MainScreen> {
         ),
         backgroundColor: Colors.teal,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
           },

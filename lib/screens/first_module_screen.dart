@@ -47,7 +47,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
               ),
               backgroundColor: Colors.teal,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen()));
                 },

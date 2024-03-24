@@ -1,12 +1,8 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../models/flat_model.dart';
 import '../models/user_model.dart';
-import '../utils/utils.dart';
 import '../services/auth_supplier.dart';
 
 class DagitimScreen extends StatefulWidget {
