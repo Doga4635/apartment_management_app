@@ -47,6 +47,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     });
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +58,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const GroceryListScreen()));
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context) => const GroceryListScreen()));
           },
         ),
       ),
@@ -124,54 +127,60 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed:  () => createOrder(),
+              onPressed: () {
+                createOrder();
+              },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal,),
               child: const Text('Listeye Ekle',
                 style: TextStyle(
-                  color: Colors.white),
+                    color: Colors.white),
               ),
             ),
             const SizedBox(height: 20),
             const Divider(),
             const SizedBox(height: 20),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
-                const Text(
-                  'Ürünler',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: addedProducts.length,
-                  itemBuilder: (context, index) {
-                    OrderModel product = addedProducts[index];
-                    return ListTile(
-                      title: Text(product.name),
-                      subtitle: Text('Miktar: ${product.amount}  -  Not: ${product.details}'),
-                      trailing: IconButton(
+            const Text(
+              'Ürünler',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: addedProducts.length,
+              itemBuilder: (context, index) {
+                OrderModel product = addedProducts[index];
+                return ListTile(
+                  title: Text(product.name),
+                  subtitle: Text(
+                      'Quantity: ${product.amount} - Details: ${product.details}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          // Implement edit functionality
-                          _showEditDialog(context);
+                          _showEditDialog(context, product);
                         },
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Other widgets...
-              ],
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _showConfirmationDialog(context, product);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed:  () => createOrder(),
+              onPressed: createList,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('Listeyi Oluştur',
                 style: TextStyle(
-                    color: Colors.white),),
+                    color: Colors.white),
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -185,7 +194,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     String randomOrderId = generateRandomId(10);
 
     OrderModel orderModel = OrderModel(
-      listId: '5b2de162',  // sonra değiştir
+      listId: '5b2de162',
+      // sonra değiştir
       orderId: randomOrderId,
       productId: '1',
       name: _selectedProduct,
@@ -193,24 +203,27 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       details: _details,
     );
 
-      ap.saveOrderDataToFirebase(
-        context: context,
-        orderModel: orderModel,
-        onSuccess: () {
-          setState(() {
-            _selectedProduct = 'Ürün adı gir';
-            _quantity = 1;
-            _details = '';
-            addedProducts.add(orderModel);
-          });
-        },
-      );
+    ap.saveOrderDataToFirebase(
+      context: context,
+      orderModel: orderModel,
+      onSuccess: () {
+        setState(() {
+          _selectedProduct = 'Ürün adı gir';
+          _quantity = 1;
+          _details = '';
+          addedProducts.add(orderModel);
+        });
+
+      },
+    );
   }
 
-  void _showEditDialog(BuildContext context) {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController quantityController = TextEditingController();
-    final TextEditingController detailsController = TextEditingController();
+
+  void _showEditDialog(BuildContext context, OrderModel product) {
+    final TextEditingController quantityController =
+    TextEditingController(text: product.amount.toString());
+    final TextEditingController detailsController =
+    TextEditingController(text: product.details);
 
     showDialog(
       context: context,
@@ -220,10 +233,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Ürün İsmi'),
-              ),
               TextField(
                 controller: quantityController,
                 decoration: const InputDecoration(labelText: 'Miktar'),
@@ -237,9 +246,17 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                // Implement your update logic here
-                // You can access the entered values using
-                // nameController.text, quantityController.text, detailsController.text
+                // Get the updated values from the text fields
+                int updatedQuantity = int.tryParse(quantityController.text) ?? product.amount;
+                String updatedDetails = detailsController.text;
+
+                // Update the order with the new values
+                setState(() {
+                  product.amount = updatedQuantity;
+                  product.details = updatedDetails;
+                });
+
+                // Close the dialog
                 Navigator.of(context).pop();
               },
               child: const Text('Kaydet'),
@@ -256,5 +273,52 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+  void _showConfirmationDialog(BuildContext context, OrderModel product) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('UYARI'),
+          content: const Text('Bu ürünü silmek istediğinden emin misin?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Remove the item from the list and the database
+                _deleteItem(product);
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: const Text('Sil'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
+
+  void _deleteItem(OrderModel product) {
+    // Remove the item from the list
+    setState(() {
+      addedProducts.remove(product);
+    });
+
+    // Delete the item from the database
+    // You can add the database deletion logic here if needed
+  }
+
+
+  void createList() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => GroceryListScreen()),
+    );
+  }
 }
