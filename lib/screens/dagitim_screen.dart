@@ -1,5 +1,6 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
@@ -76,48 +77,66 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
     return Column(
       children: floors.map((floor) {
         return ListTile(
-          title: GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Dialog(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text('$floor Kat'),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle button tap
-                          },
-                          child: const Text('Daire 1'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle button tap
-                          },
-                          child: const Text('Daire 2'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle button tap
-                          },
-                          child: const Text('Daire 3'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle button tap
-                          },
-                          child: const Text('Daire 4'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
+          title: Text('$floor. Kat'),
+          trailing: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('flats')
+                .where('floorNo', isEqualTo: floor)
+                .where('grocery', isEqualTo: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return const Icon(Icons.error);
+              } else {
+                bool hasGrocery = snapshot.data!.docs.isNotEmpty;
+                return Icon(
+                  hasGrocery ? Icons.check_circle : Icons.close,
+                  color: hasGrocery ? Colors.green : Colors.red,
+                );
+              }
             },
-            child: Text('$floor. Kat'),
           ),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text('$floor. Kat'),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap
+                        },
+                        child: const Text('Daire 1'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap
+                        },
+                        child: const Text('Daire 2'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap
+                        },
+                        child: const Text('Daire 3'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap
+                        },
+                        child: const Text('Daire 4'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         );
       }).toList(),
     );
