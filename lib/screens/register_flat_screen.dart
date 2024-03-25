@@ -289,6 +289,7 @@ Widget build(BuildContext context) {
                     backgroundColor: Colors.teal,
                     padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
                   ),
+                  //jdhlsfjkşhbçfjk
                   child: const Text(
                     'Devam Et',
                     style: TextStyle(
