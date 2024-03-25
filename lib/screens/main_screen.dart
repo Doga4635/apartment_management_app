@@ -34,7 +34,15 @@ class MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('  Ana Menü',style: TextStyle(
           fontSize: 28,
-        ),),
+        ),
+        ),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+          },
+        ),
         actions: [
           IconButton(
               onPressed: () {
@@ -75,6 +83,9 @@ class MainScreenState extends State<MainScreen> {
                     color: Colors.white,
                     fontWeight: FontWeight.w400),
               ),),
+            const SizedBox(
+              height: 20.0,
+            ),
             ElevatedButton(onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,
@@ -87,6 +98,9 @@ class MainScreenState extends State<MainScreen> {
                     color: Colors.white,
                     fontWeight: FontWeight.w400),
               ),),
+            const SizedBox(
+              height: 20.0,
+            ),
             ElevatedButton(onPressed: () {},
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text(
@@ -96,6 +110,9 @@ class MainScreenState extends State<MainScreen> {
                     color: Colors.white,
                     fontWeight: FontWeight.w400),
               ),),
+            const SizedBox(
+              height: 20.0,
+            ),
           ],
         ),
       ),

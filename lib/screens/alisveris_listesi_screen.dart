@@ -12,12 +12,13 @@ class AlisverisListesiScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alışveriş Listesi'),
+        backgroundColor: Colors.teal,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               width: 200,
               height: 50,
               child: ElevatedButton(
@@ -43,7 +44,7 @@ class AlisverisListesiScreen extends StatelessWidget {
             const SizedBox(
               height: 20.0,
             ),
-            Container(
+            SizedBox(
               width: 200,
               height: 50,
               child: ElevatedButton(
