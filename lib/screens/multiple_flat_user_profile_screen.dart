@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+class MultipleFlatUserProfileScreen extends StatefulWidget {
+  const MultipleFlatUserProfileScreen({super.key});
 
   @override
-  UserProfileScreenState createState() => UserProfileScreenState();
+  MultipleFlatUserProfileScreenState createState() => MultipleFlatUserProfileScreenState();
 }
 
-class UserProfileScreenState extends State<UserProfileScreen> {
+class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileScreen> {
   File? image;
 
   @override
@@ -34,13 +34,10 @@ class UserProfileScreenState extends State<UserProfileScreen> {
       appBar: AppBar(
         title: const Text('Profil',style: TextStyle(
           fontSize: 28,
-        ),
-        ),
+        ),),
         leading: IconButton(onPressed: () {
           Navigator.pop(context);
-        },
-          icon: const Icon(FontAwesomeIcons.angleLeft),
-        ),
+        },icon: const Icon(FontAwesomeIcons.angleLeft),),
 
         actions: [
           IconButton(
@@ -125,6 +122,25 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                 ),
                 child: const Text(
                   "Daire Ekle",
+                  style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AddFlatScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  minimumSize: const Size(210, 40),
+                ),
+                child: const Text(
+                  "Daire Değiştir",
                   style: TextStyle(
                       fontSize: 25,
                       color: Colors.white,
