@@ -1,11 +1,10 @@
-import 'package:animated_custom_dropdown/custom_dropdown.dart';
-import 'package:apartment_management_app/models/order_model.dart';
-import 'package:apartment_management_app/models/product_model.dart';
-import 'package:apartment_management_app/screens/grocery_list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import '../models/order_model.dart';
+import '../models/product_model.dart';
+import '../screens/grocery_list_screen.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
@@ -49,154 +48,185 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Yeni Liste'),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(
-                builder: (context) => const GroceryListScreen()));
-          },
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Yeni Liste'),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              _showExitConfirmationDialog();
+            },
+          ),
         ),
-      ),
-
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : CustomDropdown<String>.search(
-              hintText: _selectedProduct,
-              items: productList,
-              excludeSelected: false,
-              onChanged: (value) {
-                _selectedProduct = value;
-              },
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_quantity > 1) _quantity--;
-                    });
-                  },
-                  icon: const Icon(Icons.remove),
-                ),
-                const SizedBox(width: 50,),
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    '$_quantity',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : CustomDropdown<String>.search(
+                hintText: _selectedProduct,
+                items: productList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  _selectedProduct = value;
+                },
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_quantity > 1) _quantity--;
+                      });
+                    },
+                    icon: const Icon(Icons.remove),
+                  ),
+                  const SizedBox(
+                    width: 50,
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      '$_quantity',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _quantity++;
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              maxLength: 18,
-              onChanged: (value) {
-                setState(() {
-                  _details = value;
-                });
-              },
-              decoration: const InputDecoration(
-                labelText: 'Not',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            CustomDropdown<String>.search(
-              hintText: _selectedPlace,
-              items: placeList,
-              excludeSelected: false,
-              onChanged: (value) {
-                _selectedPlace = value;
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                createOrder();
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal,),
-              child: const Text('Listeye Ekle',
-                style: TextStyle(
-                    color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Divider(),
-            const SizedBox(height: 20),
-            const Text(
-              'Ürünler',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: addedProducts.length,
-              itemBuilder: (context, index) {
-                OrderModel product = addedProducts[index];
-                return ListTile(
-                  title: Text('${product.name} - Miktar: ${product.amount}'),
-                  subtitle: Text(
-                      'Not: ${product.details} - Yer: ${product.place}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          _showEditDialog(context, product);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          _showConfirmationDialog(context, product);
-                        },
-                      ),
-                    ],
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _quantity++;
+                      });
+                    },
+                    icon: const Icon(Icons.add),
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: createList,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: const Text('Listeyi Oluştur',
-                style: TextStyle(
-                    color: Colors.white),
+                ],
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+              TextFormField(
+                maxLength: 18,
+                onChanged: (value) {
+                  setState(() {
+                    _details = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Not',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  createOrder();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                ),
+                child: const Text(
+                  'Listeye Ekle',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              const Divider(),
+              const SizedBox(height: 20),
+              const Text(
+                'Ürünler',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: addedProducts.length,
+                itemBuilder: (context, index) {
+                  OrderModel product = addedProducts[index];
+                  return ListTile(
+                    title: Text(product.name),
+                    subtitle: Text(
+                        'Quantity: ${product.amount} - Details: ${product.details}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            _showEditDialog(context, product);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            _showConfirmationDialog(context, product);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: createList,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                child: const Text(
+                  'Listeyi Oluştur',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future<bool> _onBackPressed() async {
+    _showExitConfirmationDialog();
+    return false;
+  }
+
+  void _showExitConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Dikkat!'),
+          content: const Text('Listeyi kaydetmek istiyor musunuz?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // User wants to save the list
+                Navigator.of(context).pop();
+                createList(saveList: true);
+              },
+              child: const Text('Evet'),
+            ),
+
+            TextButton(
+              onPressed: () {
+                // User doesn't want to save the list
+                Navigator.of(context).pop();
+                createList(saveList: false);
+              },
+              child: const Text('Hayır'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -225,11 +255,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           _details = '';
           addedProducts.add(orderModel);
         });
-
       },
     );
   }
-
 
   void _showEditDialog(BuildContext context, OrderModel product) {
     final TextEditingController quantityController =
@@ -250,6 +278,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 decoration: const InputDecoration(labelText: 'Miktar'),
               ),
               TextField(
+
                 controller: detailsController,
                 decoration: const InputDecoration(labelText: 'Ayrıntılar'),
               ),
@@ -259,7 +288,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             TextButton(
               onPressed: () {
                 // Get the updated values from the text fields
-                int updatedQuantity = int.tryParse(quantityController.text) ?? product.amount;
+                int updatedQuantity =
+                    int.tryParse(quantityController.text) ?? product.amount;
                 String updatedDetails = detailsController.text;
 
                 // Update the order with the new values
@@ -316,18 +346,41 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
 
-  void _deleteItem(OrderModel product) {
+ Future<void> _deleteItem(OrderModel product) async {
     // Remove the item from the list
     setState(() {
       addedProducts.remove(product);
     });
 
-    // Delete the item from the database
-    // You can add the database deletion logic here if needed
+    try {
+      // Delete the item from the database
+      await FirebaseFirestore.instance
+          .collection('orders') // Change 'orders' to your collection name
+          .doc(product.orderId) // Assuming orderId is the document ID
+          .delete();
+      print('Item deleted from database successfully');
+    } catch (error) {
+      print('Error deleting item: $error');
+      // Handle any error that occurs during deletion
+    }
   }
 
-
-  void createList() {
+  Future<void> createList({bool saveList = false}) async {
+    if (saveList) {
+      try {
+        // Save each item in addedProducts to Firebase
+        for (OrderModel product in addedProducts) {
+          await FirebaseFirestore.instance
+              .collection('orders')
+              .doc(product.orderId)
+              .set(product.toMap()); // Convert OrderModel to a Map using toMap method
+          print('Item saved to database successfully');
+        }
+      } catch (error) {
+        print('Error saving item: $error');
+        // Handle any error that occurs during saving
+      }
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const GroceryListScreen()),
