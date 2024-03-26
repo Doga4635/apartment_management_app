@@ -58,7 +58,9 @@ class _AlimScreenState extends State<AlimScreen> {
         productId: doc['productId'] ?? '',
         name: doc['name'] ?? '',
         amount: doc['amount'] ?? 0,
-        details: doc['details'] ?? '', listId: '',
+        details: doc['details'] ?? '',
+        listId: '',
+        place: doc['place'] ?? '',
       );
     }).toList();
   }
@@ -116,7 +118,7 @@ class _AlimScreenState extends State<AlimScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => NewOrderScreen(),
+              builder: (context) => const NewOrderScreen(),
             ),
           );
         },

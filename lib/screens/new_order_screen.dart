@@ -17,9 +17,11 @@ class NewOrderScreen extends StatefulWidget {
 }
 
 class NewOrderScreenState extends State<NewOrderScreen> {
-  String _selectedProduct = 'Ürün adı gir';
+  String _selectedProduct = 'Ürün adı giriniz';
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
+  String _selectedPlace = 'Yeri seçiniz';
+  List<String> placeList = ['Market','Fırın','Manav','Diğer'];
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
@@ -126,6 +128,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            CustomDropdown<String>.search(
+              hintText: _selectedPlace,
+              items: placeList,
+              excludeSelected: false,
+              onChanged: (value) {
+                _selectedPlace = value;
+              },
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 createOrder();
@@ -150,9 +161,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               itemBuilder: (context, index) {
                 OrderModel product = addedProducts[index];
                 return ListTile(
-                  title: Text(product.name),
+                  title: Text('${product.name} - Miktar: ${product.amount}'),
                   subtitle: Text(
-                      'Quantity: ${product.amount} - Details: ${product.details}'),
+                      'Not: ${product.details} - Yer: ${product.place}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -201,6 +212,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       name: _selectedProduct,
       amount: _quantity,
       details: _details,
+      place: _selectedPlace,
     );
 
     ap.saveOrderDataToFirebase(
@@ -304,22 +316,21 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
 
-    void _deleteItem(OrderModel product) {
-      // Remove the item from the list
-      setState(() {
-        addedProducts.remove(product);
-      });
+  void _deleteItem(OrderModel product) {
+    // Remove the item from the list
+    setState(() {
+      addedProducts.remove(product);
+    });
 
-      // Delete the item from the database
-      // You can add the database deletion logic here if needed
-    }
-
-
-    void createList() {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => GroceryListScreen()),
-      );
-    }
+    // Delete the item from the database
+    // You can add the database deletion logic here if needed
   }
 
+
+  void createList() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+    );
+  }
+}
