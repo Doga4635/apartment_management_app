@@ -4,7 +4,10 @@ import 'package:apartment_management_app/screens/new_order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../models/list_model.dart';
+import '../services/auth_supplier.dart';
+import '../utils/utils.dart';
 
 class GroceryListScreen extends StatefulWidget {
   const GroceryListScreen({super.key});
@@ -63,7 +66,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const NewOrderScreen()),
+                MaterialPageRoute(builder: (context) => const NewOrderScreen(listId:'abc')),
               );
             });
             return const Center(
@@ -95,11 +98,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           ),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const NewOrderScreen()),
-                    (route) => false,
-              );
+              createList();
             },
             child: const Text(
               'Liste Oluştur',
@@ -111,6 +110,32 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void createList() async {
+
+    final ap = Provider.of<AuthSupplier>(context, listen: false);
+    String randomListId = generateRandomId(10);
+
+    ListModel listModel = ListModel(
+      listId: randomListId,
+      name: 'Liste 1',
+      uid: ap.userModel.uid,
+    );
+    ap.saveListDataToFirebase(
+      context: context,
+      listModel: listModel,
+      onSuccess: () {
+        setState(() {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId)),
+                (route) => false,
+          );
+        });
+
+      },
     );
   }
 
