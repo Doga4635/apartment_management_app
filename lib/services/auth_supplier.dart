@@ -13,7 +13,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/list_model.dart';
 
-
 class AuthSupplier extends ChangeNotifier {
 
   bool _isSignedIn = false;
@@ -240,6 +239,5 @@ class AuthSupplier extends ChangeNotifier {
     notifyListeners();
     s.clear();
   }
-
 
 }

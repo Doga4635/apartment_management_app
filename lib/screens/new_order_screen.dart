@@ -9,7 +9,10 @@ import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
 class NewOrderScreen extends StatefulWidget {
-  const NewOrderScreen({Key? key}) : super(key: key);
+
+  final String listId;
+
+  const NewOrderScreen({super.key, required this.listId});
 
   @override
   NewOrderScreenState createState() => NewOrderScreenState();
@@ -127,6 +130,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              CustomDropdown<String>.search(
+                hintText: _selectedPlace,
+                items: placeList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  _selectedPlace = value;
+                },
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   createOrder();
@@ -154,9 +166,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 itemBuilder: (context, index) {
                   OrderModel product = addedProducts[index];
                   return ListTile(
-                    title: Text(product.name),
+                    title: Text('${product.name} - Miktar: ${product.amount}'),
                     subtitle: Text(
-                        'Quantity: ${product.amount} - Details: ${product.details}'),
+                        'Details: ${product.details} - Yer: ${product.place}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -235,8 +247,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     String randomOrderId = generateRandomId(10);
 
     OrderModel orderModel = OrderModel(
-      listId: '5b2de162',
-      // sonra değiştir
+      listId: widget.listId,
       orderId: randomOrderId,
       productId: '1',
       name: _selectedProduct,
@@ -253,6 +264,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           _selectedProduct = 'Ürün adı gir';
           _quantity = 1;
           _details = '';
+          _selectedPlace = 'Yeri seçiniz';
           addedProducts.add(orderModel);
         });
       },

@@ -118,7 +118,7 @@ class _AlimScreenState extends State<AlimScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NewOrderScreen(),
+              builder: (context) => const NewOrderScreen(listId:'abc'),
             ),
           );
         },
