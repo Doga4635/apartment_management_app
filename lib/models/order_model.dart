@@ -7,6 +7,7 @@ class OrderModel {
   String name;
   int amount;
   String details;
+  String place;
 
 
   OrderModel({
@@ -16,6 +17,7 @@ class OrderModel {
     required this.name,
     required this.amount,
     required this.details,
+    required this.place,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,7 @@ class OrderModel {
       name: map['name'] ?? '',
       amount: map['amount'] ?? 0,
       details: map['details'] ?? '',
+      place: map['place'] ?? '',
     );
   }
 
@@ -37,6 +40,7 @@ class OrderModel {
       "name": name,
       "amount": amount,
       "details": details,
+      "place": place,
     };
   }
 
@@ -48,6 +52,7 @@ class OrderModel {
       name: snapshot['name'] ?? '',
       amount: snapshot['amount'] ?? 0,
       details: snapshot['details'] ?? '',
+      place: snapshot['place'] ?? '',
     );
   }
 }

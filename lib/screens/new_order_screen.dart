@@ -16,9 +16,11 @@ class NewOrderScreen extends StatefulWidget {
 }
 
 class NewOrderScreenState extends State<NewOrderScreen> {
-  String _selectedProduct = 'Ürün adı gir';
+  String _selectedProduct = 'Ürün adı giriniz';
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
+  String _selectedPlace = 'Yeri seçiniz';
+  List<String> placeList = ['Market','Fırın','Manav','Diğer'];
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
@@ -137,6 +139,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
+
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 20),
@@ -212,6 +215,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               },
               child: const Text('Evet'),
             ),
+
             TextButton(
               onPressed: () {
                 // User doesn't want to save the list
@@ -238,6 +242,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       name: _selectedProduct,
       amount: _quantity,
       details: _details,
+      place: _selectedPlace,
     );
 
     ap.saveOrderDataToFirebase(
@@ -340,7 +345,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
-  Future<void> _deleteItem(OrderModel product) async {
+
+ Future<void> _deleteItem(OrderModel product) async {
     // Remove the item from the list
     setState(() {
       addedProducts.remove(product);
