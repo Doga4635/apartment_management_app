@@ -1,10 +1,8 @@
 
 import 'package:apartment_management_app/models/flat_model.dart';
-import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:provider/provider.dart';
