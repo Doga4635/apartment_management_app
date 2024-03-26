@@ -130,6 +130,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              CustomDropdown<String>.search(
+                hintText: _selectedPlace,
+                items: placeList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  _selectedPlace = value;
+                },
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   createOrder();
@@ -157,9 +166,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 itemBuilder: (context, index) {
                   OrderModel product = addedProducts[index];
                   return ListTile(
-                    title: Text(product.name),
+                    title: Text('${product.name} - Miktar: ${product.amount}'),
                     subtitle: Text(
-                        'Quantity: ${product.amount} - Details: ${product.details}'),
+                        'Details: ${product.details} - Yer: ${product.place}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -255,6 +264,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           _selectedProduct = 'Ürün adı gir';
           _quantity = 1;
           _details = '';
+          _selectedPlace = 'Yeri seçiniz';
           addedProducts.add(orderModel);
         });
       },
