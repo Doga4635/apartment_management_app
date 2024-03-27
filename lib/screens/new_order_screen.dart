@@ -397,14 +397,30 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           await FirebaseFirestore.instance
               .collection('orders')
               .doc(product.orderId)
-              .set(product.toMap()); // Convert OrderModel to a Map using toMap method
+              .set(product
+              .toMap()); // Convert OrderModel to a Map using toMap method
           print('Item saved to database successfully');
         }
       } catch (error) {
         print('Error saving item: $error');
         // Handle any error that occurs during saving
       }
+    } else {
+      // If not saving the list, delete all items from the database
+      for (OrderModel product in addedProducts) {
+        try {
+          await FirebaseFirestore.instance
+              .collection('orders')
+              .doc(product.orderId)
+              .delete();
+          print('Item deleted from database successfully');
+        } catch (error) {
+          print('Error deleting item: $error');
+          // Handle any error that occurs during deletion
+        }
+      }
     }
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const GroceryListScreen()),
