@@ -142,6 +142,12 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               ElevatedButton(
                 onPressed: () {
                   createOrder();
+                  setState(() {
+                    _selectedProduct = 'Ürün adı gir';
+                    _quantity = 1;
+                    _details = '';
+                    _selectedPlace = 'Yeri seçiniz';
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
@@ -168,7 +174,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                   return ListTile(
                     title: Text('${product.name} - Miktar: ${product.amount}'),
                     subtitle: Text(
-                        'Details: ${product.details} - Yer: ${product.place}'),
+                        'Not: ${product.details} - Yer: ${product.place}'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -261,10 +267,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       orderModel: orderModel,
       onSuccess: () {
         setState(() {
-          _selectedProduct = 'Ürün adı gir';
-          _quantity = 1;
-          _details = '';
-          _selectedPlace = 'Yeri seçiniz';
           addedProducts.add(orderModel);
         });
       },
@@ -308,6 +310,16 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 setState(() {
                   product.amount = updatedQuantity;
                   product.details = updatedDetails;
+                });
+
+                FirebaseFirestore.instance.collection('orders').doc(product.orderId).update({
+                  'amount' : updatedQuantity,
+                  'details' : updatedDetails,
+                }).then((value) {
+                  Navigator.pop(context);
+                  showSnackBar('Ürün güncellendi');
+                }).catchError((error) {
+                  showSnackBar('Ürün güncellendi');
                 });
 
                 // Close the dialog
@@ -370,9 +382,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           .collection('orders') // Change 'orders' to your collection name
           .doc(product.orderId) // Assuming orderId is the document ID
           .delete();
-      print('Item deleted from database successfully');
+      showSnackBar('Ürün listeden silindi');
     } catch (error) {
-      print('Error deleting item: $error');
+      showSnackBar('Ürünü listeden kaldırırken bir sorun oluştu');
       // Handle any error that occurs during deletion
     }
   }
