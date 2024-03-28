@@ -12,6 +12,7 @@ import 'package:apartment_management_app/utils/utils.dart';
 
 import '../services/auth_supplier.dart';
 import 'alisveris_listesi_screen.dart';
+import 'multiple_flat_user_profile_screen.dart';
 
 class FirstModuleScreen extends StatefulWidget {
   const FirstModuleScreen({Key? key}) : super(key: key);
@@ -54,8 +55,28 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
               ),
               actions: [
                 IconButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const UserProfileScreen()));
+                  onPressed: () async {
+
+                    String currentUserUid = ap.userModel.uid;
+
+                    //Checking if the user has more than 1 role
+                    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                        .collection('flats')
+                        .where('uid', isEqualTo: currentUserUid)
+                        .get();
+
+                    if (querySnapshot.docs.length > 1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                      );
+                    }
+                    else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.person),
                 ),
