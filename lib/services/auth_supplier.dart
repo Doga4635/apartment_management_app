@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:apartment_management_app/models/flat_model.dart';
@@ -9,6 +10,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/list_model.dart';
 
 class AuthSupplier extends ChangeNotifier {
 
@@ -160,6 +163,28 @@ class AuthSupplier extends ChangeNotifier {
     notifyListeners();
     try{
       await _firebaseFirestore.collection("orders").doc(orderModel.orderId).set(orderModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  void saveListDataToFirebase ({
+    required BuildContext context,
+    required ListModel listModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      await _firebaseFirestore.collection("lists").doc(listModel.listId).set(listModel.toMap()).then((value) {
         onSuccess();
         _isLoading = false;
         notifyListeners();
