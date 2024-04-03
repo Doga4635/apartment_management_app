@@ -4,8 +4,11 @@ import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'multiple_flat_user_profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -45,11 +48,32 @@ class MainScreenState extends State<MainScreen> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const UserProfileScreen()));
-              },
-              icon: const Icon(Icons.person),
+            onPressed: () async {
+
+              String currentUserUid = ap.userModel.uid;
+
+              //Checking if the user has more than 1 role
+              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                  .collection('flats')
+                  .where('uid', isEqualTo: currentUserUid)
+                  .get();
+
+              if (querySnapshot.docs.length > 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                );
+              }
+              else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                );
+              }
+            },
+            icon: Icon(Icons.person),
           ),
+
           IconButton(
               onPressed: () {
                 ap.userSignOut().then((value) => Navigator.push(
@@ -68,9 +92,9 @@ class MainScreenState extends State<MainScreen> {
           children: [
             ElevatedButton(onPressed: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FirstModuleScreen(),
-              ),);
+                context,
+                MaterialPageRoute(builder: (context) => const FirstModuleScreen(),
+                ),);
             },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.teal,

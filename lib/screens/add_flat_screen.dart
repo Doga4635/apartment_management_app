@@ -1,10 +1,13 @@
-
 import 'package:apartment_management_app/models/flat_model.dart';
+import 'package:apartment_management_app/models/user_model.dart';
+import 'package:apartment_management_app/screens/multiple_flat_user_profile_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class AddFlatScreen extends StatefulWidget {
@@ -67,12 +70,28 @@ class AddFlatScreenState extends State<AddFlatScreen> {
   Widget build(BuildContext context) {
     final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daire Ekle',style: TextStyle(
+          fontSize: 28,
+        ),
+        ),
+        leading: IconButton(onPressed: () {
+          Navigator.pop(context);
+        },
+          icon: const Icon(FontAwesomeIcons.angleLeft),
+        ),
+      ),
       body: SafeArea(
         child: isLoading == true ? const Center(child: CircularProgressIndicator(
           color: Colors.teal,
         )) : SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.only(
+              top: 3.0,
+              left: 20.0,
+              right: 20.0,
+              bottom: 20.0,
+            ),
             child: Column(
               children: [
                 const Row(
@@ -248,7 +267,7 @@ class AddFlatScreenState extends State<AddFlatScreen> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(0.0),
                   child: ElevatedButton(
                     onPressed:  () => storeData(),
                     style: ElevatedButton.styleFrom(
@@ -284,24 +303,12 @@ class AddFlatScreenState extends State<AddFlatScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     randomFlatId = generateRandomId(10);
 
-    // Ensure that userModel is not null before accessing its properties
-    if (ap.userModel == null || ap.userModel.uid.isEmpty) {
-      await ap.getDataFromFirestore();
-
-      // If userModel is still null after fetching data, handle it accordingly
-      if (ap.userModel == null) {
-        // Handle the case where userModel is still null
-        print("User data couldn't be loaded. Please try again.");
-        return; // Exit the method to prevent further execution
-      }
-    }
-
     String currentUserUid = ap.userModel.uid;
 
     FlatModel flatModel = FlatModel(
       uid: currentUserUid,
       flatId: randomFlatId,
-      apartmentId: '0',
+      apartmentId: selectedApartmentName,
       floorNo: selectedFloorNumber,
       flatNo: selectedFlatNumber,
       role: selectedRoleValue,
@@ -320,9 +327,11 @@ class AddFlatScreenState extends State<AddFlatScreen> {
         context: context,
         flatModel: flatModel,
         onSuccess: () {
+          Navigator.pop(context);
+          Navigator.pop(context);
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+            MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
           );
         },
       );
@@ -331,4 +340,3 @@ class AddFlatScreenState extends State<AddFlatScreen> {
 
 
 }
-

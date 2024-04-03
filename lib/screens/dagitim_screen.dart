@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
+import 'multiple_flat_user_profile_screen.dart';
 
 class DagitimScreen extends StatefulWidget {
   const DagitimScreen({Key? key}) : super(key: key);
@@ -37,11 +38,28 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-              );
+            onPressed: () async {
+
+              String currentUserUid = ap.userModel.uid;
+
+              //Checking if the user has more than 1 role
+              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                  .collection('flats')
+                  .where('uid', isEqualTo: currentUserUid)
+                  .get();
+
+              if (querySnapshot.docs.length > 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                );
+              }
+              else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                );
+              }
             },
             icon: const Icon(Icons.person),
           ),
