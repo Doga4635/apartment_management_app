@@ -154,7 +154,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
       Navigator.pop(context);
       showSnackBar('Çöp atıldı.');
     }).catchError((error) {
-      showSnackBar('Error removing garbage');
+      showSnackBar('Çöp atımında hata oldu.');
     });
   }
 

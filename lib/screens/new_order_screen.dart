@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import '../models/order_model.dart';
@@ -9,10 +10,9 @@ import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
 class NewOrderScreen extends StatefulWidget {
-
   final String listId;
 
-  const NewOrderScreen({super.key, required this.listId});
+  const NewOrderScreen({Key? key, required this.listId}) : super(key: key);
 
   @override
   NewOrderScreenState createState() => NewOrderScreenState();
@@ -23,10 +23,23 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
   String _selectedPlace = 'Yeri seçiniz';
-  List<String> placeList = ['Market','Fırın','Manav','Diğer'];
+  List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
+
+  List<String> _selectedDays = [];
+  final List<String> _days = [
+    'Bir kez',
+    'Pazartesi',
+    'Salı',
+    'Çarşamba',
+    'Perşembe',
+    'Cuma',
+    'Cumartesi',
+    'Pazar',
+    'Her gün'
+  ];
 
   @override
   void initState() {
@@ -53,160 +66,171 @@ class NewOrderScreenState extends State<NewOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onBackPressed,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Yeni Liste'),
-          backgroundColor: Colors.teal,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              _showExitConfirmationDialog();
-            },
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Yeni Liste'),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            _showExitConfirmationDialog();
+          },
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 20),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : CustomDropdown<String>.search(
-                hintText: _selectedProduct,
-                items: productList,
-                excludeSelected: false,
-                onChanged: (value) {
-                  _selectedProduct = value;
-                },
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_quantity > 1) _quantity--;
-                      });
-                    },
-                    icon: const Icon(Icons.remove),
-                  ),
-                  const SizedBox(
-                    width: 50,
-                  ),
-                  SizedBox(
-                    width: 100,
-                    child: Text(
-                      '$_quantity',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 20),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : CustomDropdown<String>.search(
+              hintText: _selectedProduct,
+              items: productList,
+              excludeSelected: false,
+              onChanged: (value) {
+                _selectedProduct = value;
+              },
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      if (_quantity > 1) _quantity--;
+                    });
+                  },
+                  icon: const Icon(Icons.remove),
+                ),
+                const SizedBox(
+                  width: 50,
+                ),
+                SizedBox(
+                  width: 100,
+                  child: Text(
+                    '$_quantity',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _quantity++;
-                      });
-                    },
-                    icon: const Icon(Icons.add),
+                ),
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _quantity++;
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextFormField(
+              maxLength: 18,
+              onChanged: (value) {
+                setState(() {
+                  _details = value;
+                });
+              },
+              decoration: const InputDecoration(
+                labelText: 'Not',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
+            CustomDropdown<String>.search(
+              hintText: _selectedPlace,
+              items: placeList,
+              excludeSelected: false,
+              onChanged: (value) {
+                _selectedPlace = value;
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: createOrder,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+              ),
+              child: const Text(
+                'Listeye Ekle',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Divider(),
+            const SizedBox(height: 20),
+            const Text(
+                  '  Liste',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+            const SizedBox(height: 10),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: addedProducts.length,
+              itemBuilder: (context, index) {
+                OrderModel product = addedProducts[index];
+                return ListTile(
+                  title: Text('${product.name} - Miktar: ${product.amount}'),
+                  subtitle: Text(
+                      'Not: ${product.details} - Yer: ${product.place}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _showEditDialog(context, product);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _showConfirmationDialog(context, product);
+                        },
+                      ),
+                    ],
                   ),
+                );
+              },
+            ),
+            const SizedBox(height: 30),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      _showMultiSelect(context);
+                    },
+                    child: Text(_selectedDays.isEmpty ? "Zaman Seçiniz" : _selectedDays.join(", "),
+                      style: const TextStyle(
+                        color: Colors.teal,
+                      ),),
+                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
-              const SizedBox(height: 20),
-              TextFormField(
-                maxLength: 18,
-                onChanged: (value) {
-                  setState(() {
-                    _details = value;
-                  });
-                },
-                decoration: const InputDecoration(
-                  labelText: 'Not',
-                  border: OutlineInputBorder(),
-                ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                createList(saveList: true);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+              child: const Text(
+                'Listeyi Oluştur',
+                style: TextStyle(color: Colors.white),
               ),
-              const SizedBox(height: 20),
-              CustomDropdown<String>.search(
-                hintText: _selectedPlace,
-                items: placeList,
-                excludeSelected: false,
-                onChanged: (value) {
-                  _selectedPlace = value;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  createOrder();
-                  setState(() {
-                    _selectedProduct = 'Ürün adı gir';
-                    _quantity = 1;
-                    _details = '';
-                    _selectedPlace = 'Yeri seçiniz';
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                ),
-                child: const Text(
-                  'Listeye Ekle',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-              const Divider(),
-              const SizedBox(height: 20),
-              const Text(
-                'Ürünler',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: addedProducts.length,
-                itemBuilder: (context, index) {
-                  OrderModel product = addedProducts[index];
-                  return ListTile(
-                    title: Text('${product.name} - Miktar: ${product.amount}'),
-                    subtitle: Text(
-                        'Not: ${product.details} - Yer: ${product.place}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            _showEditDialog(context, product);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            _showConfirmationDialog(context, product);
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: createList,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                child: const Text(
-                  'Listeyi Oluştur',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
@@ -228,17 +252,22 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             TextButton(
               onPressed: () {
                 // User wants to save the list
-                Navigator.of(context).pop();
                 createList(saveList: true);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                );
               },
               child: const Text('Evet'),
             ),
-
             TextButton(
               onPressed: () {
                 // User doesn't want to save the list
-                Navigator.of(context).pop();
                 createList(saveList: false);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                );
               },
               child: const Text('Hayır'),
             ),
@@ -260,6 +289,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       amount: _quantity,
       details: _details,
       place: _selectedPlace,
+      //days: _once ? ['Once'] : _days.entries.where((e) => e.value).map((e) => e.key).toList(),
     );
 
     ap.saveOrderDataToFirebase(
@@ -292,7 +322,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 decoration: const InputDecoration(labelText: 'Miktar'),
               ),
               TextField(
-
                 controller: detailsController,
                 decoration: const InputDecoration(labelText: 'Ayrıntılar'),
               ),
@@ -312,9 +341,12 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                   product.details = updatedDetails;
                 });
 
-                FirebaseFirestore.instance.collection('orders').doc(product.orderId).update({
-                  'amount' : updatedQuantity,
-                  'details' : updatedDetails,
+                FirebaseFirestore.instance
+                    .collection('orders')
+                    .doc(product.orderId)
+                    .update({
+                  'amount': updatedQuantity,
+                  'details': updatedDetails,
                 }).then((value) {
                   Navigator.pop(context);
                   showSnackBar('Ürün güncellendi');
@@ -369,8 +401,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
-
- Future<void> _deleteItem(OrderModel product) async {
+  Future<void> _deleteItem(OrderModel product) async {
     // Remove the item from the list
     setState(() {
       addedProducts.remove(product);
@@ -390,6 +421,13 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
   Future<void> createList({bool saveList = false}) async {
+    await FirebaseFirestore.instance.collection('lists').doc(widget.listId).update({
+      'days': _selectedDays,
+    }).then((value) {
+      showSnackBar('Zaman seçildi.');
+    }).catchError((error) {
+      showSnackBar('Zaman seçilirken hata oluştu.');
+    });
     if (saveList) {
       try {
         // Save each item in addedProducts to Firebase
@@ -397,12 +435,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           await FirebaseFirestore.instance
               .collection('orders')
               .doc(product.orderId)
-              .set(product
-              .toMap()); // Convert OrderModel to a Map using toMap method
-          print('Item saved to database successfully');
+              .set(product.toMap()); // Convert OrderModel to a Map using toMap method
+          showSnackBar('Ürün başarılı bir şekilde eklendi.');
         }
       } catch (error) {
-        print('Error saving item: $error');
+        showSnackBar('Ürün eklenirken hata oluştu: $error');
         // Handle any error that occurs during saving
       }
     } else {
@@ -413,17 +450,37 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               .collection('orders')
               .doc(product.orderId)
               .delete();
-          print('Item deleted from database successfully');
+          await FirebaseFirestore.instance
+          .collection('lists')
+          .doc(widget.listId)
+          .delete();
+          showSnackBar('Ürün başarılı bir şekilde silindi');
         } catch (error) {
-          print('Error deleting item: $error');
+          showSnackBar('Ürün silinirken hata oluştu: $error');
           // Handle any error that occurs during deletion
         }
       }
-    }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-    );
+    }
   }
+
+  void _showMultiSelect(BuildContext context) async {
+    List<String> selectedValues = await showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return MultiSelectDialog(
+          items: _days.map((day) {
+            return MultiSelectItem<String>(day, day);
+          }).toList(),
+          initialValue: _selectedDays,
+          selectedColor: Colors.teal,
+        );
+      },
+    );
+
+    setState(() {
+      _selectedDays = selectedValues;
+    });
+  }
+
 }
