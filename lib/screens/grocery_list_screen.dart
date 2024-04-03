@@ -122,6 +122,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       listId: randomListId,
       name: 'Liste 1',
       uid: ap.userModel.uid,
+      days: [],
     );
     ap.saveListDataToFirebase(
       context: context,
