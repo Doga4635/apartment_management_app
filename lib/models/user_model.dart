@@ -6,15 +6,17 @@ class UserModel {
   String role;
   String apartmentName;
   String flatNumber;
-
+  
   UserModel({
-    required this.uid,
-    required this.name,
-    this.profilePic,
+    required this.uid, 
     required this.role,
+    required this.profilePic,
+    required this.name,
     required this.apartmentName,
-    required this.flatNumber,
-  });
+    required this.flatNumber
+    });
+
+  
 
   factory UserModel.fromMap(Map<String,dynamic> map) {
     return UserModel(
@@ -37,6 +39,8 @@ class UserModel {
       "flatNumber": flatNumber,
     };
   }
+
+  static fromJson(Map<String, dynamic> map) {}
 
 
 }
