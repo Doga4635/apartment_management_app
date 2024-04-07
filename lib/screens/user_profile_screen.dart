@@ -70,86 +70,99 @@ class UserProfileScreenState extends State<UserProfileScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              InkWell(
-                onTap: () => selectImage(),
-                child: image == null
-                    ? const CircleAvatar(
-                  backgroundColor: Colors.teal,
-                  radius: 60,
-                  child: Icon(
-                    Icons.account_circle,
-                    size: 70,
-                    color: Colors.white,
+              Container(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Container(
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            ap.userModel.name,
+                            style: const TextStyle(fontSize: 32),
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+
+                      const SizedBox(height: 8.0),
+
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: role,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: apartmentName,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: flatNumber,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              final String defaultText = 'Daire: '; // Prefix text
+                              final String flatNumberText = snapshot.data ?? '';
+
+                              return Text(
+                                '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                                style: const TextStyle(fontSize: 22),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+
+
+                    ],
+
                   ),
-                )
-                    : CircleAvatar(
-                  backgroundImage: FileImage(image!),
-                  radius: 60,
                 ),
               ),
-              const SizedBox(height: 16.0),
-              FutureBuilder<String?>(
-                future: role,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text(
-                      snapshot.data ?? '',
-                      style: const TextStyle(fontSize: 18),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 8.0),
-              FutureBuilder<String?>(
-                future: apartmentName,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text(
-                      snapshot.data ?? '',
-                      style: const TextStyle(fontSize: 18),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 8.0),
-              FutureBuilder<String?>(
-                future: flatNumber,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Text(
-                      snapshot.data ?? '',
-                      style: const TextStyle(fontSize: 18),
-                    );
-                  }
-                },
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                child: const Text(
-                  "Profili Düzenle",
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
+
+              const SizedBox(height: 50),
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(

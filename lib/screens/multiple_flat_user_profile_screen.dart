@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:apartment_management_app/screens/add_flat_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
+import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
@@ -194,7 +195,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
 
               Container(
                 width: 350.0,
-                height: 300.0,
+                height: 330.0,
 
 
                 decoration: BoxDecoration(
@@ -251,20 +252,51 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                 apartmentList[index] + '\n Daire: ' + flatList[index],
                                 style: const TextStyle(
                                   color: Colors.black,
-                                  fontSize: 18,
+                                  fontSize: 20,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 10), // Adjust the space between the buttons
+                          SizedBox(width: 10),
                           IconButton(
                             onPressed: () {
-                              deleteFlat(index);
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text("Daireyi Sil"),
+                                    content: Text("Bu daireyi silmek istediğinizden emin misiniz?"),
+                                    actions: [
+                                      ElevatedButton(
+                                        child: Text("İptal"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        child: Text("Sil"),
+                                        onPressed: () {
+                                          deleteFlat(index);
+                                          Navigator.of(context).pop();
+                                          if (flatList.isEmpty){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                                            );
+                                          }
+
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                             icon: Icon(Icons.delete),
                             color: Colors.red,
                             iconSize: 30,
                           ),
+
 
 
                         ],
@@ -277,11 +309,11 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
 
               ),
 
-              const SizedBox(height: 40.0),
+              const SizedBox(height: 30.0),
 
 
 
-              IconButton(
+              ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -290,11 +322,16 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
-                  minimumSize: const Size(50, 50),
+                  minimumSize: const Size(210, 50),
                 ),
-                icon: const Icon(Icons.add,
-                size: 50,
-                color: Colors.white,),
+                child: const Text(
+                  "Daire Ekle",
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
             ],
           ),
