@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/models/order_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ListModel {
@@ -13,14 +14,16 @@ class ListModel {
     required this.days,
   });
 
-  factory ListModel.fromMap(Map<String, dynamic> map) {
-    return ListModel(
-      uid: map['uid'] ?? '',
-      listId: map['listId'] ?? '',
-      name: map['name'] ?? '',
-      days: List<String>.from(map['days'] ?? []),
-    );
-  }
+  factory ListModel.fromSnapshot(DocumentSnapshot snapshot) {
+        return ListModel(
+            listId: snapshot.id,
+             name: snapshot['name'],
+              uid: snapshot['uid'],
+              days: List<String>.from(snapshot.get('days') ?? []).map((e) => e.toString()).toList(),
+       );
+      }
+
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -31,12 +34,5 @@ class ListModel {
     };
   }
 
-  factory ListModel.fromSnapshot(DocumentSnapshot snapshot) {
-    return ListModel(
-      uid: snapshot['uid'] ?? '',
-      listId: snapshot['listId'] ?? '',
-      name: snapshot['name'] ?? '',
-      days: List<String>.from(snapshot['days'] ?? []),
-    );
-  }
+
 }

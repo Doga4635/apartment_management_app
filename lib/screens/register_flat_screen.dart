@@ -323,7 +323,7 @@ Widget build(BuildContext context) {
       name: nameController.text.trim(),
       role: selectedRoleValue,
       apartmentName: selectedApartmentName,
-      flatNumber: selectedFlatNumber,
+      flatNumber: selectedFlatNumber, profilePic: '',
     );
 
     FlatModel flatModel = FlatModel(

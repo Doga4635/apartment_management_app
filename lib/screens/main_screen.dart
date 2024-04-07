@@ -1,5 +1,6 @@
 import 'dart:io';
 
+
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -8,6 +9,10 @@ import 'package:apartment_management_app/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+
+import 'ana_menü_yardım_screen.dart';
+import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -50,9 +55,9 @@ class MainScreenState extends State<MainScreen> {
 
               //Checking if the user has more than 1 role
               QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                  .collection('flats')
-                  .where('uid', isEqualTo: currentUserUid)
-                  .get();
+                 .collection('flats')
+                 .where('uid', isEqualTo: currentUserUid)
+                 .get();
 
               if (querySnapshot.docs.length > 1) {
                 Navigator.push(
@@ -148,14 +153,39 @@ class MainScreenState extends State<MainScreen> {
           ),
 
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(
-          Icons.question_mark,
-          color: Colors.white,
-        ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AnnoucementScreen()),
+        );
+            },
+            tooltip: 'Duyuru',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.announcement,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(
+            width: 10.0,
+          ),
+          FloatingActionButton(
+            onPressed: () {Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => YardimScreen()),
+    );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
       ),
     );
   }

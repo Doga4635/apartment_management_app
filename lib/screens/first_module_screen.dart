@@ -22,6 +22,10 @@ class FirstModuleScreen extends StatefulWidget {
 }
 
 class FirstModuleScreenState extends State<FirstModuleScreen> {
+  get createdList => null;
+
+
+
 
 
   @override
@@ -122,8 +126,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-                        );
-                      }
+                        );                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
@@ -223,7 +226,10 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
   }
 }
 
-  class ToggleSwitchProvider with ChangeNotifier {
+void createList({required bool saveList, required Null Function(dynamic createdList) onListCreated}) {
+}
+
+class ToggleSwitchProvider with ChangeNotifier {
   int _currentIndex = 1;
 
   int get currentIndex => _currentIndex;

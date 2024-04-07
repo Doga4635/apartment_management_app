@@ -9,24 +9,30 @@ import '../screens/grocery_list_screen.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
-class NewOrderScreen extends StatefulWidget {
-  final String listId;
 
-  const NewOrderScreen({Key? key, required this.listId}) : super(key: key);
+class NewOrderScreen extends StatefulWidget {
+
+  final String listId;
+  final List<String> days;
+
+  const NewOrderScreen({Key? key, required this.listId, required this.days}) : super(key: key);
+
 
   @override
   NewOrderScreenState createState() => NewOrderScreenState();
 }
-
 class NewOrderScreenState extends State<NewOrderScreen> {
   String _selectedProduct = 'Ürün adı giriniz';
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
   String _selectedPlace = 'Yeri seçiniz';
+
+
   List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
+
 
   List<String> _selectedDays = [];
   final List<String> _days = [
@@ -41,29 +47,26 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     'Her gün'
   ];
 
+
   @override
   void initState() {
     super.initState();
     _getProducts();
   }
-
   Future<void> _getProducts() async {
     QuerySnapshot productSnapshot =
     await FirebaseFirestore.instance.collection('products').get();
-
     List<ProductModel> products = productSnapshot.docs.map((doc) {
       return ProductModel(
         productId: doc['productId'] ?? '',
         name: doc['name'] ?? '',
       );
     }).toList();
-
     productList = products.map((product) => product.name).toList();
     setState(() {
       _isLoading = false;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -164,9 +167,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             const Divider(),
             const SizedBox(height: 20),
             const Text(
-                  '  Liste',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+              '  Liste',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             ListView.builder(
               shrinkWrap: true,
@@ -236,10 +239,12 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+
   Future<bool> _onBackPressed() async {
     _showExitConfirmationDialog();
     return false;
   }
+
 
   void _showExitConfirmationDialog() {
     showDialog(
@@ -263,6 +268,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             TextButton(
               onPressed: () {
                 // User doesn't want to save the list
+                Navigator.of(context).pop();
                 createList(saveList: false);
                 Navigator.pushReplacement(
                   context,
@@ -277,9 +283,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+
   void createOrder() async {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
+
 
     OrderModel orderModel = OrderModel(
       listId: widget.listId,
@@ -289,8 +297,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       amount: _quantity,
       details: _details,
       place: _selectedPlace,
-      //days: _once ? ['Once'] : _days.entries.where((e) => e.value).map((e) => e.key).toList(),
+      days: widget.days,
     );
+
 
     ap.saveOrderDataToFirebase(
       context: context,
@@ -303,11 +312,13 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+
   void _showEditDialog(BuildContext context, OrderModel product) {
     final TextEditingController quantityController =
     TextEditingController(text: product.amount.toString());
     final TextEditingController detailsController =
     TextEditingController(text: product.details);
+
 
     showDialog(
       context: context,
@@ -335,11 +346,13 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                     int.tryParse(quantityController.text) ?? product.amount;
                 String updatedDetails = detailsController.text;
 
+
                 // Update the order with the new values
                 setState(() {
                   product.amount = updatedQuantity;
                   product.details = updatedDetails;
                 });
+
 
                 FirebaseFirestore.instance
                     .collection('orders')
@@ -353,6 +366,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 }).catchError((error) {
                   showSnackBar('Ürün güncellendi');
                 });
+
 
                 // Close the dialog
                 Navigator.of(context).pop();
@@ -370,6 +384,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       },
     );
   }
+
 
   void _showConfirmationDialog(BuildContext context, OrderModel product) {
     showDialog(
@@ -401,11 +416,13 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     );
   }
 
+
   Future<void> _deleteItem(OrderModel product) async {
     // Remove the item from the list
     setState(() {
       addedProducts.remove(product);
     });
+
 
     try {
       // Delete the item from the database
@@ -419,6 +436,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       // Handle any error that occurs during deletion
     }
   }
+
 
   Future<void> createList({bool saveList = false}) async {
     await FirebaseFirestore.instance.collection('lists').doc(widget.listId).update({
@@ -439,31 +457,37 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           showSnackBar('Ürün başarılı bir şekilde eklendi.');
         }
       } catch (error) {
+
+
         showSnackBar('Ürün eklenirken hata oluştu: $error');
         // Handle any error that occurs during saving
       }
     } else {
-      // If not saving the list, delete all items from the database
+// If not saving the list, delete all items from the database
       for (OrderModel product in addedProducts) {
         try {
           await FirebaseFirestore.instance
               .collection('orders')
               .doc(product.orderId)
               .delete();
+
+
           await FirebaseFirestore.instance
-          .collection('lists')
-          .doc(widget.listId)
-          .delete();
+              .collection('lists')
+              .doc(widget.listId)
+              .delete();
           showSnackBar('Ürün başarılı bir şekilde silindi');
         } catch (error) {
+
+
           showSnackBar('Ürün silinirken hata oluştu: $error');
           // Handle any error that occurs during deletion
         }
       }
 
+
     }
   }
-
   void _showMultiSelect(BuildContext context) async {
     List<String> selectedValues = await showModalBottomSheet(
       context: context,
@@ -478,9 +502,9 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       },
     );
 
+
     setState(() {
       _selectedDays = selectedValues;
     });
   }
-
 }

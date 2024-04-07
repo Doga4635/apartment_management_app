@@ -8,7 +8,7 @@ class OrderModel {
   int amount;
   String details;
   String place;
-
+  List<String> days;
 
   OrderModel({
     required this.listId,
@@ -18,6 +18,7 @@ class OrderModel {
     required this.amount,
     required this.details,
     required this.place,
+    required this.days,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -29,8 +30,11 @@ class OrderModel {
       amount: map['amount'] ?? 0,
       details: map['details'] ?? '',
       place: map['place'] ?? '',
+      days: map['days'] ?? '',
     );
   }
+
+
 
   Map<String, dynamic> toMap() {
     return {
@@ -41,6 +45,7 @@ class OrderModel {
       "amount": amount,
       "details": details,
       "place": place,
+      "days": days,
     };
   }
 
@@ -53,6 +58,7 @@ class OrderModel {
       amount: snapshot['amount'] ?? 0,
       details: snapshot['details'] ?? '',
       place: snapshot['place'] ?? '',
+      days: snapshot['days'] ?? '',
     );
   }
 }
