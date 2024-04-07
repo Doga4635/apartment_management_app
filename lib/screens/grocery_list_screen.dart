@@ -6,19 +6,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../models/list_model.dart';
+import '../models/order_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
+
 class GroceryListScreen extends StatefulWidget {
   const GroceryListScreen({super.key});
+
 
   @override
   GroceryListScreenState createState() => GroceryListScreenState();
 }
 
+
 class GroceryListScreenState extends State<GroceryListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
+
 
   @override
   void initState() {
@@ -26,10 +31,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     _getUser();
   }
 
+
   void _getUser() async {
     _user = _auth.currentUser;
     setState(() {});
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +51,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           },
         ),
       ),
+
 
       body: _user != null
           ? StreamBuilder(
@@ -63,10 +71,10 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             );
           }
           if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+            WidgetsBinding.instance!.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const NewOrderScreen(listId:'abc')),
+                MaterialPageRoute(builder: (context) => const NewOrderScreen(listId: 'abc')),
               );
             });
             return const Center(
@@ -76,9 +84,51 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           return ListView(
             children: snapshot.data!.docs.map((document) {
               final list = ListModel.fromSnapshot(document);
-              return ListTile(
-                title: Text(list.name),
-                // Daha fazla detay eklenebilir
+              return StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection('orders')
+                    .where('listId', isEqualTo: list.listId)
+                    .snapshots(),
+                builder: (context, AsyncSnapshot<QuerySnapshot> orderSnapshot) {
+                  if (orderSnapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (orderSnapshot.hasError) {
+                    return Center(
+                      child: Text('Error: ${orderSnapshot.error}'),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      ListTile(
+                        title: Text(list.name),
+                        // Daha fazla detay eklenebilir
+                      ),
+                      ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: orderSnapshot.data!.docs.map((orderDocument) {
+                          final order = OrderModel(
+                            orderId: orderDocument['orderId'],
+                            listId: orderDocument['listId'],
+                            productId: orderDocument['productId'],
+                            name: orderDocument['name'],
+                            amount: orderDocument['amount'],
+                            details: orderDocument['details'],
+                            place: orderDocument['place'],
+                          );
+                          return ListTile(
+                            title: Text('${order.name} - Miktar: ${order.amount}'),
+                            subtitle: Text('Details: ${order.details} - Yer: ${order.place}'),
+                            // Other order details can be displayed here
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  );
+                },
               );
             }).toList(),
           );
@@ -113,10 +163,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     );
   }
 
+
   void createList() async {
+
 
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomListId = generateRandomId(10);
+
 
     ListModel listModel = ListModel(
       listId: randomListId,
@@ -136,8 +189,10 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           );
         });
 
+
       },
     );
   }
+
 
 }

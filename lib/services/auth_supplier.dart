@@ -176,7 +176,7 @@ class AuthSupplier extends ChangeNotifier {
 
   }
 
-  void saveListDataToFirebase ({
+  saveListDataToFirebase ({
     required BuildContext context,
     required ListModel listModel,
     required Function onSuccess

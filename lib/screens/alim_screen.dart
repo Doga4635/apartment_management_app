@@ -24,23 +24,24 @@ class _AlimScreenState extends State<AlimScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchMarketProducts();// Fetch initial data
+    _fetchMarketProducts(); // Fetch initial data
     _fetchFirinProducts();
     _fetchManavProducts();
   }
+
   Future<void> _fetchMarketProducts() async {
     // Implement fetching Market products from Firebase Firestore
     // For example:
-     QuerySnapshot marketSnapshot =
-         await FirebaseFirestore.instance.collection('market_products').get();
+    QuerySnapshot marketSnapshot =
+    await FirebaseFirestore.instance.collection('market_products').get();
     // Parse the data and update the marketProducts list
   }
 
   Future<void> _fetchFirinProducts() async {
     // Implement fetching Fırın products from Firebase Firestore
     // For example:
-     QuerySnapshot firinSnapshot =
-         await FirebaseFirestore.instance.collection('firin_products').get();
+    QuerySnapshot firinSnapshot =
+    await FirebaseFirestore.instance.collection('firin_products').get();
     // Parse the data and update the firinProducts list
   }
 
@@ -65,13 +66,55 @@ class _AlimScreenState extends State<AlimScreen> {
     }).toList();
   }
 
+  int calculateTotalQuantity(List<OrderModel> products) {
+    int totalQuantity = 0;
+    for (var product in products) {
+      totalQuantity += product.amount;
+    }
+    return totalQuantity;
+  }
 
+  void showTotalQuantityDialog(String location, List<OrderModel> products) {
+    int totalQuantity = calculateTotalQuantity(products);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(location),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: products.map((product) {
+              return ListTile(
+                title: Text('${product.name}: ${product.amount}'),
+              );
+            }).toList(),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Do something with the total quantity
+                print('Total Quantity for $location: $totalQuantity');
+              },
+              child: const Text('Print Total Quantity'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Alışveriş Listesi'),
+        backgroundColor: Colors.teal,
       ),
       body: Center(
         child: Column(
@@ -115,12 +158,7 @@ class _AlimScreenState extends State<AlimScreen> {
       height: 50,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NewOrderScreen(listId:'abc'),
-            ),
-          );
+          showTotalQuantityDialog(location, products);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,
@@ -137,4 +175,3 @@ class _AlimScreenState extends State<AlimScreen> {
     );
   }
 }
-
