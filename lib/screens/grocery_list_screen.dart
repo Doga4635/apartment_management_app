@@ -23,7 +23,11 @@ class GroceryListScreen extends StatefulWidget {
 class GroceryListScreenState extends State<GroceryListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
-
+  final TextEditingController nameController =
+  TextEditingController();
+  final TextEditingController daysController =
+  TextEditingController();
+  String randomListId = generateRandomId(10);
 
   @override
   void initState() {
@@ -40,6 +44,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Lists'),
@@ -71,11 +76,8 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             );
           }
           if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-            WidgetsBinding.instance!.addPostFrameCallback((_) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const NewOrderScreen(listId: 'abc')),
-              );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showListDialog(context);
             });
             return const Center(
               child: CircularProgressIndicator(),
@@ -118,6 +120,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             amount: orderDocument['amount'],
                             details: orderDocument['details'],
                             place: orderDocument['place'],
+                            days: orderDocument['days'],
                           );
                           return ListTile(
                             title: Text('${order.name} - Miktar: ${order.amount}'),
@@ -148,7 +151,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           ),
           child: GestureDetector(
             onTap: () {
-              createList();
+              _showListDialog(context);
             },
             child: const Text(
               'Liste Oluştur',
@@ -163,19 +166,69 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     );
   }
 
+  void _showListDialog(BuildContext context) {
+    final TextEditingController nameController =
+    TextEditingController();
+    final TextEditingController daysController =
+    TextEditingController();
 
-  void createList() async {
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Liste Oluştur'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'İsim'),
+              ),
+              TextField(
+                controller: daysController,
+                decoration: const InputDecoration(labelText: 'Zaman'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Get the updated values from the text fields
+                String name = nameController.text;
+                String days = daysController.text;
+
+                // Close the dialog
+                Navigator.of(context).pop();
+
+                createList(name, days);
+              },
+              child: const Text('Oluştur'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('İptal'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void createList(String name, String days) async {
 
 
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    String randomListId = generateRandomId(10);
+
 
 
     ListModel listModel = ListModel(
       listId: randomListId,
-      name: 'Liste 1',
+      name: name,
       uid: ap.userModel.uid,
-      days: [],
+      days: [days],
     );
     ap.saveListDataToFirebase(
       context: context,
@@ -184,7 +237,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         setState(() {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId)),
+            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: [days],)),
                 (route) => false,
           );
         });

@@ -12,13 +12,10 @@ import '../utils/utils.dart';
 
 class NewOrderScreen extends StatefulWidget {
 
-
   final String listId;
+  final List<String> days;
 
-
-
-
-  const NewOrderScreen({Key? key, required this.listId}) : super(key: key);
+  const NewOrderScreen({Key? key, required this.listId, required this.days}) : super(key: key);
 
 
   @override
@@ -300,7 +297,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       amount: _quantity,
       details: _details,
       place: _selectedPlace,
-      //days: _once ? ['Once'] : _days.entries.where((e) => e.value).map((e) => e.key).toList(),
+      days: widget.days,
     );
 
 

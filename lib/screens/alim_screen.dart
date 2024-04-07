@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:apartment_management_app/screens/new_order_screen.dart';
 import '../models/order_model.dart';
+import '../utils/utils.dart';
 
 class AlimScreen extends StatefulWidget {
   const AlimScreen({Key? key}) : super(key: key);
@@ -20,6 +21,7 @@ class _AlimScreenState extends State<AlimScreen> {
   List<OrderModel> marketProducts = []; // Products for the market
   List<OrderModel> firinProducts = []; // Products for the fırın
   List<OrderModel> manavProducts = []; // Products for the manav
+  late String _currentDay;
 
   @override
   void initState() {
@@ -27,14 +29,26 @@ class _AlimScreenState extends State<AlimScreen> {
     _fetchMarketProducts(); // Fetch initial data
     _fetchFirinProducts();
     _fetchManavProducts();
+    _updateCurrentDay();
+  }
+  // Function to update the current day
+  void _updateCurrentDay() {
+    final now = DateTime.now();
+    // Convert the current date to a string representation of the day (e.g., Monday, Tuesday, etc.)
+    _currentDay = getDayOfWeek(now.weekday);
   }
 
   Future<void> _fetchMarketProducts() async {
     // Implement fetching Market products from Firebase Firestore
     // For example:
     QuerySnapshot marketSnapshot =
-    await FirebaseFirestore.instance.collection('market_products').get();
+    await FirebaseFirestore.instance.collection('orders')
+        .where('days',arrayContains: [_currentDay])
+        .where('place',isEqualTo: 'Market')
+        .get();
+    marketProducts = _parseProducts(marketSnapshot);
     // Parse the data and update the marketProducts list
+    setState(() {});
   }
 
   Future<void> _fetchFirinProducts() async {
@@ -62,6 +76,7 @@ class _AlimScreenState extends State<AlimScreen> {
         details: doc['details'] ?? '',
         listId: '',
         place: doc['place'] ?? '',
+        days: doc['days'] ?? '',
       );
     }).toList();
   }
