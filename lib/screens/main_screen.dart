@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:apartment_management_app/screens/ana_men%C3%BC_yard%C4%B1m_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -161,7 +162,10 @@ class MainScreenState extends State<MainScreen> {
             width: 10.0,
           ),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => YardimScreen()),
+    );},
             tooltip: 'Yardım',
             backgroundColor: Colors.teal,
             child: const Icon(Icons.question_mark,
