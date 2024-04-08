@@ -1,11 +1,3 @@
-<<<<<<< Updated upstream
-=======
-import 'dart:io';
-import 'package:apartment_management_app/screens/first_module_screen.dart';
-import 'package:apartment_management_app/screens/payment_screen.dart';
-import 'package:apartment_management_app/screens/user_payment_screen_admin.dart';
-import 'package:apartment_management_app/screens/user_profile_screen.dart';
->>>>>>> Stashed changes
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +48,6 @@ class _MainScreenState extends State<MainScreen> {
                 radius: 60,
                 backgroundImage: AssetImage(''),
               ),
-<<<<<<< Updated upstream
 
               const SizedBox(height: 16.0),
               const Text(
@@ -104,64 +95,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ],
           ),
-=======
-              child: const Text(
-                "Kapıcı İşlemleri",
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400),
-              ),),
-            const SizedBox(
-              height: 20.0,
-            ),
-            ElevatedButton(onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen(),
-                ),);
-            },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                minimumSize: const Size(290, 40),
-              ),
-              child: const Text(
-                "Bireysel Ödeme İşlemleri",
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400),
-              ),),
-            const SizedBox(
-              height: 20.0,
-            ),
-            ElevatedButton(onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserPaymentScreenAdmin(),
-                ),);
-            },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: const Text(
-                "Apartman Muhasebe İşlemleri",
-                style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400),
-              ),),
-            const SizedBox(
-              height: 20.0,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.question_mark,
-          color: Colors.white,
->>>>>>> Stashed changes
         ),
       ),
     );
