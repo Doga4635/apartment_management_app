@@ -9,10 +9,10 @@ class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
   @override
-  _WelcomeScreenState createState() => _WelcomeScreenState();
+  WelcomeScreenState createState() => WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class WelcomeScreenState extends State<WelcomeScreen> {
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                  "Let's get started",
+                  "Haydi Başlayalım!",
                   style: TextStyle(
                     color: Colors.black87,
                     fontSize: 28.0,
@@ -49,8 +49,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               const Padding(
                 padding: EdgeInsets.only(bottom: 10),
                 child: Text(
-                  "If you live in an apartment, start now.",
-                  style: greyTextStyle
+                    "Eğer bir apartmanda yaşıyorsan şimdi başla.",
+                    style: greyTextStyle
                 ),
               ),
               ElevatedButton(
@@ -59,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     await ap.getDataFromSP().whenComplete(() => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                        builder: (context) => const MainScreen())));
+                            builder: (context) => const MainScreen())));
 
                   }
                   else {
@@ -74,7 +74,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
                 ),
                 child: const Text(
-                  'Get started',
+                  'Başlayalım',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -85,4 +85,3 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     );
   }
 }
-

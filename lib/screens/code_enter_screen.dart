@@ -12,10 +12,10 @@ class CodeEnterScreen extends StatefulWidget {
   const CodeEnterScreen({super.key, required this.verificationId});
 
   @override
-  _CodeEnterScreenState createState() => _CodeEnterScreenState();
+  CodeEnterScreenState createState() => CodeEnterScreenState();
 }
 
-class _CodeEnterScreenState extends State<CodeEnterScreen> {
+class CodeEnterScreenState extends State<CodeEnterScreen> {
 
   @override
   void initState() {
@@ -52,7 +52,7 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
               color: Colors.teal,
             ),
             const Text(
-              'Enter the SMS Code',
+              'SMS Kodunu Giriniz',
               style: TextStyle(
                 color: customTealShade900,
                 fontSize: 28.0,
@@ -62,7 +62,7 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
             const Padding(
               padding: EdgeInsets.only(top: 10,bottom: 15),
               child: Text(
-                'Enter the code sent to your phone via SMS.',
+                'Telefonunuza SMS ile gönderilen kodu giriniz.',
                 style: greyTextStyle,
               ),
             ),
@@ -72,18 +72,18 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
                 length: 6,
                 showCursor: true,
                 defaultPinTheme: PinTheme(
-                  width: 50,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.teal.shade200,
+                    width: 50,
+                    height: 60,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.teal.shade200,
+                        )
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
                     )
-                  ),
-                  textStyle: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w600,
-                  )
                 ),
                 onCompleted: (value) {
                   setState(() {
@@ -100,25 +100,25 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
                     verifyOTP(context, otpCode!);
                   }
                   else {
-                    showSnackBar(context, "Enter 6-Digit code");
+                    showSnackBar("6 haneli kodu girin.");
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
                 ),
-                child: const Text('Submit' , style: TextStyle(color: Colors.white),),
+                child: const Text('Gönder' , style: TextStyle(color: Colors.white),),
               ),
             ),
             const Padding(
-                padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Didn't receive any code?",
-              style: greyTextStyle,
-            ),
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                "Koda ulaşamadınız mı?",
+                style: greyTextStyle,
+              ),
             ),
             const Text(
-              "Resend New Code",
+              "Kodu Yeniden Gönder",
               style: TextStyle(
                 color: Colors.teal,
                 fontSize: 16.0,
@@ -132,12 +132,12 @@ class _CodeEnterScreenState extends State<CodeEnterScreen> {
         tooltip: 'Help',
         backgroundColor: Colors.teal,
         child: const Icon(Icons.question_mark,
-        color: Colors.white,),
+          color: Colors.white,),
       ),
     );
   }
 
-void verifyOTP(BuildContext context,String userOtp) {
+  void verifyOTP(BuildContext context,String userOtp) {
     final ap = Provider.of<AuthSupplier>(context,listen: false);
     ap.verifyOtp(
         context: context,
@@ -146,11 +146,11 @@ void verifyOTP(BuildContext context,String userOtp) {
         onSuccess: () {
           ap.checkExistingUser().then((value) async {
             if(value == true) {
-              ap.getDataFromFirestore().then((value) => 
-                  ap.saveUserDataToSP().then((value) => 
-                      ap.setSignIn().then((value) => 
+              ap.getDataFromFirestore().then((value) =>
+                  ap.saveUserDataToSP().then((value) =>
+                      ap.setSignIn().then((value) =>
                           Navigator.pushAndRemoveUntil(
-                              context, 
+                              context,
                               MaterialPageRoute(
                                   builder: (context) => const MainScreen()),
                                   (route) => false))));
@@ -163,6 +163,6 @@ void verifyOTP(BuildContext context,String userOtp) {
 
         }
     );
-}
+  }
 
 }

@@ -8,10 +8,10 @@ class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  RegisterScreenState createState() => RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void initState() {
@@ -53,7 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: Colors.teal,
                 ),
                 const Text(
-                  'Register',
+                  'Kayıt Ol',
                   style: TextStyle(
                     color: customTealShade900,
                     fontSize: 28.0,
@@ -61,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const Text(
-                  'Create a New Account',
+                  'Yeni Bir Hesap Oluştur',
                   style: greyTextStyle
                 ),
                 Padding(
@@ -76,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     cursorColor: Colors.teal,
                     decoration: InputDecoration(
-                      hintText: "Enter phone number",
+                      hintText: "Cep Telefonu",
                       hintStyle: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
@@ -134,10 +134,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 ElevatedButton(
-                  child: Text(
-                    'Continue',
-                    style: TextStyle(color: Colors.white),
-                  ),
                   onPressed:  () => sendPhoneNumber(),
                   // {
                   //
@@ -148,7 +144,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
+                  ),
+                  child: const Text(
+                    'Devam Et',
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],

@@ -1,5 +1,9 @@
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:apartment_management_app/models/flat_model.dart';
+import 'package:apartment_management_app/models/message_model.dart';
+import 'package:apartment_management_app/models/order_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/code_enter_screen.dart';
 import 'package:apartment_management_app/utils/utils.dart';
@@ -7,6 +11,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/list_model.dart';
 
 class AuthSupplier extends ChangeNotifier {
 
@@ -41,6 +47,7 @@ class AuthSupplier extends ChangeNotifier {
 
   void signInWithPhone(BuildContext context, String phoneNumber) async {
     try {
+      await _firebaseAuth.setSettings(appVerificationDisabledForTesting: true);
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
           verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
@@ -56,7 +63,7 @@ class AuthSupplier extends ChangeNotifier {
           },
           codeAutoRetrievalTimeout: (verificationId) {} );
     } on FirebaseAuthException catch(e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
     }
   }
 
@@ -76,15 +83,13 @@ class AuthSupplier extends ChangeNotifier {
           smsCode: userOtp);
       User user = (await _firebaseAuth.signInWithCredential(creds)).user!;
 
-      if(user != null) {
         _uid = user.uid;
         onSuccess();
-      }
 
       _isLoading = false;
       notifyListeners();
     } on FirebaseAuthException catch (e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
       _isLoading = false;
       notifyListeners();
     }
@@ -94,11 +99,9 @@ class AuthSupplier extends ChangeNotifier {
   Future<bool> checkExistingUser() async {
     DocumentSnapshot snapshot = await _firebaseFirestore.collection("users").doc(_uid).get();
     if(snapshot.exists) {
-      print("User exists");
       return true;
     }
     else {
-      print("New User");
       return false;
     }
   }
@@ -114,14 +117,104 @@ class AuthSupplier extends ChangeNotifier {
       userModel.uid = _firebaseAuth.currentUser!.uid;
       _userModel = userModel;
 
-      await _firebaseFirestore.collection("users").doc(_uid).set(userModel.toMap()).then((value) {
-      onSuccess();
-      _isLoading = false;
-      notifyListeners();
+      await _firebaseFirestore.collection("users").doc(userModel.uid).set(userModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
 
       });
     } on FirebaseAuthException catch(e) {
-      showSnackBar(context, e.message.toString());
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  void saveFlatDataToFirebase ({
+    required BuildContext context,
+    required FlatModel flatModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      flatModel.uid = _firebaseAuth.currentUser!.uid;
+
+      await _firebaseFirestore.collection("flats").doc(flatModel.flatId).set(flatModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  void saveOrderDataToFirebase ({
+    required BuildContext context,
+    required OrderModel orderModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      await _firebaseFirestore.collection("orders").doc(orderModel.orderId).set(orderModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  saveListDataToFirebase ({
+    required BuildContext context,
+    required ListModel listModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      await _firebaseFirestore.collection("lists").doc(listModel.listId).set(listModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  saveMessageDataToFirebase ({
+    required BuildContext context,
+    required MessageModel messageModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      await _firebaseFirestore.collection("messages").doc(messageModel.messageId).set(messageModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
       _isLoading = false;
       notifyListeners();
     }
@@ -132,9 +225,10 @@ class AuthSupplier extends ChangeNotifier {
     await _firebaseFirestore.collection("users").doc(_firebaseAuth.currentUser!.uid).get().then((DocumentSnapshot snapshot) {
       _userModel = UserModel(
           uid: snapshot['uid'],
+          name: snapshot['name'],
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
-          flatNumber: snapshot['flatNumber']
+          flatNumber: snapshot['flatNumber'], profilePic: '',
       );
       _uid = userModel.uid;
     });
@@ -151,6 +245,14 @@ class AuthSupplier extends ChangeNotifier {
     _userModel = UserModel.fromMap(jsonDecode(data));
     _uid = _userModel!.uid;
     notifyListeners();
+  }
+
+    Future<String> getField(String data) async {
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+        'users').doc(FirebaseAuth.instance.currentUser!.uid);
+    DocumentSnapshot snapshot1 = await userDocRef.get();
+    String value = snapshot1[data];
+    return value;
   }
 
   Future userSignOut() async {
