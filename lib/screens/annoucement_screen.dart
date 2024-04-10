@@ -7,21 +7,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_supplier.dart';
 import 'package:intl/intl.dart';
+
+
 class AnnoucementScreen extends StatefulWidget {
   const AnnoucementScreen({Key? key}) : super(key: key);
 
   @override
-  _AnnouncementScreenState createState() => _AnnouncementScreenState();
+  AnnouncementScreenState createState() => AnnouncementScreenState();
 }
 
-class _AnnouncementScreenState extends State<AnnoucementScreen> {
+class AnnouncementScreenState extends State<AnnoucementScreen> {
   final _formKey = GlobalKey<FormState>();
   final _controller = TextEditingController();
   final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Duyuru'),
@@ -39,23 +40,19 @@ class _AnnouncementScreenState extends State<AnnoucementScreen> {
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("Yükleniyor...");
+                    return const Text("Yükleniyor...");
                   }
 
                   return ListView.builder(
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
                       final message = MessageModel.fromMap(snapshot.data!.docs[index].data() as Map<String, dynamic>);
+                      DateTime createdAt = message.createdAt.toDate(); // Convert Timestamp to DateTime
+                      String formattedCreatedAt = DateFormat('dd-MM-yyyy HH:mm:ss').format(createdAt);
                       return ListTile(
                       title: Text(message.content),
                       subtitle: Text(message.role),
-                      trailing: Text(
-                        DateFormat('dd/MM/yyyy hh:mm a').format(message.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
+                      trailing: Text(formattedCreatedAt),
                     );
                     },
                   );
@@ -96,7 +93,7 @@ class _AnnouncementScreenState extends State<AnnoucementScreen> {
                             MessageModel(
                               uid: user.uid,
                               content: _controller.text,
-                              createdAt: DateTime.now(),
+                              createdAt: Timestamp.now(),
                               role: userModel.role,
                               messageId: randomId,
                             );

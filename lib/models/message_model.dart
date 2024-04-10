@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class MessageModel {
   final String uid;
   final String content;
-  final DateTime createdAt;
+  final Timestamp createdAt;
   final String role;
   final String messageId;
 
@@ -19,7 +19,7 @@ class MessageModel {
     return MessageModel(
       uid: map['uid'] ?? '',
       content: map['content'] ?? '',
-      createdAt: map['createdAt'] ?? '0',
+      createdAt: map['createdAt'] ?? Timestamp.now(),
       role: map['role'] ?? '',
       messageId: map['messageId'] ?? '',
     );
