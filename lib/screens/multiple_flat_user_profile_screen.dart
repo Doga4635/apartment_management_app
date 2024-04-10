@@ -217,7 +217,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                             flex: 3,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.teal[50],
+                                backgroundColor: Colors.teal[50],
                                 minimumSize: Size(250, 85),
                               ),
                               onPressed: () async {
