@@ -8,6 +8,7 @@ import '../models/product_model.dart';
 import '../screens/grocery_list_screen.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'alim_screen.dart';
 
 
 class NewOrderScreen extends StatefulWidget {
@@ -223,7 +224,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 createList(saveList: true);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                  MaterialPageRoute(builder: (context) => AlimScreen(
+                    marketProducts: addedProducts.where((product) => product.place == 'Market').toList(),
+                    firinProducts: addedProducts.where((product) => product.place == 'Fırın').toList(),
+                    manavProducts: addedProducts.where((product) => product.place == 'Manav').toList(),
+                  )),
+                );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => GroceryListScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
@@ -232,6 +241,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             ),
+
             const SizedBox(height: 20),
           ],
         ),

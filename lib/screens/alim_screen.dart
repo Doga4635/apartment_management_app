@@ -5,7 +5,17 @@ import '../models/order_model.dart';
 import '../utils/utils.dart';
 
 class AlimScreen extends StatefulWidget {
-  const AlimScreen({Key? key}) : super(key: key);
+  List<OrderModel> marketProducts = []; // Products for the market
+  List<OrderModel> firinProducts = []; // Products for the fırın
+  List<OrderModel> manavProducts = []; // Products for the manav
+
+
+   AlimScreen({
+    super.key,
+    required this.marketProducts,
+    required this.firinProducts,
+    required this.manavProducts,
+  });
 
   @override
   _AlimScreenState createState() => _AlimScreenState();
@@ -23,6 +33,7 @@ class _AlimScreenState extends State<AlimScreen> {
   List<OrderModel> manavProducts = []; // Products for the manav
   late String _currentDay;
 
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +42,7 @@ class _AlimScreenState extends State<AlimScreen> {
     _fetchManavProducts();
     _updateCurrentDay();
   }
+
   // Function to update the current day
   void _updateCurrentDay() {
     final now = DateTime.now();
@@ -98,11 +110,15 @@ class _AlimScreenState extends State<AlimScreen> {
           title: Text(location),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: products.map((product) {
-              return ListTile(
-                title: Text('${product.name}: ${product.amount}'),
-              );
-            }).toList(),
+            children: [
+              Text('Total Quantity: $totalQuantity'), // Print total quantity for the location
+              SizedBox(height: 10), // Add some spacing
+              ...products.map((product) {
+                return ListTile(
+                  title: Text('${product.name}: ${product.amount}'),
+                );
+              }).toList(),
+            ],
           ),
           actions: <Widget>[
             TextButton(
@@ -111,18 +127,13 @@ class _AlimScreenState extends State<AlimScreen> {
               },
               child: const Text('Close'),
             ),
-            TextButton(
-              onPressed: () {
-                // Do something with the total quantity
-                print('Total Quantity for $location: $totalQuantity');
-              },
-              child: const Text('Print Total Quantity'),
-            ),
           ],
         );
       },
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {

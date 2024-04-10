@@ -25,7 +25,7 @@ class AlisverisListesiScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AlimScreen()),
+                    MaterialPageRoute(builder: (context) => AlimScreen(marketProducts: [], firinProducts: [], manavProducts: [],)),
                   );// Handle Alım button tap
                 },
                 style: ElevatedButton.styleFrom(
