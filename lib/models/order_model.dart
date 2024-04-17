@@ -30,7 +30,7 @@ class OrderModel {
       amount: map['amount'] ?? 0,
       details: map['details'] ?? '',
       place: map['place'] ?? '',
-      days: map['days'] ?? '',
+      days: (map['days'] as List<dynamic>).cast<String>(),
     );
   }
 
@@ -58,7 +58,9 @@ class OrderModel {
       amount: snapshot['amount'] ?? 0,
       details: snapshot['details'] ?? '',
       place: snapshot['place'] ?? '',
-      days: snapshot['days'] ?? '',
+      days: (snapshot['days'] as List<dynamic>).cast<String>(),
     );
   }
+
+  static fromJson(Map<String, dynamic>? data) {}
 }

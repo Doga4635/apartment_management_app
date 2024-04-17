@@ -224,11 +224,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 createList(saveList: true);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AlimScreen(
-                    marketProducts: addedProducts.where((product) => product.place == 'Market').toList(),
-                    firinProducts: addedProducts.where((product) => product.place == 'Fırın').toList(),
-                    manavProducts: addedProducts.where((product) => product.place == 'Manav').toList(),
-                  )),
+                  MaterialPageRoute(builder: (context) => AlimScreen()),
                 );
                 Navigator.pushReplacement(
                   context,

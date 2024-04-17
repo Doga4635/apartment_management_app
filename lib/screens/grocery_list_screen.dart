@@ -83,6 +83,8 @@ class GroceryListScreenState extends State<GroceryListScreen> {
               child: CircularProgressIndicator(),
             );
           }
+
+
           return ListView(
             children: snapshot.data!.docs.map((document) {
               final list = ListModel.fromSnapshot(document);
@@ -228,7 +230,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       listId: randomListId,
       name: name,
       uid: ap.userModel.uid,
-      days: [days],
+      days: [days], orders: [],
     );
     ap.saveListDataToFirebase(
       context: context,
