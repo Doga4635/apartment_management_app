@@ -25,68 +25,90 @@ class AlimScreenState extends State<AlimScreen> {
     _currentDay = getDayOfWeek(now.weekday);
   }
 
-  Future<int> getTotalOrdersAmount(String location) async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('orders')
-        .where('place', isEqualTo: location)
-        .get();
-
-    int totalAmount = 0;
-    querySnapshot.docs.forEach((doc) {
-      int itemAmount = doc['amount'];
-      totalAmount += itemAmount;
-    });
-    return totalAmount;
-  }
-
   void showMarketQuantity(String location) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Market Orders'),
-          content: FutureBuilder<QuerySnapshot>(
-            future: FirebaseFirestore.instance
-                .collection('orders')
-                .where('place', isEqualTo: location)
-                .get(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                Map<String, int> productsMap = {};
-                snapshot.data?.docs.forEach((doc) {
-                  String productName = doc['name'];
-                  int productAmount = doc['amount'];
-                  if (productsMap.containsKey(productName)) {
-                    productsMap[productName] = productsMap[productName]! + productAmount;
-                  } else {
-                    productsMap[productName] = productAmount;
-                  }
-                });
-                List<Widget> productsList = [];
-                productsMap.forEach((productName, productAmount) {
-                  productsList.add(
-                    Text('$productName: $productAmount'),
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: Text('Market Orders'),
+            content: FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('orders')
+                  .where('place', isEqualTo: location)
+                  .where('days', arrayContains: _currentDay)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  Map<String, Map<String, int>> productsDetailsMap = {};
+                  Map<String, int> productsMap = {};
+                  snapshot.data?.docs.forEach((doc) {
+                    String productName = doc['name'];
+                    String details = doc['details'];
+                    int productAmount = doc['amount'];
+
+                    // If the product already exists in the map, update its details and amount
+                    if (productsDetailsMap.containsKey(productName)) {
+                      productsMap[productName] = productsMap[productName]! + productAmount;
+                      if (productsDetailsMap[productName]!.containsKey(details)) {
+                        productsDetailsMap[productName]![details] =
+                            productsDetailsMap[productName]![details]! + productAmount;
+                      } else {
+                        productsDetailsMap[productName]![details] = productAmount;
+                      }
+                    } else {
+                      productsMap[productName] = productAmount;
+                      productsDetailsMap[productName] = {details: productAmount};
+                    }
+                  });
+
+                  List<Widget> productsList = [];
+
+                  productsDetailsMap.forEach((productName, detailsMap) {
+                    List<Widget> detailsList = [];
+
+                    detailsMap.forEach((details, amount) {
+                      detailsList.add(
+                        Text('$details: $amount'),
+                      );
+                    });
+
+                    productsList.add(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('> $productName: ${productsMap[productName]}'),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: detailsList,
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: productsList,
                   );
-                });
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: productsList,
-                );
-              }
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+
+
+                }
               },
-              child: Text('Close'),
             ),
-          ],
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Close'),
+              ),
+            ],
+          ),
         );
       },
     );

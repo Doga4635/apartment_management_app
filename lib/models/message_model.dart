@@ -3,22 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class MessageModel {
   final String uid;
   final String content;
-  final DateTime createdAt;
+  final Timestamp createdAt;
   final String role;
+  final String messageId;
 
   MessageModel({
     required this.uid,
     required this.content,
     required this.createdAt,
     required this.role,
+    required this.messageId,
   });
 
   factory MessageModel.fromMap(Map<String,dynamic> map) {
     return MessageModel(
       uid: map['uid'] ?? '',
       content: map['content'] ?? '',
-      createdAt: map['createdAt'] ?? '0',
+      createdAt: map['createdAt'] ?? Timestamp.now(),
       role: map['role'] ?? '',
+      messageId: map['messageId'] ?? '',
     );
   }
 
@@ -28,7 +31,7 @@ class MessageModel {
       "content": content,
       "createdAt": createdAt,
       "role": role,
-     
+      "messageId": messageId,
     };
   }
 
@@ -38,6 +41,7 @@ class MessageModel {
       content: snapshot['content'] ?? '',
       createdAt: snapshot['createdAt'] ?? '0',
       role: snapshot['role'] ?? '',
+      messageId: snapshot['messageId'] ?? '',
     );
   }
 

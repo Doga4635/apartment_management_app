@@ -478,10 +478,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               .delete();
 
 
-          await FirebaseFirestore.instance
-              .collection('lists')
-              .doc(widget.listId)
-              .delete();
           showSnackBar('Ürün başarılı bir şekilde silindi');
         } catch (error) {
 
@@ -491,6 +487,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         }
       }
 
+      await FirebaseFirestore.instance
+          .collection('lists')
+          .doc(widget.listId)
+          .delete();
 
     }
   }
