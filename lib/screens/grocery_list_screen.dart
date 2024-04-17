@@ -1,5 +1,4 @@
 import 'package:apartment_management_app/screens/first_module_screen.dart';
-//import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/new_order_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +7,6 @@ import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:provider/provider.dart';
 import '../models/list_model.dart';
-import '../models/order_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
@@ -74,83 +72,39 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
       body: _user != null
           ? StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection('lists')
-            .where('uid', isEqualTo: _user!.uid)
-            .snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        stream: FirebaseFirestore.instance.collection('lists').where('uid', isEqualTo: _auth.currentUser?.uid).snapshots(),
+        builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
+            print('Waiting for data...');
+            return const Center(child: CircularProgressIndicator());
+          }
+          else if (snapshot.hasError) {
+            print('Hata: ${snapshot.error}');
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          else {
+            List<ListModel> lists = snapshot.data!.docs.map((doc) => ListModel.fromSnapshot(doc)).toList();
+            print('Lists: ${lists[0].name},${lists[1].name}');
+            // Display list names
+            return ListView.builder(
+              itemCount: lists.length,
+              itemBuilder: (context, index) {
+                final list = lists[index];
+                return ListTile(
+                  title: Text(list.name),
+                  onTap: () {
+
+                  },
+                );
+              },
             );
           }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          }
-          if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _showListDialog(context);
-            });
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return ListView(
-            children: snapshot.data!.docs.map((document) {
-              final list = ListModel.fromSnapshot(document);
-              return StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('orders')
-                    .where('listId', isEqualTo: list.listId)
-                    .snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> orderSnapshot) {
-                  if (orderSnapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (orderSnapshot.hasError) {
-                    return Center(
-                      child: Text('Error: ${orderSnapshot.error}'),
-                    );
-                  }
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text(list.name),
-                        // Daha fazla detay eklenebilir
-                      ),
-                      ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: orderSnapshot.data!.docs.map((orderDocument) {
-                          final order = OrderModel(
-                            orderId: orderDocument['orderId'],
-                            listId: orderDocument['listId'],
-                            productId: orderDocument['productId'],
-                            name: orderDocument['name'],
-                            amount: orderDocument['amount'],
-                            details: orderDocument['details'],
-                            place: orderDocument['place'],
-                            days: orderDocument['days'],
-                          );
-                          return ListTile(
-                            title: Text('${order.name} - Miktar: ${order.amount}'),
-                            subtitle: Text('Details: ${order.details} - Yer: ${order.place}'),
-                            // Other order details can be displayed here
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  );
-                },
-              );
-            }).toList(),
-          );
+          // Extract lists from snapshot
+
         },
       )
+
           : const Center(
         child: CircularProgressIndicator(),
       ),
@@ -283,6 +237,27 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     setState(() {
       _selectedDays = selectedValues;
     });
+  }
+
+  Future<List<ListModel>> _getLists() async {
+    // Get the authenticated user
+    User? user = _auth.currentUser;
+
+    // Check if user is authenticated
+    if (user != null) {
+      // Retrieve lists where uid matches the authenticated user's uid
+      QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
+          .collection('lists')
+          .where('uid', isEqualTo: user.uid)
+          .get();
+
+      // Convert each document snapshot to ListModel
+      List<ListModel> lists = querySnapshot.docs.map((doc) => ListModel.fromSnapshot(doc)).toList();
+
+      return lists;
+    } else {
+      throw Exception('User not authenticated.');
+    }
   }
 
 }
