@@ -49,10 +49,8 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
 
     void deleteFlat(int index) async {
       String flatIdToDelete = flatIDList[index];
-      // Delete the flat document from Firestore
       await FirebaseFirestore.instance.collection('flats').doc(flatIdToDelete).delete();
 
-      // Remove the flat from the lists
       setState(() {
         flatList.removeAt(index);
         flatIDList.removeAt(index);
@@ -172,11 +170,11 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                             } else if (snapshot.hasError) {
                               return Text('Error: ${snapshot.error}');
                             } else {
-                              final String defaultText = 'Daire: '; // Prefix text
+                              final String defaultText = 'Daire: '; 
                               final String flatNumberText = snapshot.data ?? '';
 
                               return Text(
-                                '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                                '$defaultText$flatNumberText',
                                 style: const TextStyle(fontSize: 22),
                               );
                             }
