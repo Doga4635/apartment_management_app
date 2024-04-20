@@ -76,46 +76,46 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Expanded(
-                  child:Container(
-                    width: 350.0,
-                    height: 330.0,
+                child:Container(
+                  width: 350.0,
+                  height: 330.0,
 
 
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey, width: 1.0),
-                    ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 1.0),
+                  ),
 
-                    child: ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: listNameList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.teal[50],
-                              minimumSize: Size(250, 85),
-                            ),
-                            onPressed: () async {
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: listNameList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.teal[50],
+                            minimumSize: Size(250, 85),
+                          ),
+                          onPressed: () async {
 
-                            },
-                            child: Text(
-                              listNameList[index],
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                              ),
+                          },
+                          child: Text(
+                            listNameList[index],
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
+                  ),
 
 
 
-                  ), ),
+                ), ),
 
               const SizedBox(height: 30.0),
 

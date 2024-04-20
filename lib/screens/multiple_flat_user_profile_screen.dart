@@ -196,42 +196,42 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
               const SizedBox(height: 28.0),
 
               Expanded(
-                  child:Container(
-                    width: 350.0,
-                    height: 330.0,
+                child:Container(
+                  width: 350.0,
+                  height: 330.0,
 
 
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey, width: 1.0),
-                    ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 1.0),
+                  ),
 
-                    child: ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: flatList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Colors.teal[50],
-                                    minimumSize: Size(250, 85),
-                                  ),
-                                  onPressed: () async {
-                                    String selectedFlatId = flatIDList[index];
-                                    updateSelectedFlatIdentityFalse(currentUserUid);
-                                    updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
-                                    updateUserIdentity(currentUserUid, selectedFlatId);
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: flatList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.teal[50],
+                                  minimumSize: Size(250, 85),
+                                ),
+                                onPressed: () async {
+                                  String selectedFlatId = flatIDList[index];
+                                  updateSelectedFlatIdentityFalse(currentUserUid);
+                                  updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
+                                  updateUserIdentity(currentUserUid, selectedFlatId);
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
 
-                                    /*
+                                  /*
                                   setState(() {
                                     apartmentName = getUserApartmentName(currentUserUid);
                                     role = getUserRole(currentUserUid);
@@ -239,78 +239,78 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                   });
                                   */
 
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const MainScreen()),
-                                    );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                                  );
 
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                      content: Text('Daire başarıyla değiştirildi.'),
-                                    ));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text('Daire başarıyla değiştirildi.'),
+                                  ));
 
 
 
-                                  },
-                                  child: Text(
-                                    apartmentList[index] + '\n Daire: ' + flatList[index],
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 20,
-                                    ),
+                                },
+                                child: Text(
+                                  apartmentList[index] + '\n Daire: ' + flatList[index],
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 10),
-                              IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: Text("Daireyi Sil"),
-                                        content: Text("Bu daireyi silmek istediğinizden emin misiniz?"),
-                                        actions: [
-                                          ElevatedButton(
-                                            child: Text("İptal"),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          ElevatedButton(
-                                            child: Text("Sil"),
-                                            onPressed: () {
-                                              deleteFlat(index);
-                                              Navigator.of(context).pop();
-                                              if (flatList.isEmpty){
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                                                );
-                                              }
+                            ),
+                            SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("Daireyi Sil"),
+                                      content: Text("Bu daireyi silmek istediğinizden emin misiniz?"),
+                                      actions: [
+                                        ElevatedButton(
+                                          child: Text("İptal"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                          child: Text("Sil"),
+                                          onPressed: () {
+                                            deleteFlat(index);
+                                            Navigator.of(context).pop();
+                                            if (flatList.isEmpty){
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                                              );
+                                            }
 
-                                            },
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                                icon: Icon(Icons.delete),
-                                color: Colors.red,
-                                iconSize: 30,
-                              ),
-
-
-
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              icon: Icon(Icons.delete),
+                              color: Colors.red,
+                              iconSize: 30,
+                            ),
 
 
 
+                          ],
+                        ),
+                      );
+                    },
                   ),
+
+
+
+                ),
               ),
 
               const SizedBox(height: 30.0),
