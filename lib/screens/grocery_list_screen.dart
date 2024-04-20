@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../models/list_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 
 
 class GroceryListScreen extends StatefulWidget {
@@ -21,12 +22,11 @@ class GroceryListScreen extends StatefulWidget {
 
 
 class GroceryListScreenState extends State<GroceryListScreen> {
+
+  List<String> listNameList = [];
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late User? _user;
-  final TextEditingController nameController =
-  TextEditingController();
-  final TextEditingController daysController =
-  TextEditingController();
+
   String randomListId = generateRandomId(10);
   List<String> _selectedDays = [];
   final List<String> _days = [
@@ -41,22 +41,21 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     'Her gün'
   ];
 
+
   @override
   void initState() {
     super.initState();
-    _getUser();
+
+    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+    getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
+      setState(() {});
+
+    });
   }
-
-
-  void _getUser() async {
-    _user = _auth.currentUser;
-    setState(() {});
-  }
-
 
   @override
   Widget build(BuildContext context) {
-
+    final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Lists'),
@@ -70,67 +69,107 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       ),
 
 
-      body: _user != null
-          ? StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('lists').where('uid', isEqualTo: _auth.currentUser?.uid).snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            print('Waiting for data...');
-            return const Center(child: CircularProgressIndicator());
-          }
-          else if (snapshot.hasError) {
-            print('Hata: ${snapshot.error}');
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(25.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Expanded(
+                  child:Container(
+                    width: 350.0,
+                    height: 330.0,
 
-          else {
-            List<ListModel> lists = snapshot.data!.docs.map((doc) => ListModel.fromSnapshot(doc)).toList();
-            print('Lists: ${lists[0].name},${lists[1].name}');
-            // Display list names
-            return ListView.builder(
-              itemCount: lists.length,
-              itemBuilder: (context, index) {
-                final list = lists[index];
-                return ListTile(
-                  title: Text(list.name),
-                  onTap: () {
 
-                  },
-                );
-              },
-            );
-          }
-          // Extract lists from snapshot
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey, width: 1.0),
+                    ),
 
-        },
-      )
+                    child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: listNameList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.teal[50],
+                              minimumSize: Size(250, 85),
+                            ),
+                            onPressed: () async {
 
-          : const Center(
-        child: CircularProgressIndicator(),
-      ),
-      bottomNavigationBar: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          margin: const EdgeInsets.all(20.0),
-          padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-          decoration: BoxDecoration(
-            color: Colors.teal,
-            borderRadius: BorderRadius.circular(30.0),
-          ),
-          child: GestureDetector(
-            onTap: () {
-              _showListDialog(context);
-            },
-            child: const Text(
-              'Liste Oluştur',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
+                            },
+                            child: Text(
+                              listNameList[index],
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+
+
+                  ), ),
+
+              const SizedBox(height: 30.0),
+
+              ElevatedButton(
+                onPressed: () {
+                  _showListDialog(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  minimumSize: const Size(75, 50),
+                ),
+                child: const Text(
+                  "Liste Oluştur",
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
-            ),
+
+            ],
           ),
         ),
+
       ),
+
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                );
+              },
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(
+                Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+
+
+
+
+
     );
   }
 
@@ -239,24 +278,27 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     });
   }
 
-  Future<List<ListModel>> _getLists() async {
-    // Get the authenticated user
-    User? user = _auth.currentUser;
+  Future<String?> getCurrentUserListNames(String currentUserUid, List<String> listNameList) async {
 
-    // Check if user is authenticated
-    if (user != null) {
-      // Retrieve lists where uid matches the authenticated user's uid
-      QuerySnapshot<Map<String, dynamic>> querySnapshot = await FirebaseFirestore.instance
-          .collection('lists')
-          .where('uid', isEqualTo: user.uid)
-          .get();
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('lists')
+        .where('uid', isEqualTo: currentUserUid)
+        .get();
 
-      // Convert each document snapshot to ListModel
-      List<ListModel> lists = querySnapshot.docs.map((doc) => ListModel.fromSnapshot(doc)).toList();
+    if (querySnapshot.docs.isNotEmpty) {
+      querySnapshot.docs.forEach((doc) {
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          String? listName = data['name'] as String?;
+          bool selectedFlat = data['selectedFlat'] as bool? ?? false;
+          if ( listName != null && !selectedFlat) {
+            listNameList.add(listName);
+          }
 
-      return lists;
+        }
+      });
     } else {
-      throw Exception('User not authenticated.');
+      print('No documents found for the current user.');
     }
   }
 

@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'ana_menü_yardım_screen.dart';
+
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({Key? key});
 
@@ -187,13 +189,26 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(
-          Icons.question_mark,
-          color: Colors.white,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                );
+              },
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(
+                Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
