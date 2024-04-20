@@ -53,6 +53,26 @@ Future<String?> getRoleForFlat(String flatUid) async {
   return role;
 }
 
+Future<String?> getApartmentIdForUser(String uid) async {
+  String? apartmentId;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      apartmentId = querySnapshot.docs.first['apartmentId'];
+    }
+  } catch (error) {
+    showSnackBar('Apartman ismi alınamadı.');
+  }
+
+  return apartmentId;
+}
+
    String getDayOfWeek(int day) {
     switch (day) {
       case 1:
