@@ -1,9 +1,11 @@
 import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
+import 'package:apartment_management_app/screens/create_apartment_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:provider/provider.dart';
@@ -191,13 +193,33 @@ Widget build(BuildContext context) {
                   ),
                 ],
               ),
-              CustomDropdown<String>.search(
-                hintText: selectedApartmentName,
-                items: _apartmentList,
-                excludeSelected: false,
-                onChanged: (value) {
-                  selectedApartmentName = value;
-                },
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CreateApartmentScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                      child: const Icon(Icons.add,color: Colors.white,),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: CustomDropdown<String>.search(
+                      hintText: selectedApartmentName,
+                      items: _apartmentList,
+                      excludeSelected: false,
+                      onChanged: (value) {
+                        selectedApartmentName = value;
+                      },
+                    ),
+                  ),
+                ],
               ),
               const Row(
                 children: [
@@ -313,6 +335,17 @@ Widget build(BuildContext context) {
     ),
   );
 }
+
+//**************************************Devam et
+
+// void getApartments() async {
+//   QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('apartments').get();
+//   snapshot.forEach(doc => {
+//   // Assuming 'name' is the field containing the apartment name
+//   const apartmentName = doc.data().name;
+//   apartmentList.push(apartmentName);
+//   });
+// }
 
   void storeData() async {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
