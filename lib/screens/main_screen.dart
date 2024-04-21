@@ -1,6 +1,7 @@
 import 'dart:io';
 
 
+import 'package:apartment_management_app/screens/apartment_payment_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -114,7 +115,12 @@ class MainScreenState extends State<MainScreen> {
               ),
               const SizedBox(height: 30),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.teal,
                   minimumSize: const Size(290, 50),

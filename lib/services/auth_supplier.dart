@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/list_model.dart';
+import '../models/payment_model.dart';
 
 class AuthSupplier extends ChangeNotifier {
 
@@ -175,6 +176,27 @@ class AuthSupplier extends ChangeNotifier {
       notifyListeners();
     }
 
+  }
+
+  savePaymentDataToFirebase ({
+    required BuildContext context,
+    required PaymentModel paymentModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+      await _firebaseFirestore.collection("payments").doc(paymentModel.id).set(paymentModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   saveListDataToFirebase ({
