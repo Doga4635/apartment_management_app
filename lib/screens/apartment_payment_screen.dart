@@ -2,11 +2,14 @@ import 'package:apartment_management_app/screens/define_payment_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen_admin.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
+import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
+import '../utils/utils.dart';
 
 class ApartmentPaymentScreen extends StatefulWidget {
   const ApartmentPaymentScreen({Key? key}) : super(key: key);
@@ -58,9 +61,17 @@ class _ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               InkWell(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const DefinePaymentScreen()));
+                onTap: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  final userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+                  final userData = await userDoc.get();
+                  final userModel = UserModel.fromMap(userData.data()!);
+                  if (userModel.role == 'Apartman Yöneticisi') {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const DefinePaymentScreen()));
+                  } else {
+                    showSnackBar('Sadece apartman yöneticileri bu sayfaya erişebilir.');
+                  }
                 },
                 child: Container(
                   width: 300,

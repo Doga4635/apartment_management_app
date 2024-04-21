@@ -18,11 +18,13 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
   String randomPaymentId = "";
 
   String selectedPaymentName = '';
+  String selectedApartmentName = '';
   String selectedPrice = '';
   String selectedDescription = '';
   Map<String, bool> selectedFlats = {};
 
   final paymentNameController = TextEditingController();
+  final apartmentNameController = TextEditingController();
   final priceController = TextEditingController();
   final descriptionController = TextEditingController();
   final flatController = TextEditingController();
@@ -36,6 +38,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
   void dispose() {
     super.dispose();
     paymentNameController.dispose();
+    apartmentNameController.dispose();
     priceController.dispose();
     descriptionController.dispose();
     flatController.dispose();
@@ -120,6 +123,52 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                   onChanged: (value) {
                     setState(() {
                       selectedPaymentName = value;
+                    });
+                  },
+                ),const Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Icon(
+                        Icons.apartment,
+                        size: 60.0,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 24.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            "Apartman İsmini Giriniz",
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              'Apartman için isim nedir?',
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                TextField(
+                  controller: apartmentNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Apartman Adı',
+                    labelText: 'Apartman Adı',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedApartmentName = value;
                     });
                   },
                 ),
@@ -260,26 +309,19 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                     labelText: 'Daire Numarası',
                   ),
                 ),
-                  ElevatedButton(
 
-                    onPressed: () {
-                      setState(() {
-                        String flatNumber = flatController.text.trim(); // Get the text from the text field and remove leading/trailing spaces
-                        if (flatNumber.isNotEmpty) {
-                          selectedFlats[flatNumber] = false; // Add the flat number to the map
-                          flatController.clear(); // Clear the text field after adding the flat number
-                        }
-                      });
-                    },
-                    child: Text('Add Flat', style: TextStyle(
-                      color: Colors.teal,
-                    )),
-                    // Text for the button
-                  ),
                 Padding(
                   padding: const EdgeInsets.all(0.0),
                   child: ElevatedButton(
-                    onPressed: () => storeData(),
+                    onPressed: () {setState(() {
+                      String flatNumber = flatController.text.trim(); // Get the text from the text field and remove leading/trailing spaces
+                      if (flatNumber.isNotEmpty) {
+                        selectedFlats[flatNumber] = false; // Add the flat number to the map
+                        flatController.clear(); // Clear the text field after adding the flat number
+                      }
+                      storeData();
+                    });
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       padding: const EdgeInsets.symmetric(
@@ -317,9 +359,10 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
     PaymentModel paymentModel = PaymentModel(
       id: randomPaymentId,
       name: selectedPaymentName,
+      apartmentId: selectedApartmentName,
       description: selectedDescription,
       price: selectedPrice,
-      flats: selectedFlats,
+      flatId: selectedFlats,
     );
 
     if (selectedPaymentName == '') {
@@ -330,14 +373,18 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
       showSnackBar("Lütfen ödeme açıklamasını giriniz.");
     } else if (selectedFlats.isEmpty) {
       showSnackBar("Lütfen daire numarası giriniz.");
+    }
+    else if (selectedApartmentName == '') {
+      showSnackBar("Lütfen apartman adınızı giriniz.");
     } else {
       final firestore = FirebaseFirestore.instance;
       try {
         await firestore.collection('payments').doc(randomPaymentId).set({
           'name': paymentModel.name,
+          'apartmentId': paymentModel.apartmentId,
           'description': paymentModel.description,
           'price': paymentModel.price,
-          'flats': selectedFlats,
+          'flatId': selectedFlats,
         });
 
         showSnackBar("Ödeme başarıyla kaydedildi.");
