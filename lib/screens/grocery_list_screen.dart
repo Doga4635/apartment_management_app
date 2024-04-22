@@ -95,8 +95,8 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                         padding: const EdgeInsets.all(6.0),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.teal[50],
-                            minimumSize: Size(250, 85),
+                            backgroundColor: Colors.teal[50],
+                            minimumSize: const Size(250, 85),
                           ),
                           onPressed: () async {
 
