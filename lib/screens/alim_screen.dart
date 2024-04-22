@@ -31,7 +31,7 @@ class AlimScreenState extends State<AlimScreen> {
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: AlertDialog(
-            title: Text('Market Orders'),
+            title: const Text('Market Orders'),
             content: FutureBuilder<QuerySnapshot>(
               future: FirebaseFirestore.instance
                   .collection('orders')
@@ -40,7 +40,7 @@ class AlimScreenState extends State<AlimScreen> {
                   .get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
@@ -50,6 +50,12 @@ class AlimScreenState extends State<AlimScreen> {
                     String productName = doc['name'];
                     String details = doc['details'];
                     int productAmount = doc['amount'];
+                    //int price = doc['price'];
+
+                    // For showing non-detailed orders
+                    if(details == "") {
+                      details = "Normal";
+                    }
 
                     // If the product already exists in the map, update its details and amount
                     if (productsDetailsMap.containsKey(productName)) {
@@ -72,10 +78,33 @@ class AlimScreenState extends State<AlimScreen> {
                     List<Widget> detailsList = [];
 
                     detailsMap.forEach((details, amount) {
+                      TextEditingController priceController = TextEditingController(); // Add controller for each TextField
                       detailsList.add(
-                        Text('$details: $amount'),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 16.0,bottom: 8.0),
+                              child: Text('$details: $amount'),
+                            ),
+                            SizedBox(
+                              width: 40, // Adjust width according to your preference
+                              height: 15,
+                              child: TextField(
+                                controller: priceController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  hintText: '0',
+                                  hintStyle: TextStyle(fontSize: 13),
+                                ),
+                              ),
+                            ),
+                            const Text(' TL '),
+                            TextButton(onPressed: () {} , child: const Icon(Icons.check,color: Colors.teal,),)
+                          ],
+                        ),
                       );
                     });
+
 
                     productsList.add(
                       Column(
@@ -105,7 +134,7 @@ class AlimScreenState extends State<AlimScreen> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Close'),
+                child: const Text('Close',style: TextStyle(color: Colors.teal),),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:apartment_management_app/models/apartment_model.dart';
 import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/message_model.dart';
 import 'package:apartment_management_app/models/order_model.dart';
@@ -142,6 +143,29 @@ class AuthSupplier extends ChangeNotifier {
       flatModel.uid = _firebaseAuth.currentUser!.uid;
 
       await _firebaseFirestore.collection("flats").doc(flatModel.flatId).set(flatModel.toMap()).then((value) {
+        onSuccess();
+        _isLoading = false;
+        notifyListeners();
+
+      });
+    } on FirebaseAuthException catch(e) {
+      showSnackBar(e.message.toString());
+      _isLoading = false;
+      notifyListeners();
+    }
+
+  }
+
+  void saveApartmentDataToFirebase ({
+    required BuildContext context,
+    required ApartmentModel apartmentModel,
+    required Function onSuccess
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try{
+
+      await _firebaseFirestore.collection("apartments").doc(apartmentModel.id).set(apartmentModel.toMap()).then((value) {
         onSuccess();
         _isLoading = false;
         notifyListeners();
