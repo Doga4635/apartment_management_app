@@ -135,13 +135,6 @@ class RegisterScreenState extends State<RegisterScreen> {
                 ),
                 ElevatedButton(
                   onPressed:  () => sendPhoneNumber(),
-                  // {
-                  //
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => const CodeEnterScreen()),
-                    // );
-                  // },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
                     padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
