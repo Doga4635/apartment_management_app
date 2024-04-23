@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import '../models/order_model.dart';
@@ -34,18 +33,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   bool _isLoading = true;
 
 
-  List<String> _selectedDays = [];
-  final List<String> _days = [
-    'Bir kez',
-    'Pazartesi',
-    'Salı',
-    'Çarşamba',
-    'Perşembe',
-    'Cuma',
-    'Cumartesi',
-    'Pazar',
-    'Her gün'
-  ];
 
 
   @override
@@ -201,23 +188,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               },
             ),
             const SizedBox(height: 30),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _showMultiSelect(context);
-                    },
-                    child: Text(_selectedDays.isEmpty ? "Zaman Seçiniz" : _selectedDays.join(", "),
-                      style: const TextStyle(
-                        color: Colors.teal,
-                      ),),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
+
             ElevatedButton(
               onPressed: () {
                 createList(saveList: true);
@@ -240,10 +211,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
 
-  Future<bool> _onBackPressed() async {
-    _showExitConfirmationDialog();
-    return false;
-  }
 
 
   void _showExitConfirmationDialog() {
@@ -439,13 +406,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
 
 
   Future<void> createList({bool saveList = false}) async {
-    await FirebaseFirestore.instance.collection('lists').doc(widget.listId).update({
-      'days': _selectedDays,
-    }).then((value) {
-      showSnackBar('Zaman seçildi.');
-    }).catchError((error) {
-      showSnackBar('Zaman seçilirken hata oluştu.');
-    });
     if (saveList) {
       try {
         // Save each item in addedProducts to Firebase
@@ -487,24 +447,5 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           .delete();
 
     }
-  }
-  void _showMultiSelect(BuildContext context) async {
-    List<String> selectedValues = await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return MultiSelectDialog(
-          items: _days.map((day) {
-            return MultiSelectItem<String>(day, day);
-          }).toList(),
-          initialValue: _selectedDays,
-          selectedColor: Colors.teal,
-        );
-      },
-    );
-
-
-    setState(() {
-      _selectedDays = selectedValues;
-    });
   }
 }
