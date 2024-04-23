@@ -456,7 +456,7 @@ void getApartments() async {
     FlatModel flatModel = FlatModel(
       uid: "",
       flatId: randomFlatId,
-      apartmentId: '0',
+      apartmentId: selectedApartmentName,
       floorNo: selectedFloorNumber.toString(),
       flatNo: selectedFlatNumber.toString(),
       role: selectedRoleValue,
