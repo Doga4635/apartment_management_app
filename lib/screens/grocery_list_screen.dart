@@ -24,8 +24,7 @@ class GroceryListScreen extends StatefulWidget {
 class GroceryListScreenState extends State<GroceryListScreen> {
 
   List<String> listNameList = [];
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  List<String> listIdList = [];
 
   String randomListId = generateRandomId(10);
   List<String> _selectedDays = [];
@@ -47,7 +46,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     super.initState();
 
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
+    getCurrentUserListNames(currentUserUid ,listNameList,listIdList).then((_) {
       setState(() {});
 
     });
@@ -55,7 +54,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Lists'),
@@ -92,22 +90,36 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     itemCount: listNameList.length,
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal[50],
-                            minimumSize: const Size(250, 85),
-                          ),
-                          onPressed: () async {
-
-                          },
-                          child: Text(
-                            listNameList[index],
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                        padding: const EdgeInsets.only(left: 8.0,top: 6.0,right: 3.0,bottom: 6.0),
+                        child: Row(
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal[50],
+                                minimumSize: const Size(250, 60),
+                              ),
+                              onPressed: () async {
+                            
+                              },
+                              child: Text(
+                                listNameList[index],
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                ),
+                              ),
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6.0),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.delete_forever,
+                                  size: 30,
+                                  color: Colors.teal,),
+                                onPressed: () => _showConfirmationDialog(context,listIdList[index]),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -152,7 +164,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
                 );
               },
               tooltip: 'Yardım',
@@ -253,8 +265,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 (route) => false,
           );
         });
-
-
       },
     );
   }
@@ -278,7 +288,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     });
   }
 
-  Future<String?> getCurrentUserListNames(String currentUserUid, List<String> listNameList) async {
+  Future<String?> getCurrentUserListNames(String currentUserUid, List<String> listNameList, List<String> listIdList) async {
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
@@ -286,20 +296,84 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
+          String? listId = data['listId'] as String?;
           bool selectedFlat = data['selectedFlat'] as bool? ?? false;
-          if ( listName != null && !selectedFlat) {
+          if ( listName != null && listId != null && !selectedFlat) {
             listNameList.add(listName);
+            listIdList.add(listId);
           }
 
         }
-      });
+      }
     } else {
-      print('No documents found for the current user.');
+      showSnackBar('Listen bulunmamaktadır.');
     }
+    return null;
   }
+
+  void _removeList(String listId) async {
+    try {
+      CollectionReference ordersRef = FirebaseFirestore.instance.collection('orders');
+      QuerySnapshot querySnapshot = await ordersRef.where('listId', isEqualTo: listId).get();
+
+      for (QueryDocumentSnapshot docSnapshot in querySnapshot.docs) {
+        await docSnapshot.reference.delete();
+      }
+    } catch (e) {
+      showSnackBar('Error deleting orders: $e');
+    }
+
+    await FirebaseFirestore.instance
+        .collection('lists')
+        .doc(listId)
+        .delete()
+        .then((value) {
+      setState(() {
+        int index = listIdList.indexOf(listId);
+        if (index != -1) {
+          listNameList.removeAt(index);
+          listIdList.removeAt(index);
+        }
+      });
+      showSnackBar('Liste silindi.');
+    }).catchError((error) {
+      showSnackBar('Liste silmede hata oldu.');
+    });
+  }
+
+  void _showConfirmationDialog(BuildContext context, String listId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('UYARI'),
+          content: const Text('Bu ürünü silmek istediğinden emin misin?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: const Text('İptal'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Remove the item from the list and the database
+                _removeList(listId);
+                // Close the dialog
+                Navigator.of(context).pop();
+              },
+              child: const Text('Sil'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
 }
