@@ -1,13 +1,14 @@
-
 import 'package:flutter/material.dart';
 
 class YardimScreen extends StatefulWidget {
+  const YardimScreen({super.key});
+
   @override
-  _YardimScreenState createState() => _YardimScreenState();
+  YardimScreenState createState() => YardimScreenState();
 }
 
-class _YardimScreenState extends State<YardimScreen> {
-  String _helpText = '''
+class YardimScreenState extends State<YardimScreen> {
+  final String _helpText = '''
 Uygulamamıza Hoş Geldiniz...
 
 Bu uygulama, apartman yöneticilerinin ve konut sahiplerinin kollektif bir ortamda yaşadıkları sorunları çözmelerini ve iletişim kurmalarını sağlayan bir araçtır.
@@ -36,7 +37,7 @@ Bize ulaşmak için:
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Yardım'),
+        title: const Text('Yardım'),
       ),
       body: SingleChildScrollView(
         child: Padding(

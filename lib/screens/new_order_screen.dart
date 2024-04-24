@@ -262,6 +262,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       productId: '1',
       name: _selectedProduct,
       amount: _quantity,
+      price: 0,
       details: _details,
       place: _selectedPlace,
       days: widget.days,

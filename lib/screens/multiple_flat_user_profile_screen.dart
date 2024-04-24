@@ -346,7 +346,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
                 );
               },
               tooltip: 'Yardım',
@@ -490,7 +490,7 @@ Future<String?> getCurrentUserFlats(String currentUserUid, List<String> flatList
       .get();
 
   if (querySnapshot.docs.isNotEmpty) {
-    querySnapshot.docs.forEach((doc) {
+    for (var doc in querySnapshot.docs) {
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
       if (data != null) {
         String? flatID = data['flatId'] as String?;
@@ -504,9 +504,9 @@ Future<String?> getCurrentUserFlats(String currentUserUid, List<String> flatList
         }
 
       }
-    });
+    }
   } else {
-    print('No documents found for the current user.');
+    showSnackBar('No documents found for the current user.');
   }
   return null;
 }
