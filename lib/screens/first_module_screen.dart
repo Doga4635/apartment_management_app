@@ -72,13 +72,13 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                     if (querySnapshot.docs.length > 1) {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                        MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
                       );
                     }
                     else {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                        MaterialPageRoute(builder: (context) => const UserProfileScreen()),
                       );
                     }
                   },
@@ -246,6 +246,7 @@ void _applyGarbage() async{
     await firestore
         .collection('flats')
         .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('selectedFlat', isEqualTo: true)
     // buraya selectedFlat eklenecek
         .get()
         .then((querySnapshot) {
