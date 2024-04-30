@@ -1,34 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:apartment_management_app/screens/new_order_screen.dart';
-import '../models/order_model.dart';
 import '../utils/utils.dart';
 
 class AlimScreen extends StatefulWidget {
   const AlimScreen({Key? key}) : super(key: key);
 
   @override
-  _AlimScreenState createState() => _AlimScreenState();
+  AlimScreenState createState() => AlimScreenState();
 
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
-  }
 }
 
-class _AlimScreenState extends State<AlimScreen> {
-  List<OrderModel> marketProducts = []; // Products for the market
-  List<OrderModel> firinProducts = []; // Products for the fırın
-  List<OrderModel> manavProducts = []; // Products for the manav
+class AlimScreenState extends State<AlimScreen> {
   late String _currentDay;
+  String? price;
 
   @override
   void initState() {
     super.initState();
-    _fetchMarketProducts(); // Fetch initial data
-    _fetchFirinProducts();
-    _fetchManavProducts();
     _updateCurrentDay();
   }
   // Function to update the current day
@@ -38,87 +26,133 @@ class _AlimScreenState extends State<AlimScreen> {
     _currentDay = getDayOfWeek(now.weekday);
   }
 
-  Future<void> _fetchMarketProducts() async {
-    // Implement fetching Market products from Firebase Firestore
-    // For example:
-    QuerySnapshot marketSnapshot =
-    await FirebaseFirestore.instance.collection('orders')
-        .where('days',arrayContains: [_currentDay])
-        .where('place',isEqualTo: 'Market')
-        .get();
-    marketProducts = _parseProducts(marketSnapshot);
-    // Parse the data and update the marketProducts list
-    setState(() {});
-  }
-
-  Future<void> _fetchFirinProducts() async {
-    // Implement fetching Fırın products from Firebase Firestore
-    // For example:
-    QuerySnapshot firinSnapshot =
-    await FirebaseFirestore.instance.collection('firin_products').get();
-    // Parse the data and update the firinProducts list
-  }
-
-  Future<void> _fetchManavProducts() async {
-    QuerySnapshot manavSnapshot =
-    await FirebaseFirestore.instance.collection('manav_products').get();
-    manavProducts = _parseProducts(manavSnapshot);
-    setState(() {}); // Update the UI
-  }
-
-  List<OrderModel> _parseProducts(QuerySnapshot snapshot) {
-    return snapshot.docs.map((doc) {
-      return OrderModel(
-        orderId: doc['orderId'] ?? '',
-        productId: doc['productId'] ?? '',
-        name: doc['name'] ?? '',
-        amount: doc['amount'] ?? 0,
-        details: doc['details'] ?? '',
-        listId: '',
-        place: doc['place'] ?? '',
-        days: doc['days'] ?? '',
-      );
-    }).toList();
-  }
-
-  int calculateTotalQuantity(List<OrderModel> products) {
-    int totalQuantity = 0;
-    for (var product in products) {
-      totalQuantity += product.amount;
-    }
-    return totalQuantity;
-  }
-
-  void showTotalQuantityDialog(String location, List<OrderModel> products) {
-    int totalQuantity = calculateTotalQuantity(products);
+  void showMarketQuantity(String location) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(location),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: products.map((product) {
-              return ListTile(
-                title: Text('${product.name}: ${product.amount}'),
-              );
-            }).toList(),
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: Text('$location Orders'),
+            content: FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('orders')
+                  .where('place', isEqualTo: location)
+                  .where('days', arrayContains: _currentDay)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  Map<String, Map<String, int>> productsDetailsMap = {};
+                  Map<String, int> productsMap = {};
+                  snapshot.data?.docs.forEach((doc) {
+                    String productName = doc['name'];
+                    String details = doc['details'];
+                    int productAmount = doc['amount'];
+
+                    // For showing non-detailed orders
+                    if(details == "") {
+                      details = "Normal";
+                    }
+
+                    // If the product already exists in the map, update its details and amount
+                    if (productsDetailsMap.containsKey(productName)) {
+                      productsMap[productName] = productsMap[productName]! + productAmount;
+                      if (productsDetailsMap[productName]!.containsKey(details)) {
+                        productsDetailsMap[productName]![details] =
+                            productsDetailsMap[productName]![details]! + productAmount;
+                      } else {
+                        productsDetailsMap[productName]![details] = productAmount;
+                      }
+                    } else {
+                      productsMap[productName] = productAmount;
+                      productsDetailsMap[productName] = {details: productAmount};
+                    }
+                  });
+
+                  List<Widget> productsList = [];
+
+                  productsDetailsMap.forEach((productName, detailsMap) {
+                    List<Widget> detailsList = [];
+
+                    detailsMap.forEach((details, amount) {
+                      TextEditingController priceController = TextEditingController();
+                      detailsList.add(
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 16.0,bottom: 8.0),
+                              child: Text('$details: $amount',style: const TextStyle(fontSize: 14),),
+                            ),
+                            SizedBox(
+                              width: 40, // Adjust width according to your preference
+                              height: 15,
+                              child: FutureBuilder(
+                                future: getProductPrice(productName),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    priceController = TextEditingController(text: snapshot.data);
+                                    return TextField(
+                                      controller: priceController,
+                                      keyboardType: TextInputType.number,
+                                      style: const TextStyle(fontSize: 14),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                            const Text(' TL '),
+                            TextButton(onPressed: () async {
+                                String newPrice = priceController.text;
+                                  List<String> orderId = await getOrderIds(productName,details);
+                                  for(String id in orderId) {
+                                    FirebaseFirestore.instance.collection('orders').doc(id).update({
+                                      'price': int.parse(newPrice),
+                                    });
+                                  }
+                                  updateProductPrice(productName, newPrice);
+                            } , child: const Icon(Icons.check,color: Colors.teal,),)
+                          ],
+                        ),
+                      );
+                    });
+
+                    productsList.add(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('> $productName: ${productsMap[productName]}',style: const TextStyle(fontSize: 16),),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: detailsList,
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: productsList,
+                  );
+                }
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close',style: TextStyle(color: Colors.teal),),
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Do something with the total quantity
-                print('Total Quantity for $location: $totalQuantity');
-              },
-              child: const Text('Print Total Quantity'),
-            ),
-          ],
         );
       },
     );
@@ -135,11 +169,11 @@ class _AlimScreenState extends State<AlimScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildLocationButton('Market', marketProducts),
+            _buildLocationButton('Market'),
             const SizedBox(height: 20.0),
-            _buildLocationButton('Fırın', firinProducts),
+            _buildLocationButton('Fırın'),
             const SizedBox(height: 20.0),
-            _buildLocationButton('Manav', manavProducts),
+            _buildLocationButton('Manav'),
             const SizedBox(height: 20.0),
             SizedBox(
               width: 200,
@@ -167,13 +201,13 @@ class _AlimScreenState extends State<AlimScreen> {
     );
   }
 
-  Widget _buildLocationButton(String location, List<OrderModel> products) {
+  Widget _buildLocationButton(String location) {
     return SizedBox(
       width: 200,
       height: 50,
       child: ElevatedButton(
         onPressed: () {
-          showTotalQuantityDialog(location, products);
+          showMarketQuantity(location);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,
@@ -189,4 +223,36 @@ class _AlimScreenState extends State<AlimScreen> {
       ),
     );
   }
+
+  Future<List<String>> getOrderIds(String productName, String details) async {
+    List<String> orderIds = [];
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('name', isEqualTo: productName)
+        .where('details', isEqualTo: details)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      orderIds.add(doc.id);
+    }
+
+    return orderIds;
+  }
+
+  Future<void> updateProductPrice(String productName, String price) async {
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('name', isEqualTo: productName)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      FirebaseFirestore.instance.collection('products').doc(doc.id).update({
+        'price': int.parse(price),
+      });
+    }
+
+  }
+
 }

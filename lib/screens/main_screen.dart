@@ -62,12 +62,12 @@ class MainScreenState extends State<MainScreen> {
               if (querySnapshot.docs.length > 1) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
                 );
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
 
                 );
               }
@@ -98,7 +98,7 @@ class MainScreenState extends State<MainScreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.teal,
+                  backgroundColor: Colors.teal,
                   minimumSize: const Size(290, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -116,7 +116,7 @@ class MainScreenState extends State<MainScreen> {
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.teal,
+                  backgroundColor: Colors.teal,
                   minimumSize: const Size(290, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -134,7 +134,7 @@ class MainScreenState extends State<MainScreen> {
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.teal,
+                  backgroundColor: Colors.teal,
                   minimumSize: const Size(290, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -176,7 +176,7 @@ class MainScreenState extends State<MainScreen> {
           FloatingActionButton(
             onPressed: () {Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => YardimScreen()),
+      MaterialPageRoute(builder: (context) => const YardimScreen()),
     );},
             tooltip: 'Yardım',
             backgroundColor: Colors.teal,

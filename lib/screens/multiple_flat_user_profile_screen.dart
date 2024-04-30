@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'ana_menü_yardım_screen.dart';
+
 class MultipleFlatUserProfileScreen extends StatefulWidget {
-  const MultipleFlatUserProfileScreen({Key? key});
+  const MultipleFlatUserProfileScreen({super.key});
 
   @override
   MultipleFlatUserProfileScreenState createState() => MultipleFlatUserProfileScreenState();
@@ -49,15 +51,17 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
 
     void deleteFlat(int index) async {
       String flatIdToDelete = flatIDList[index];
+      // Delete the flat document from Firestore
       await FirebaseFirestore.instance.collection('flats').doc(flatIdToDelete).delete();
 
+      // Remove the flat from the lists
       setState(() {
         flatList.removeAt(index);
         flatIDList.removeAt(index);
         apartmentList.removeAt(index);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Flat deleted successfully.'),
       ));
     }
@@ -100,133 +104,130 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            ap.userModel.name,
-                            style: const TextStyle(fontSize: 32),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        ap.userModel.name,
+                        style: const TextStyle(fontSize: 32),
+                        textAlign: TextAlign.start,
                       ),
-                      const SizedBox(height: 8.0),
+                    ),
+                    const SizedBox(height: 8.0),
 
-                      const SizedBox(height: 8.0),
+                    const SizedBox(height: 8.0),
 
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: role,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return Text(
-                                snapshot.data ?? '',
-                                style: const TextStyle(fontSize: 22),
-                                textAlign: TextAlign.left,
-                              );
-                            }
-                          },
-                        ),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: role,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            return Text(
+                              snapshot.data ?? '',
+                              style: const TextStyle(fontSize: 22),
+                              textAlign: TextAlign.left,
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 8.0),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: apartmentName,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return Text(
-                                snapshot.data ?? '',
-                                style: const TextStyle(fontSize: 22),
-                                textAlign: TextAlign.left,
-                              );
-                            }
-                          },
-                        ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: apartmentName,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            return Text(
+                              snapshot.data ?? '',
+                              style: const TextStyle(fontSize: 22),
+                              textAlign: TextAlign.left,
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 8.0),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: flatNumber,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              final String defaultText = 'Daire: '; 
-                              final String flatNumberText = snapshot.data ?? '';
+                    ),
+                    const SizedBox(height: 8.0),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: flatNumber,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            const String defaultText = 'Daire: '; // Prefix text
+                            final String flatNumberText = snapshot.data ?? '';
 
-                              return Text(
-                                '$defaultText$flatNumberText',
-                                style: const TextStyle(fontSize: 22),
-                              );
-                            }
-                          },
-                        ),
+                            return Text(
+                              '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                              style: const TextStyle(fontSize: 22),
+                            );
+                          }
+                        },
                       ),
+                    ),
 
 
-                    ],
+                  ],
 
-                  ),
                 ),
               ),
 
               const SizedBox(height: 28.0),
 
-              Container(
-                width: 350.0,
-                height: 330.0,
+              Expanded(
+                child:Container(
+                  width: 350.0,
+                  height: 330.0,
 
 
-                decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey, width: 1.0),
-                ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.rectangle,
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 1.0),
+                  ),
 
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  itemCount: flatList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(6.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            flex: 3,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.teal[50],
-                                minimumSize: Size(250, 85),
-                              ),
-                              onPressed: () async {
-                                String selectedFlatId = flatIDList[index];
-                                updateSelectedFlatIdentityFalse(currentUserUid);
-                                updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
-                                updateUserIdentity(currentUserUid, selectedFlatId);
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: flatList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(6.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              flex: 3,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.teal[50],
+                                  minimumSize: const Size(250, 85),
+                                ),
+                                onPressed: () async {
+                                  String selectedFlatId = flatIDList[index];
+                                  updateSelectedFlatIdentityFalse(currentUserUid);
+                                  updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
+                                  updateUserIdentity(currentUserUid, selectedFlatId);
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
 
-                                /*
+                                  /*
                                   setState(() {
                                     apartmentName = getUserApartmentName(currentUserUid);
                                     role = getUserRole(currentUserUid);
@@ -234,77 +235,78 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                   });
                                   */
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const MainScreen()),
-                                );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                                  );
 
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text('Daire başarıyla değiştirildi.'),
-                                ));
+                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                    content: Text('Daire başarıyla değiştirildi.'),
+                                  ));
 
 
 
-                              },
-                              child: Text(
-                                apartmentList[index] + '\n Daire: ' + flatList[index],
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 20,
+                                },
+                                child: Text(
+                                  '${apartmentList[index]}\n Daire: ${flatList[index]}',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 10),
-                          IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text("Daireyi Sil"),
-                                    content: Text("Bu daireyi silmek istediğinizden emin misiniz?"),
-                                    actions: [
-                                      ElevatedButton(
-                                        child: Text("İptal"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      ElevatedButton(
-                                        child: Text("Sil"),
-                                        onPressed: () {
-                                          deleteFlat(index);
-                                          Navigator.of(context).pop();
-                                          if (flatList.isEmpty){
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                                            );
-                                          }
+                            const SizedBox(width: 10),
+                            IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("Daireyi Sil"),
+                                      content: const Text("Bu daireyi silmek istediğinizden emin misiniz?"),
+                                      actions: [
+                                        ElevatedButton(
+                                          child: const Text("İptal"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        ElevatedButton(
+                                          child: const Text("Sil"),
+                                          onPressed: () {
+                                            deleteFlat(index);
+                                            Navigator.of(context).pop();
+                                            if (flatList.isEmpty){
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                                              );
+                                            }
 
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            icon: Icon(Icons.delete),
-                            color: Colors.red,
-                            iconSize: 30,
-                          ),
-
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.delete),
+                              color: Colors.red,
+                              iconSize: 30,
+                            ),
 
 
-                        ],
-                      ),
-                    );
-                  },
+
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
+
+
                 ),
-
-
-
               ),
 
               const SizedBox(height: 30.0),
@@ -335,13 +337,26 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(
-          Icons.question_mark,
-          color: Colors.white,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
+                );
+              },
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(
+                Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -364,11 +379,11 @@ void updateSelectedFlatIdentityFalse(String currentUserUid) async {
   });
 }
 
-void updateSelectedFlatIdentityTrue(String currentUserUid, String FlatId) async {
+void updateSelectedFlatIdentityTrue(String currentUserUid, String flatId) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
       .where('uid', isEqualTo: currentUserUid)
-      .where('flatId', isEqualTo: FlatId)
+      .where('flatId', isEqualTo: flatId)
       .get();
 
   querySnapshot.docs.forEach((doc) async {
@@ -377,10 +392,10 @@ void updateSelectedFlatIdentityTrue(String currentUserUid, String FlatId) async 
   });
 }
 
-Future<void> updateUserIdentity(String currentUserUid, String FlatId) async {
+Future<void> updateUserIdentity(String currentUserUid, String flatId) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
-      .where('flatId', isEqualTo: FlatId)
+      .where('flatId', isEqualTo: flatId)
       .get();
 
   querySnapshot.docs.forEach((doc) async {
@@ -475,7 +490,7 @@ Future<String?> getCurrentUserFlats(String currentUserUid, List<String> flatList
       .get();
 
   if (querySnapshot.docs.isNotEmpty) {
-    querySnapshot.docs.forEach((doc) {
+    for (var doc in querySnapshot.docs) {
       Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
       if (data != null) {
         String? flatID = data['flatId'] as String?;
@@ -489,10 +504,11 @@ Future<String?> getCurrentUserFlats(String currentUserUid, List<String> flatList
         }
 
       }
-    });
+    }
   } else {
-    print('No documents found for the current user.');
+    showSnackBar('No documents found for the current user.');
   }
+  return null;
 }
 
 

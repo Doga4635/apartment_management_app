@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import '../models/order_model.dart';
@@ -26,6 +25,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
   String _selectedPlace = 'Yeri seçiniz';
+  final productNameController = TextEditingController();
+  final placeNameController = TextEditingController();
 
 
   List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
@@ -34,25 +35,19 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   bool _isLoading = true;
 
 
-  List<String> _selectedDays = [];
-  final List<String> _days = [
-    'Bir kez',
-    'Pazartesi',
-    'Salı',
-    'Çarşamba',
-    'Perşembe',
-    'Cuma',
-    'Cumartesi',
-    'Pazar',
-    'Her gün'
-  ];
-
-
   @override
   void initState() {
     super.initState();
     _getProducts();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    productNameController.dispose();
+    placeNameController.dispose();
+  }
+
   Future<void> _getProducts() async {
     QuerySnapshot productSnapshot =
     await FirebaseFirestore.instance.collection('products').get();
@@ -63,6 +58,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       );
     }).toList();
     productList = products.map((product) => product.name).toList();
+    productList.add('Diğer');
     setState(() {
       _isLoading = false;
     });
@@ -92,10 +88,27 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               items: productList,
               excludeSelected: false,
               onChanged: (value) {
-                _selectedProduct = value;
+                setState(() {
+                  _isLoading = true;
+                  _selectedProduct = value;
+                  _isLoading = false;
+                });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            _selectedProduct == 'Diğer' ?
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+              child: TextField(
+                keyboardType: TextInputType.name,
+                controller: productNameController,
+                decoration: const InputDecoration(
+                  hintText: 'Yeni ürünün adını yazın',
+                ),
+              ),
+            ) :
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -149,10 +162,27 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               items: placeList,
               excludeSelected: false,
               onChanged: (value) {
-                _selectedPlace = value;
+                setState(() {
+                  _isLoading = true;
+                  _selectedPlace = value;
+                  _isLoading = false;
+                });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            _selectedPlace == 'Diğer' ?
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+              child: TextField(
+                keyboardType: TextInputType.name,
+                controller: placeNameController,
+                decoration: const InputDecoration(
+                  hintText: 'Yeni yerin adını yazın',
+                ),
+              ),
+            ) :
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: createOrder,
               style: ElevatedButton.styleFrom(
@@ -201,23 +231,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               },
             ),
             const SizedBox(height: 30),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      _showMultiSelect(context);
-                    },
-                    child: Text(_selectedDays.isEmpty ? "Zaman Seçiniz" : _selectedDays.join(", "),
-                      style: const TextStyle(
-                        color: Colors.teal,
-                      ),),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
+
             ElevatedButton(
               onPressed: () {
                 createList(saveList: true);
@@ -240,10 +254,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
 
-  Future<bool> _onBackPressed() async {
-    _showExitConfirmationDialog();
-    return false;
-  }
 
 
   void _showExitConfirmationDialog() {
@@ -288,28 +298,114 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
+    if(_selectedProduct == 'Diğer' || _selectedPlace == 'Diğer') {
+      if(_selectedProduct != 'Diğer') {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: _selectedProduct,
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: placeNameController.text.trim(),
+          days: widget.days,
+        );
 
-    OrderModel orderModel = OrderModel(
-      listId: widget.listId,
-      orderId: randomOrderId,
-      productId: '1',
-      name: _selectedProduct,
-      amount: _quantity,
-      details: _details,
-      place: _selectedPlace,
-      days: widget.days,
-    );
+
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+      else if(_selectedPlace != 'Diğer') {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: productNameController.text.trim(),
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: _selectedPlace,
+          days: widget.days,
+        );
 
 
-    ap.saveOrderDataToFirebase(
-      context: context,
-      orderModel: orderModel,
-      onSuccess: () {
-        setState(() {
-          addedProducts.add(orderModel);
-        });
-      },
-    );
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+      else {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: productNameController.text.trim(),
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: placeNameController.text.trim(),
+          days: widget.days,
+        );
+
+
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+    }
+
+    else {
+      OrderModel orderModel = OrderModel(
+        listId: widget.listId,
+        orderId: randomOrderId,
+        productId: '1',
+        name: _selectedProduct,
+        amount: _quantity,
+        price: 0,
+        details: _details,
+        place: _selectedPlace,
+        days: widget.days,
+      );
+
+
+      ap.saveOrderDataToFirebase(
+        context: context,
+        orderModel: orderModel,
+        onSuccess: () {
+          setState(() {
+            addedProducts.add(orderModel);
+          });
+        },
+      );
+    }
+
+    setState(() {
+      _selectedProduct = 'Ürün adı giriniz';
+      _selectedPlace = 'Yeri seçiniz';
+      _details = '';
+      productNameController.clear();
+      placeNameController.clear();
+    });
+
   }
 
 
@@ -439,13 +535,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
 
 
   Future<void> createList({bool saveList = false}) async {
-    await FirebaseFirestore.instance.collection('lists').doc(widget.listId).update({
-      'days': _selectedDays,
-    }).then((value) {
-      showSnackBar('Zaman seçildi.');
-    }).catchError((error) {
-      showSnackBar('Zaman seçilirken hata oluştu.');
-    });
     if (saveList) {
       try {
         // Save each item in addedProducts to Firebase
@@ -472,10 +561,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               .delete();
 
 
-          await FirebaseFirestore.instance
-              .collection('lists')
-              .doc(widget.listId)
-              .delete();
           showSnackBar('Ürün başarılı bir şekilde silindi');
         } catch (error) {
 
@@ -485,26 +570,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         }
       }
 
+      await FirebaseFirestore.instance
+          .collection('lists')
+          .doc(widget.listId)
+          .delete();
 
     }
-  }
-  void _showMultiSelect(BuildContext context) async {
-    List<String> selectedValues = await showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return MultiSelectDialog(
-          items: _days.map((day) {
-            return MultiSelectItem<String>(day, day);
-          }).toList(),
-          initialValue: _selectedDays,
-          selectedColor: Colors.teal,
-        );
-      },
-    );
-
-
-    setState(() {
-      _selectedDays = selectedValues;
-    });
   }
 }

@@ -8,8 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
+import 'ana_menü_yardım_screen.dart';
+
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({Key? key});
+  const UserProfileScreen({super.key});
 
   @override
   UserProfileScreenState createState() => UserProfileScreenState();
@@ -72,92 +74,88 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            ap.userModel.name,
-                            style: const TextStyle(fontSize: 32),
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        ap.userModel.name,
+                        style: const TextStyle(fontSize: 32),
+                        textAlign: TextAlign.start,
                       ),
-                      const SizedBox(height: 8.0),
+                    ),
+                    const SizedBox(height: 8.0),
 
-                      const SizedBox(height: 8.0),
+                    const SizedBox(height: 8.0),
 
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: role,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return Text(
-                                snapshot.data ?? '',
-                                style: const TextStyle(fontSize: 22),
-                                textAlign: TextAlign.left,
-                              );
-                            }
-                          },
-                        ),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: role,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            return Text(
+                              snapshot.data ?? '',
+                              style: const TextStyle(fontSize: 22),
+                              textAlign: TextAlign.left,
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 8.0),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: apartmentName,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              return Text(
-                                snapshot.data ?? '',
-                                style: const TextStyle(fontSize: 22),
-                                textAlign: TextAlign.left,
-                              );
-                            }
-                          },
-                        ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: apartmentName,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            return Text(
+                              snapshot.data ?? '',
+                              style: const TextStyle(fontSize: 22),
+                              textAlign: TextAlign.left,
+                            );
+                          }
+                        },
                       ),
-                      const SizedBox(height: 8.0),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: FutureBuilder<String?>(
-                          future: flatNumber,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.waiting) {
-                              return CircularProgressIndicator();
-                            } else if (snapshot.hasError) {
-                              return Text('Error: ${snapshot.error}');
-                            } else {
-                              final String defaultText = 'Daire: '; // Prefix text
-                              final String flatNumberText = snapshot.data ?? '';
+                    ),
+                    const SizedBox(height: 8.0),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: FutureBuilder<String?>(
+                        future: flatNumber,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            const  String defaultText = 'Daire: '; // Prefix text
+                            final String flatNumberText = snapshot.data ?? '';
 
-                              return Text(
-                                '$defaultText$flatNumberText', // Concatenate the prefix with flat number
-                                style: const TextStyle(fontSize: 22),
-                              );
-                            }
-                          },
-                        ),
+                            return Text(
+                              '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                              style: const TextStyle(fontSize: 22),
+                            );
+                          }
+                        },
                       ),
+                    ),
 
 
-                    ],
+                  ],
 
-                  ),
                 ),
               ),
 
@@ -187,13 +185,26 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(
-          Icons.question_mark,
-          color: Colors.white,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
+                );
+              },
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(
+                Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );
