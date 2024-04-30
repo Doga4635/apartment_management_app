@@ -58,10 +58,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     getCurrentUserListDays(currentUserUid ,listDays);
-    getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
-      setState(() {});
-
-    });
     print(listDays);
     getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
     getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
@@ -70,11 +66,17 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     getCurrentUserListDaysFriday(currentUserUid, listDayFriday);
     getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
     getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
+    getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
+      setState(() {});
+    });
+
+
 
   }
 
   @override
   Widget build(BuildContext context) {
+    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
@@ -104,233 +106,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     color: Colors.white,
                     border: Border.all(color: Colors.grey, width: 1.0),
                   ),
-                  child: Column(
-                    children: [
-                      if (listDays.contains('Pazartesi'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDayMonday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text('Pazartesi'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDayMonday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      if (listDays.contains('Salı'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDayTuesday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text(' Salı'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDayTuesday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      if (listDays.contains('Çarşamba'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDayWednesday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text('Çarşamba'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDayWednesday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      if (listDays.contains('Perşembe'))
-                        Text('Perşembe'),
-                      Expanded(
-                        child: ListView.builder(
-                          scrollDirection: Axis.vertical,
-                          itemCount: listDayThursday.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(6.0),
-                              child: Column(
-                                children: [
-
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.teal[50],
-                                      minimumSize: const Size(250, 85),
-                                    ),
-                                    onPressed: () async {},
-                                    child: Text(
-                                      listDayThursday[index],
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      if (listDays.contains('Cuma'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDayFriday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text('Cuma'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDayFriday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      if (listDays.contains('Cumartesi'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDaySaturday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text('Cumartesi'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDaySaturday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                      if (listDays.contains('Pazar'))
-                        Expanded(
-                          child: ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: listDaySunday.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Column(
-                                  children: [
-                                    Text('Pazar'),
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.teal[50],
-                                        minimumSize: const Size(250, 85),
-                                      ),
-                                      onPressed: () async {},
-                                      child: Text(
-                                        listDaySunday[index],
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                    ],
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (listDays.contains('Pazartesi'))
+                          ...buildDayColumnMonday('Pazartesi', listDayMonday,currentUserUid ),
+                        if (listDays.contains('Salı'))
+                          ...buildDayColumnTuesday('Salı', listDayTuesday,currentUserUid),
+                        if (listDays.contains('Çarşamba'))
+                          ...buildDayColumnWednesday('Çarşamba', listDayWednesday,currentUserUid),
+                        if (listDays.contains('Perşembe'))
+                          ...buildDayColumnThursday('Perşembe', listDayThursday,currentUserUid),
+                        if (listDays.contains('Cuma'))
+                          ...buildDayColumnFriday('Cuma', listDayFriday,currentUserUid),
+                        if (listDays.contains('Cumartesi'))
+                          ...buildDayColumnSaturday('Cumartesi', listDaySaturday,currentUserUid),
+                        if (listDays.contains('Pazar'))
+                          ...buildDayColumnSunday('Pazar', listDaySunday,currentUserUid),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -752,6 +547,592 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     }
   }
 
+  List<Widget> buildDayColumnMonday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Pazartesi');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Pazartesi" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+
+  List<Widget> buildDayColumnTuesday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Salı');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Salı" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+
+  List<Widget> buildDayColumnWednesday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Çarşamba');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Çarşamba" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+
+  List<Widget> buildDayColumnThursday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Perşembe');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysThursday(currentUserUid, listDayThursday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Perşembe" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> buildDayColumnFriday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Cuma');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysFriday(currentUserUid, listDayFriday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Cuma" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> buildDayColumnSaturday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Cumartesi');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Cumartesi" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+  List<Widget> buildDayColumnSunday(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Pazar');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});
+                          }
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Pazar" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
+
+
+  Future<void> deleteDocument(String documentName, String currentUserUid) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('lists')
+          .where('uid', isEqualTo: currentUserUid)
+          .where('name', isEqualTo: documentName)
+          .get();
+
+      print('Document $documentName deleted successfully');
+    } catch (e) {
+      print('Error deleting document: $e');
+    }
+  }
 
 
 
