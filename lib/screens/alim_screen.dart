@@ -12,6 +12,7 @@ class AlimScreen extends StatefulWidget {
 
 class AlimScreenState extends State<AlimScreen> {
   late String _currentDay;
+  String? price;
 
   @override
   void initState() {
@@ -50,7 +51,6 @@ class AlimScreenState extends State<AlimScreen> {
                     String productName = doc['name'];
                     String details = doc['details'];
                     int productAmount = doc['amount'];
-                    //int price = doc['price'];
 
                     // For showing non-detailed orders
                     if(details == "") {
@@ -78,39 +78,56 @@ class AlimScreenState extends State<AlimScreen> {
                     List<Widget> detailsList = [];
 
                     detailsMap.forEach((details, amount) {
-                      TextEditingController priceController = TextEditingController(); // Add controller for each TextField
+                      TextEditingController priceController = TextEditingController();
                       detailsList.add(
                         Row(
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 16.0,bottom: 8.0),
-                              child: Text('$details: $amount'),
+                              child: Text('$details: $amount',style: const TextStyle(fontSize: 14),),
                             ),
                             SizedBox(
                               width: 40, // Adjust width according to your preference
                               height: 15,
-                              child: TextField(
-                                controller: priceController,
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  hintText: '0',
-                                  hintStyle: TextStyle(fontSize: 13),
-                                ),
+                              child: FutureBuilder(
+                                future: getProductPrice(productName),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else {
+                                    priceController = TextEditingController(text: snapshot.data);
+                                    return TextField(
+                                      controller: priceController,
+                                      keyboardType: TextInputType.number,
+                                      style: const TextStyle(fontSize: 14),
+                                    );
+                                  }
+                                },
                               ),
                             ),
                             const Text(' TL '),
-                            TextButton(onPressed: () {} , child: const Icon(Icons.check,color: Colors.teal,),)
+                            TextButton(onPressed: () async {
+                                String newPrice = priceController.text;
+                                  List<String> orderId = await getOrderIds(productName,details);
+                                  for(String id in orderId) {
+                                    FirebaseFirestore.instance.collection('orders').doc(id).update({
+                                      'price': int.parse(newPrice),
+                                    });
+                                  }
+                                  updateProductPrice(productName, newPrice);
+                            } , child: const Icon(Icons.check,color: Colors.teal,),)
                           ],
                         ),
                       );
                     });
 
-
                     productsList.add(
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('> $productName: ${productsMap[productName]}'),
+                          Text('> $productName: ${productsMap[productName]}',style: const TextStyle(fontSize: 16),),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: detailsList,
@@ -124,8 +141,6 @@ class AlimScreenState extends State<AlimScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: productsList,
                   );
-
-
                 }
               },
             ),
@@ -208,4 +223,36 @@ class AlimScreenState extends State<AlimScreen> {
       ),
     );
   }
+
+  Future<List<String>> getOrderIds(String productName, String details) async {
+    List<String> orderIds = [];
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('name', isEqualTo: productName)
+        .where('details', isEqualTo: details)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      orderIds.add(doc.id);
+    }
+
+    return orderIds;
+  }
+
+  Future<void> updateProductPrice(String productName, String price) async {
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('name', isEqualTo: productName)
+        .get();
+
+    for (var doc in querySnapshot.docs) {
+      FirebaseFirestore.instance.collection('products').doc(doc.id).update({
+        'price': int.parse(price),
+      });
+    }
+
+  }
+
 }
