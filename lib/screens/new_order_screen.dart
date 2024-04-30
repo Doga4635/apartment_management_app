@@ -439,13 +439,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
 
 
   Future<void> createList({bool saveList = false}) async {
-    await FirebaseFirestore.instance.collection('lists').doc(widget.listId).update({
-      'days': _selectedDays,
-    }).then((value) {
-      showSnackBar('Zaman seçildi.');
-    }).catchError((error) {
-      showSnackBar('Zaman seçilirken hata oluştu.');
-    });
     if (saveList) {
       try {
         // Save each item in addedProducts to Firebase
