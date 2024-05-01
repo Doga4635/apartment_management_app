@@ -1,4 +1,5 @@
 import 'package:apartment_management_app/screens/define_payment_screen.dart';
+import 'package:apartment_management_app/screens/done_payment_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen_admin.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -118,6 +119,8 @@ class _ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
               const SizedBox(height: 20),
               InkWell(
                 onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const DonePaymentScreen()));
                   // Add your functionality here
 
                 },
@@ -130,7 +133,7 @@ class _ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Button 3',
+                      'Yapılmış Ödemeler',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,

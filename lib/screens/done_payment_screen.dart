@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 
-import '../services/auth_supplier.dart';
-
-class UserPaymentScreen extends StatefulWidget {
-  const UserPaymentScreen({Key? key}) : super(key: key);
+class DonePaymentScreen extends StatefulWidget {
+  const DonePaymentScreen({Key? key}) : super(key: key);
 
   @override
-  _UserPaymentScreenState createState() => _UserPaymentScreenState();
+  _DonePaymentScreenState createState() => _DonePaymentScreenState();
 }
 
-class _UserPaymentScreenState extends State<UserPaymentScreen> {
+class _DonePaymentScreenState extends State<DonePaymentScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
-
-    final ap = Provider.of<AuthSupplier>(context,listen: false);
-    String currentUserUid = ap.userModel.uid;
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Payments'),
@@ -43,17 +37,9 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
               final String description = userData['description'];
               final String price = userData['price'];
 
-              if (flatId!= null && flatId.values.contains(true)) {
+              if (flatId!= null && flatId.values.contains(false)) {
                 return Container(); // Return an empty container if flatId is true
               }
-              getUserFlatNumber(currentUserUid).then((value) {
-                print(value);
-                print(flatId?.keys);
-                if (flatId!.keys.contains(value) != true) {
-                  return Container(); // Return an empty container if flatId is not equal to currentUserFlat
-                }
-              });
-
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,8 +66,8 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
                       subtitle: Row(
                         children: [
                           Text('Ödeme bilgisi '), // Adjust this based on your flatId structure
-                          if (flatId.values.contains(false))
-                            Icon(Icons.clear, color: Colors.red),
+                          if (flatId.values.contains(true))
+                            Icon(Icons.done, color: Colors.green),
                         ],
                       ),
                     ),
@@ -94,25 +80,5 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
         },
       ),
     );
-  }
-}
-Future<String?> getUserFlatNumber(String currentUserUid) async {
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('uid', isEqualTo: currentUserUid)
-      .get();
-
-  if (querySnapshot.docs.isNotEmpty) {
-    DocumentSnapshot userDoc = querySnapshot.docs.first;
-    Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
-
-    if (userData != null && userData.containsKey('flatNumber')) {
-      String flatNumber = userData['flatNumber'] as String;
-      return flatNumber;
-    } else {
-      return null;
-    }
-  } else {
-    return null;
   }
 }
