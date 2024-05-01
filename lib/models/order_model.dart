@@ -6,6 +6,7 @@ class OrderModel {
   String productId;
   String name;
   int amount;
+  int price;
   String details;
   String place;
   List<String> days;
@@ -16,6 +17,7 @@ class OrderModel {
     required this.productId,
     required this.name,
     required this.amount,
+    required this.price,
     required this.details,
     required this.place,
     required this.days,
@@ -28,6 +30,7 @@ class OrderModel {
       productId: map['productId'] ?? '',
       name: map['name'] ?? '',
       amount: map['amount'] ?? 0,
+      price: map['price'] ?? 0,
       details: map['details'] ?? '',
       place: map['place'] ?? '',
       days: map['days'] ?? '',
@@ -43,6 +46,7 @@ class OrderModel {
       "productId": productId,
       "name": name,
       "amount": amount,
+      "price": price,
       "details": details,
       "place": place,
       "days": days,
@@ -56,6 +60,7 @@ class OrderModel {
       productId: snapshot['productId'] ?? '',
       name: snapshot['name'] ?? '',
       amount: snapshot['amount'] ?? 0,
+      price: snapshot['price'] ?? 0,
       details: snapshot['details'] ?? '',
       place: snapshot['place'] ?? '',
       days: snapshot['days'] ?? '',
