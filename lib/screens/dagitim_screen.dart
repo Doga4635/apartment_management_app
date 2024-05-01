@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/apartment_model.dart';
-import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 import 'multiple_flat_user_profile_screen.dart';
@@ -18,21 +17,92 @@ class DagitimScreen extends StatefulWidget {
 }
 
 class TrashTrackingScreenState extends State<DagitimScreen> {
-  late List<UserModel> users;
+  List<String> users = [];
   List<int> floors = [];
+  Map<int,List<String>> floorToFlats = {};
   bool _isLoading = true;
+  late Future<void> _future;
+  List<String> flats = [];
 
   @override
   void initState() {
     super.initState();
-    users = [];
-    updateFloorAndFlatLists(FirebaseAuth.instance.currentUser!.uid);
+    getUsers();
+    _future = updateFloorAndFlatLists(FirebaseAuth.instance.currentUser!.uid);
+  }
+
+  Future<void> updateFloorAndFlatLists(String uid) async {
+    // Clear floor and flat lists
+    floors.clear();
+
+    String? selectedApartment = await getApartmentIdForUser(uid);
+    QuerySnapshot apartmentSnapshot = await FirebaseFirestore.instance
+        .collection('apartments')
+        .where('name', isEqualTo: selectedApartment)
+        .get();
+
+    if (apartmentSnapshot.docs.isNotEmpty) {
+      // Get the first document
+      var doc = apartmentSnapshot.docs.first;
+
+      ApartmentModel apartment = ApartmentModel(
+        id: doc.id,
+        name: doc['name'],
+        floorCount: doc['floorCount'],
+        flatCount: doc['flatCount'],
+        managerCount: doc['managerCount'],
+        doormanCount: doc['doormanCount'],
+      );
+      int floorNo = apartment.floorCount;
+
+      for (int i = 1; i <= floorNo; i++) {
+        flats.clear();
+        floors.add(i);
+        QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+            .collection('flats')
+            .where('apartmentId', isEqualTo: selectedApartment)
+            .where('floorNo', isEqualTo: i.toString())
+            .get();
+
+        for(var doc in flatSnapshot.docs) {
+          String flatNumber = doc['flatNo'];
+          flats.add(flatNumber);
+        }
+
+        floorToFlats[i] = flats;
+        print(floorToFlats[i]);
+
+      }
+    }
+    setState(() {
+      // Set loading state to false after fetching data
+      _isLoading = false;
+    });
+  }
+
+  void getUsers() async {
+    users.clear();
+
+    String? selectedApartment = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('apartmentId', isEqualTo: selectedApartment)
+        .get();
+
+    for (var doc in flatSnapshot.docs) {
+      users.add(doc['uid']);
+    }
+
+    setState(() {
+      // Set loading state to false after fetching data
+      _isLoading = false;
+    });
+
   }
 
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -48,7 +118,6 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
 
               String currentUserUid = ap.userModel.uid;
 
-              //Checking if the user has more than 1 role
               QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                   .collection('flats')
                   .where('uid', isEqualTo: currentUserUid)
@@ -81,16 +150,22 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
         ],
       ),
       body: SafeArea(
-        child: isLoading == true ? const Center(child: CircularProgressIndicator(
-          color: Colors.teal,
-        )) : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Build floor list with garbage status icons
-              buildFloorList(),
-            ],
-          ),
+        child: FutureBuilder(
+          future: _future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    buildFloorList(),
+                  ],
+                ),
+              );
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
         ),
       ),
     );
@@ -105,7 +180,6 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
             stream: FirebaseFirestore.instance
                 .collection('flats')
                 .where('floorNo', isEqualTo: floor)
-                .where('grocery', isEqualTo: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -122,6 +196,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
             },
           ),
           onTap: () {
+              print(floorToFlats[1]);
             showDialog(
               context: context,
               builder: (BuildContext context) {
@@ -130,29 +205,15 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text('$floor. Kat'),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle button tap
-                        },
-                        child: const Text('Daire 1'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle button tap
-                        },
-                        child: const Text('Daire 2'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle button tap
-                        },
-                        child: const Text('Daire 3'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Handle button tap
-                        },
-                        child: const Text('Daire 4'),
+                      Column(
+                        children: floorToFlats[floor]!.map((flatNo) {
+                        return ElevatedButton(
+                          onPressed: () {
+
+                          },
+                          child: Text('Daire $flatNo'),
+                        );
+                      }).toList(),
                       ),
                     ],
                   ),
@@ -165,39 +226,5 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
     );
   }
 
-  void updateFloorAndFlatLists(String uid) async {
-    // Clear floor and flat lists
-    floors.clear();
-
-
-    String? selectedApartment = await getApartmentIdForUser(uid);
-    QuerySnapshot productSnapshot = await FirebaseFirestore.instance
-        .collection('apartments')
-        .where('name', isEqualTo: selectedApartment)
-        .get();
-
-    if (productSnapshot.docs.isNotEmpty) {
-      // Get the first document
-      var doc = productSnapshot.docs.first;
-
-      ApartmentModel apartment = ApartmentModel(
-        id: doc.id,
-        name: doc['name'],
-        floorCount: doc['floorCount'],
-        flatCount: doc['flatCount'],
-        managerCount: doc['managerCount'],
-        doormanCount: doc['doormanCount'],
-      );
-      int floorNo = apartment.floorCount;
-
-      for (int i = 1; i <= floorNo; i++) {
-        floors.add(i);
-      }
-    }
-    setState(() {
-      // Set loading state to false after fetching data
-      _isLoading = false;
-    });
-  }
 
 }

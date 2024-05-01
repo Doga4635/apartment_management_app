@@ -37,7 +37,9 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
       future: ap.getField('role'), // Assuming 'role' is the field that contains the user's role
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          ));
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
