@@ -25,6 +25,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   List<String> productList = [];
   List<OrderModel> addedProducts = [];
   String _selectedPlace = 'Yeri seçiniz';
+  final productNameController = TextEditingController();
+  final placeNameController = TextEditingController();
 
 
   List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
@@ -33,13 +35,19 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   bool _isLoading = true;
 
 
-
-
   @override
   void initState() {
     super.initState();
     _getProducts();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    productNameController.dispose();
+    placeNameController.dispose();
+  }
+
   Future<void> _getProducts() async {
     QuerySnapshot productSnapshot =
     await FirebaseFirestore.instance.collection('products').get();
@@ -50,6 +58,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       );
     }).toList();
     productList = products.map((product) => product.name).toList();
+    productList.add('Diğer');
     setState(() {
       _isLoading = false;
     });
@@ -79,10 +88,27 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               items: productList,
               excludeSelected: false,
               onChanged: (value) {
-                _selectedProduct = value;
+                setState(() {
+                  _isLoading = true;
+                  _selectedProduct = value;
+                  _isLoading = false;
+                });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            _selectedProduct == 'Diğer' ?
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+              child: TextField(
+                keyboardType: TextInputType.name,
+                controller: productNameController,
+                decoration: const InputDecoration(
+                  hintText: 'Yeni ürünün adını yazın',
+                ),
+              ),
+            ) :
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -136,10 +162,27 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               items: placeList,
               excludeSelected: false,
               onChanged: (value) {
-                _selectedPlace = value;
+                setState(() {
+                  _isLoading = true;
+                  _selectedPlace = value;
+                  _isLoading = false;
+                });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 6),
+            _selectedPlace == 'Diğer' ?
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+              child: TextField(
+                keyboardType: TextInputType.name,
+                controller: placeNameController,
+                decoration: const InputDecoration(
+                  hintText: 'Yeni yerin adını yazın',
+                ),
+              ),
+            ) :
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: createOrder,
               style: ElevatedButton.styleFrom(
@@ -255,29 +298,114 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
+    if(_selectedProduct == 'Diğer' || _selectedPlace == 'Diğer') {
+      if(_selectedProduct != 'Diğer') {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: _selectedProduct,
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: placeNameController.text.trim(),
+          days: widget.days,
+        );
 
-    OrderModel orderModel = OrderModel(
-      listId: widget.listId,
-      orderId: randomOrderId,
-      productId: '1',
-      name: _selectedProduct,
-      amount: _quantity,
-      price: 0,
-      details: _details,
-      place: _selectedPlace,
-      days: widget.days,
-    );
+
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+      else if(_selectedPlace != 'Diğer') {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: productNameController.text.trim(),
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: _selectedPlace,
+          days: widget.days,
+        );
 
 
-    ap.saveOrderDataToFirebase(
-      context: context,
-      orderModel: orderModel,
-      onSuccess: () {
-        setState(() {
-          addedProducts.add(orderModel);
-        });
-      },
-    );
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+      else {
+        OrderModel orderModel = OrderModel(
+          listId: widget.listId,
+          orderId: randomOrderId,
+          productId: '1',
+          name: productNameController.text.trim(),
+          amount: _quantity,
+          price: 0,
+          details: _details,
+          place: placeNameController.text.trim(),
+          days: widget.days,
+        );
+
+
+        ap.saveOrderDataToFirebase(
+          context: context,
+          orderModel: orderModel,
+          onSuccess: () {
+            setState(() {
+              addedProducts.add(orderModel);
+            });
+          },
+        );
+      }
+    }
+
+    else {
+      OrderModel orderModel = OrderModel(
+        listId: widget.listId,
+        orderId: randomOrderId,
+        productId: '1',
+        name: _selectedProduct,
+        amount: _quantity,
+        price: 0,
+        details: _details,
+        place: _selectedPlace,
+        days: widget.days,
+      );
+
+
+      ap.saveOrderDataToFirebase(
+        context: context,
+        orderModel: orderModel,
+        onSuccess: () {
+          setState(() {
+            addedProducts.add(orderModel);
+          });
+        },
+      );
+    }
+
+    setState(() {
+      _selectedProduct = 'Ürün adı giriniz';
+      _selectedPlace = 'Yeri seçiniz';
+      _details = '';
+      productNameController.clear();
+      placeNameController.clear();
+    });
+
   }
 
 

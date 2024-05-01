@@ -73,6 +73,27 @@ Future<String?> getApartmentIdForUser(String uid) async {
   return apartmentId;
 }
 
+Future<String?> getProductPrice(String productName) async {
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('products')
+      .where('name', isEqualTo: productName)
+      .get();
+
+  if (querySnapshot.docs.isNotEmpty) {
+    DocumentSnapshot userDoc = querySnapshot.docs.first;
+    Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+
+    if (userData != null && userData.containsKey('price')) {
+      int price = userData['price'] as int;
+      return price.toString();
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
    String getDayOfWeek(int day) {
     switch (day) {
       case 1:
