@@ -32,6 +32,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   List<String> listDayFriday = [];
   List<String> listDaySaturday = [];
   List<String> listDaySunday = [];
+  bool _isLoading = true;
 
 
 
@@ -67,10 +68,10 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
     getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
     getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
-      setState(() {});
+      setState(() {
+        _isLoading = false;
+      });
     });
-
-
 
   }
 
@@ -90,8 +91,9 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         ),
       ),
 
-
-      body: Center(
+      body: _isLoading ? const Center(child: CircularProgressIndicator(
+        color: Colors.teal,
+      )) : Center(
         child: Padding(
           padding: const EdgeInsets.all(25.0),
           child: Column(
