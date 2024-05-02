@@ -7,14 +7,16 @@ import '../models/product_model.dart';
 import '../screens/grocery_list_screen.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'alim_screen.dart';
 
 
 class NewOrderScreen extends StatefulWidget {
 
   final String listId;
   final List<String> days;
+  final String flatId;
 
-  const NewOrderScreen({Key? key, required this.listId, required this.days}) : super(key: key);
+  const NewOrderScreen({Key? key, required this.listId, required this.days, required this.flatId}) : super(key: key);
 
 
   @override
@@ -33,6 +35,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   int _quantity = 1;
   String _details = '';
   bool _isLoading = true;
+
+
 
 
   @override
@@ -237,7 +241,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 createList(saveList: true);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                  MaterialPageRoute(builder: (context) => AlimScreen()),
+                );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => GroceryListScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
@@ -246,6 +254,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -298,6 +307,17 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
+    // Get the current user's flatId
+    String currentUserUid = ap.userModel.uid;
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: currentUserUid)
+        .get()
+        .then((querySnapshot) => querySnapshot.docs.first);
+    String flatId = userDoc['flatId'];
+
+
+
     if(_selectedProduct == 'Diğer' || _selectedPlace == 'Diğer') {
       if(_selectedProduct != 'Diğer') {
         OrderModel orderModel = OrderModel(
@@ -310,6 +330,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           details: _details,
           place: placeNameController.text.trim(),
           days: widget.days,
+          flatId: widget.flatId,
         );
 
 
@@ -323,6 +344,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           },
         );
       }
+
       else if(_selectedPlace != 'Diğer') {
         OrderModel orderModel = OrderModel(
           listId: widget.listId,
@@ -334,6 +356,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           details: _details,
           place: _selectedPlace,
           days: widget.days,
+          flatId: widget.flatId,
         );
 
 
@@ -358,6 +381,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           details: _details,
           place: placeNameController.text.trim(),
           days: widget.days,
+          flatId: widget.flatId,
         );
 
 
@@ -384,19 +408,20 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         details: _details,
         place: _selectedPlace,
         days: widget.days,
+        flatId: widget.flatId,
       );
 
 
-      ap.saveOrderDataToFirebase(
-        context: context,
-        orderModel: orderModel,
-        onSuccess: () {
-          setState(() {
-            addedProducts.add(orderModel);
-          });
-        },
-      );
-    }
+    ap.saveOrderDataToFirebase(
+      context: context,
+      orderModel: orderModel,
+      onSuccess: () {
+        setState(() {
+          addedProducts.add(orderModel);
+        });
+      },
+    );
+  }
 
     setState(() {
       _selectedProduct = 'Ürün adı giriniz';

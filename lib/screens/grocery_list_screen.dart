@@ -220,7 +220,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 // Get the updated values from the text fields
                 String name = nameController.text;
                 List<String> days = _selectedDays;
@@ -228,7 +228,16 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 // Close the dialog
                 Navigator.of(context).pop();
 
-                createList(name, days);
+                // Create the list
+                 createList(name, days);
+
+                // Navigate to the NewOrderScreen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NewOrderScreen(listId: randomListId, days: days, flatId: '',),
+                  ),
+                );
               },
               child: const Text('Oluştur',style: TextStyle(color: Colors.teal),),
             ),
@@ -255,7 +264,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       listId: randomListId,
       name: name,
       uid: ap.userModel.uid,
-      days: days,
+      days: days, orders: [],
     );
     ap.saveListDataToFirebase(
       context: context,
@@ -264,7 +273,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         setState(() {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days,)),
+            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: '',)),
                 (route) => false,
           );
         });
