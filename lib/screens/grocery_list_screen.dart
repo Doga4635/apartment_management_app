@@ -25,6 +25,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   List<String> listNameList = [];
   List<String> listDays = [];
+  List<String> listDayOneTime = [];
   List<String> listDayMonday = [];
   List<String> listDayTuesday = [];
   List<String> listDayWednesday = [];
@@ -59,6 +60,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     getCurrentUserListDays(currentUserUid ,listDays);
     print(listDays);
+    getCurrentUserListDaysOneTime(currentUserUid, listDayOneTime);
     getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
     getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
     getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
@@ -110,6 +112,8 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (listDays.contains('Bir kez'))
+                          ...buildDayColumnOneTime('Bir kez', listDayOneTime,currentUserUid ),
                         if (listDays.contains('Pazartesi'))
                           ...buildDayColumnMonday('Pazartesi', listDayMonday,currentUserUid ),
                         if (listDays.contains('Salı'))
@@ -320,7 +324,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
     List<String> listDays = [];
     List<String> orderedDays = [
-      'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'
+      'Bir kez','Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'
     ];
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -354,6 +358,33 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
     print(filteredDays);
     return filteredDays;
+  }
+
+  Future<String?> getCurrentUserListDaysOneTime(String currentUserUid, List<String> listDayOneTime) async {
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('lists')
+        .where('uid', isEqualTo: currentUserUid)
+        .where('days', arrayContains: 'Bir kez')
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      querySnapshot.docs.forEach((doc) {
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          String? listName = data['name'] as String?;
+          bool selectedFlat = data['selectedFlat'] as bool? ?? false;
+          if ( listName != null && !selectedFlat) {
+            listDayOneTime.add(listName);
+          }
+
+        }
+      });
+      print('Bir kez: ');
+      print(listDayOneTime);
+    } else {
+      print('Bir kez: No documents found for the current user.');
+    }
   }
 
   Future<String?> getCurrentUserListDaysMonday(String currentUserUid, List<String> listDayMonday) async {
@@ -547,12 +578,106 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     }
   }
 
+
+  List<Widget> buildDayColumnOneTime(String day, List<String> dayList, String currentUserUid) {
+    return [
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
+          for (int i = 0; i < dayList.length; i++)
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal[50],
+                        minimumSize: const Size(250, 85),
+                      ),
+                      onPressed: () async {},
+                      child: Text(
+                        dayList[i],
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete),
+                    onPressed: () async {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('lists')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .where('name', isEqualTo: dayList[i])
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        var doc = querySnapshot.docs.first;
+                        var docId = doc.id;
+                        var data = doc.data() as Map<String, dynamic>?;
+                        if (data != null && data.containsKey('days')) {
+                          var days = data['days'] as List<dynamic>;
+                          days.remove('Bir kez');
+
+                          if (days.isEmpty) {
+                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                            print('Document deleted successfully');
+                          } else {
+                            await FirebaseFirestore.instance
+                                .collection('lists')
+                                .doc(docId)
+                                .update({'days': days});}
+
+                          setState(() {
+                            getCurrentUserListDays(currentUserUid ,listDays);
+                            print(listDays);
+                            getCurrentUserListDaysOneTime(currentUserUid, listDayOneTime);
+                          });
+
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => GroceryListScreen(),
+                            ),
+                          );
+                          print('Element "Bir kez" deleted successfully');
+                        } else {
+                          print('Document data is null or "days" not found');
+                        }
+                      } else {
+                        print('Document not found');
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    ];
+  }
+
   List<Widget> buildDayColumnMonday(String day, List<String> dayList, String currentUserUid) {
     return [
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -634,7 +759,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -716,7 +847,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -798,7 +935,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -879,7 +1022,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -960,7 +1109,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -1041,7 +1196,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(day),
+          Text(day,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),),
           for (int i = 0; i < dayList.length; i++)
             Padding(
               padding: const EdgeInsets.all(6.0),
@@ -1136,12 +1297,5 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
 
-
-
-
-
-
-
-
-
 }
+
