@@ -116,27 +116,14 @@ Future<String?> getFlatIdForUser(String uid) async {
   return flatId;
 }
 
-
-Future<List<dynamic>> getOrdersForFlat(String uid, String floor) async {
-  // Then, get the lists for the flat
-  QuerySnapshot listsQuerySnapshot = await FirebaseFirestore.instance
-      .collection('flats')
-      .doc(uid)
-      .collection('lists')
-      .where('floor', isEqualTo: floor)
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo) async {
+  final QuerySnapshot result = await FirebaseFirestore.instance
+      .collection('orders')
+      .where('flatNo', isEqualTo: flatNo)
+      .where('floorNo', isEqualTo: floorNo)
       .get();
 
-  // Get the orders for the lists
-  List<dynamic> orders = [];
-  for (var list in listsQuerySnapshot.docs) {
-    QuerySnapshot orderQuerySnapshot = await FirebaseFirestore.instance
-        .collection('orders')
-        .where('listId', isEqualTo: list.id)
-        .get();
-    orders.addAll(orderQuerySnapshot.docs.map((doc) => doc.data()));
-  }
-
-  return orders;
+  return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
 }
 
 
@@ -177,5 +164,21 @@ Future<bool> validateFlatId(String flatId) async {
   } catch (error) {
     print('Error validating flatId: $error');
     return false;
+  }
+
+
+}
+
+Future<String> fetchFirstFlatIdForFloor(String floor) async {
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('flats')
+      .where('floorNo', isEqualTo: floor)
+      .where('grocery', isEqualTo: false)
+      .get();
+
+  if (querySnapshot.docs.isNotEmpty) {
+    return querySnapshot.docs.first.get('flatId');
+  } else {
+    return '';
   }
 }

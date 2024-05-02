@@ -14,8 +14,9 @@ class NewOrderScreen extends StatefulWidget {
 
   final String listId;
   final List<String> days;
+  final String flatId;
 
-  const NewOrderScreen({Key? key, required this.listId, required this.days}) : super(key: key);
+  const NewOrderScreen({Key? key, required this.listId, required this.days, required this.flatId}) : super(key: key);
 
 
   @override
@@ -261,6 +262,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
+    // Get the current user's flatId
+    String currentUserUid = ap.userModel.uid;
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: currentUserUid)
+        .get()
+        .then((querySnapshot) => querySnapshot.docs.first);
+    String flatId = userDoc['flatId'];
 
     OrderModel orderModel = OrderModel(
       listId: widget.listId,
@@ -272,15 +281,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
       details: _details,
       place: _selectedPlace,
       days: widget.days,
+      flatId: widget.flatId, // Set the flatId field of the orderModel
     );
-
 
     ap.saveOrderDataToFirebase(
       context: context,
       orderModel: orderModel,
       onSuccess: () {
         setState(() {
-          addedProducts.add(orderModel);
+          addedProducts.add(orderModel); // Add the new order to the addedProducts list
         });
       },
     );
