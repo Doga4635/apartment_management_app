@@ -10,6 +10,7 @@ class OrderModel {
   String details;
   String place;
   List<String> days;
+  String flatId;
 
   OrderModel({
     required this.listId,
@@ -21,6 +22,7 @@ class OrderModel {
     required this.details,
     required this.place,
     required this.days,
+   required this.flatId,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -33,7 +35,9 @@ class OrderModel {
       price: map['price'] ?? 0,
       details: map['details'] ?? '',
       place: map['place'] ?? '',
-      days: map['days'] ?? '',
+      days: (map['days'] as List<dynamic>).cast<String>(),
+      flatId: map['flatId'] ?? '',
+
     );
   }
 
@@ -50,6 +54,8 @@ class OrderModel {
       "details": details,
       "place": place,
       "days": days,
+      "flatId": flatId,
+
     };
   }
 
@@ -63,7 +69,13 @@ class OrderModel {
       price: snapshot['price'] ?? 0,
       details: snapshot['details'] ?? '',
       place: snapshot['place'] ?? '',
-      days: snapshot['days'] ?? '',
+      days: (snapshot['days'] as List<dynamic>).cast<String>(),
+      flatId: snapshot['flatId'] ?? '',
+
     );
   }
+
+  static fromJson(Map<String, dynamic>? data) {}
+
+
 }

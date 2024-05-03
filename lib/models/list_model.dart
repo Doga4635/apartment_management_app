@@ -7,6 +7,7 @@ class ListModel {
   String flatId;
   String name;
   List<String> days;
+  List<OrderModel> orders;
 
   ListModel({
     required this.uid,
@@ -14,15 +15,23 @@ class ListModel {
     required this.flatId,
     required this.name,
     required this.days,
+    required this.orders,
   });
 
   factory ListModel.fromSnapshot(DocumentSnapshot snapshot) {
+
+      // Convert list of order snapshots to a list of OrderModel objects
+      List<OrderModel> orders = (snapshot['orders'] as List<dynamic>)
+          .map((orderSnapshot) => OrderModel.fromSnapshot(orderSnapshot))
+          .toList();
+
         return ListModel(
             listId: snapshot.id,
              name: snapshot['name'],
              flatId: snapshot['flatId'],
               uid: snapshot['uid'],
               days: List<String>.from(snapshot.get('days') ?? []).map((e) => e.toString()).toList(),
+              orders: orders,
        );
       }
 
@@ -35,6 +44,7 @@ class ListModel {
       "flatId": flatId,
       "name": name,
       "days": days,
+      "orders": orders.map((order) => order.toMap()).toList(),
     };
   }
 
