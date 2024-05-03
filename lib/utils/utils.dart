@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../models/flat_model.dart';
+
 final GlobalKey<ScaffoldMessengerState> snackbarKey = GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -115,3 +117,89 @@ Future<String?> getProductPrice(String productName) async {
     }
   }
 
+Future<String?> getFlatIdForUser(String uid) async {
+  String? flatId;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      flatId = querySnapshot.docs.first['flatId'];
+    }
+  } catch (error) {
+    showSnackBar('Daire ismi alınamadı.');
+  }
+
+  return flatId;
+}
+
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo) async {
+  final QuerySnapshot result = await FirebaseFirestore.instance
+      .collection('orders')
+      .where('flatNo', isEqualTo: flatNo)
+      .where('floorNo', isEqualTo: floorNo)
+      .get();
+
+  return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+}
+
+
+Future<String> fetchFlatId(String userUid) async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: userUid)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final flatModel = FlatModel.fromSnapshot(snapshot.docs.first);
+      final fetchedFlatId = flatModel.flatId;
+
+      // Check if the fetched flatId is valid
+      final isValidFlatId = await validateFlatId(fetchedFlatId);
+      if (isValidFlatId) {
+        return fetchedFlatId;
+      }
+    }
+  } catch (error) {
+    print('Error fetching flatId: $error');
+  }
+
+  return ''; // Return an empty string if flatId is not valid or not found
+}
+
+Future<bool> validateFlatId(String flatId) async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .limit(1)
+        .get();
+
+    return snapshot.docs.isNotEmpty;
+  } catch (error) {
+    print('Error validating flatId: $error');
+    return false;
+  }
+
+
+}
+
+Future<String> fetchFirstFlatIdForFloor(String floor) async {
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('flats')
+      .where('floorNo', isEqualTo: floor)
+      .where('grocery', isEqualTo: false)
+      .get();
+
+  if (querySnapshot.docs.isNotEmpty) {
+    return querySnapshot.docs.first.get('flatId');
+  } else {
+    return '';
+  }
+}
