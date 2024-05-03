@@ -4,18 +4,26 @@ import 'package:flutter/material.dart';
 
 
 
+
+
+
 class FlatScreen extends StatefulWidget {
   final String flatId;
 
 
+
+
   const FlatScreen({Key? key, required this.flatId}) : super(key: key);
+
 
   @override
   _FlatScreenState createState() => _FlatScreenState();
 }
 
+
 class _FlatScreenState extends State<FlatScreen> {
   late List<Map<String, dynamic>> orders;
+
 
   @override
   void initState() {
@@ -24,11 +32,13 @@ class _FlatScreenState extends State<FlatScreen> {
     getOrdersForFlat(widget.flatId);
   }
 
+
   Future<void> getOrdersForFlat(String flatId) async {
     // Retrieve the flatId value from the flats collection
     final QuerySnapshot flatSnapshot = await FirebaseFirestore.instance.collection('flats').where('flatId', isEqualTo: flatId).get();
     if (flatSnapshot.docs.isNotEmpty) {
       final Map<String, dynamic> flat = flatSnapshot.docs.first.data() as Map<String, dynamic>;
+
 
       // Use the flatId value to update the flatId field in the orders collection
       await FirebaseFirestore.instance.collection('orders').where('flatId', isEqualTo: '').get().then((querySnapshot) {
@@ -38,6 +48,7 @@ class _FlatScreenState extends State<FlatScreen> {
           }
         });
       });
+
 
       // Use the updated flatId value to filter the orders collection
       final List<Map<String, dynamic>> ordersList =
@@ -51,6 +62,7 @@ class _FlatScreenState extends State<FlatScreen> {
       print('Flat not found');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

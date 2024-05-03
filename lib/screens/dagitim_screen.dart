@@ -214,7 +214,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
 
 
   Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo) async {
-    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo);
+    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo,_currentDay);
 
     if (orders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

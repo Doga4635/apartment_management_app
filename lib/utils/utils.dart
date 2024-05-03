@@ -75,6 +75,47 @@ Future<String?> getApartmentIdForUser(String uid) async {
   return apartmentId;
 }
 
+Future<String?> getSelectedFlatIdForUser(String uid) async {
+  String? flatId;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      flatId = querySnapshot.docs.first['flatId'];
+    }
+  } catch (error) {
+    showSnackBar('Apartman ismi alınamadı.');
+  }
+
+  return flatId;
+}
+
+Future<String?> getProductPrice(String productName) async {
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('products')
+      .where('name', isEqualTo: productName)
+      .get();
+
+  if (querySnapshot.docs.isNotEmpty) {
+    DocumentSnapshot userDoc = querySnapshot.docs.first;
+    Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+
+    if (userData != null && userData.containsKey('price')) {
+      int price = userData['price'] as int;
+      return price.toString();
+    } else {
+      return null;
+    }
+  } else {
+    return null;
+  }
+}
+
    String getDayOfWeek(int day) {
     switch (day) {
       case 1:
@@ -116,11 +157,12 @@ Future<String?> getFlatIdForUser(String uid) async {
   return flatId;
 }
 
-Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo) async {
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
       .where('flatNo', isEqualTo: flatNo)
       .where('floorNo', isEqualTo: floorNo)
+      .where('days',arrayContains: 'day')
       .get();
 
   return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
