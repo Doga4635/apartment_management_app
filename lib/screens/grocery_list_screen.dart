@@ -36,8 +36,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   String randomListId = generateRandomId(10);
   List<String> _selectedDays = [];
   final List<String> _days = [
@@ -59,7 +57,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     getCurrentUserListDays(currentUserUid ,listDays);
-    print(listDays);
     getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
     getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
     getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
@@ -78,7 +75,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   @override
   Widget build(BuildContext context) {
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Lists'),
@@ -165,7 +161,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
                 );
               },
               tooltip: 'Yardım',
@@ -246,11 +242,11 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-
-
+    String? flatId = await getSelectedFlatIdForUser(ap.userModel.uid);
 
     ListModel listModel = ListModel(
       listId: randomListId,
+      flatId: flatId!,
       name: name,
       uid: ap.userModel.uid,
       days: days,
@@ -299,7 +295,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -309,10 +305,11 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
     } else {
       print('No documents found for the current user.');
     }
+    return null;
   }
 
   Future<List<String>> getCurrentUserListDays(String currentUserUid, List<String> filteredDays) async {
@@ -326,7 +323,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     ];
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           List<dynamic>? days = data['days'] as List<dynamic>?;
@@ -340,7 +337,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             }
           }
         }
-      });
+      }
     } else {
       print('No documents found for the current user.');
     }
@@ -367,7 +364,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -377,12 +374,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Pzt: ');
       print(listDayMonday);
     } else {
       print('Pzt: No documents found for the current user.');
     }
+    return null;
   }
 
   Future<String?> getCurrentUserListDaysTuesday(String currentUserUid, List<String> listDayTuesday) async {
@@ -394,7 +392,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -404,12 +402,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Salı: ');
       print(listDayTuesday);
     } else {
       print('Salı: No documents found for the current user.');
     }
+    return null;
   }
 
   Future<String?> getCurrentUserListDaysWednesday(String currentUserUid, List<String> listDayWednesday) async {
@@ -421,7 +420,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -431,12 +430,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Çarş: ');
       print(listDayWednesday);
     } else {
       print('Çarş: No documents found for the current user.');
     }
+    return null;
   }
 
   Future<String?> getCurrentUserListDaysThursday(String currentUserUid, List<String> listDayThursday) async {
@@ -448,7 +448,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -458,12 +458,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Perş: ');
       print(listDayThursday);
     } else {
       print('Perş: No documents found for the current user.');
     }
+    return null;
   }
 
   Future<String?> getCurrentUserListDaysFriday(String currentUserUid, List<String> listDayFriday) async {
@@ -475,7 +476,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -485,12 +486,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Cuma: ');
       print(listDayFriday);
     } else {
       print('Cuma: No documents found for the current user.');
     }
+    return null;
   }
 
 
@@ -503,7 +505,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -513,12 +515,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Cmt: ');
       print(listDaySaturday);
     } else {
       print('Cmt: No documents found for the current user.');
     }
+    return null;
   }
 
 
@@ -531,7 +534,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -541,12 +544,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Pzr: ');
       print(listDaySunday);
     } else {
       print('Pzr: No documents found for the current user.');
     }
+    return null;
   }
 
   List<Widget> buildDayColumnMonday(String day, List<String> dayList, String currentUserUid) {
@@ -577,7 +581,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -610,7 +614,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Pazartesi" deleted successfully');
@@ -659,7 +663,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -692,7 +696,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Salı" deleted successfully');
@@ -741,7 +745,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -774,7 +778,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Çarşamba" deleted successfully');
@@ -823,7 +827,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -856,7 +860,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Perşembe" deleted successfully');
@@ -904,7 +908,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -937,10 +941,10 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
-                          print('Element "Cuma" deleted successfully');
+                          showSnackBar('Cuma günü başarılı bir şekilde silindi.');
                         } else {
                           print('Document data is null or "days" not found');
                         }
@@ -985,7 +989,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -1018,7 +1022,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Cumartesi" deleted successfully');
@@ -1066,7 +1070,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                           .collection('lists')
@@ -1100,7 +1104,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
+                              builder: (context) => const GroceryListScreen(),
                             ),
                           );
                           print('Element "Pazar" deleted successfully');
