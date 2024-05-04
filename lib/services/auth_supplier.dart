@@ -301,6 +301,32 @@ class AuthSupplier extends ChangeNotifier {
     return value;
   }
 
+  Future<bool> getGarbage(String data) async {
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+      DocumentSnapshot flatDoc = flatSnapshot.docs.first;
+      Map<String, dynamic>? userData = flatDoc.data() as Map<String, dynamic>?;
+
+      if (userData != null && userData.containsKey('garbage')) {
+        bool garbage = userData['garbage'] as bool;
+        bool value = garbage;
+        return value;
+      }
+      else {
+        showSnackBar('Çöp durumu gözükmesinde hata var.');
+        return false;
+      }
+    } else {
+      showSnackBar('Çöp durumu gözükmesinde hata var.');
+      return false;
+    }
+  }
+
   Future userSignOut() async {
     SharedPreferences s = await SharedPreferences.getInstance();
     await _firebaseAuth.signOut();

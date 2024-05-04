@@ -28,11 +28,8 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
 
   @override
   void initState() {
-    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    _getSwitch(currentUserUid,isThereGarbage);
-    setState(() {
-      _isLoading = false;
-    });
+    _getSwitch(isThereGarbage);
+    print(isThereGarbage);
     super.initState();
   }
 
@@ -182,44 +179,62 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         color: Colors.teal,
                         borderRadius: BorderRadius.all(Radius.circular(20)),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(right: 20.0),
-                            child: Text(
-                              "Çöpüm var",
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400),
-                            ),
-                          ),
-                          ToggleSwitch(
-                            minWidth: 60.0,
-                            minHeight: 35.0,
-                            cornerRadius: 20.0,
-                            activeBgColors: [[Colors.green[800]!], [Colors.red[800]!]],
-                            activeFgColor: Colors.white,
-                            inactiveBgColor: Colors.grey,
-                            inactiveFgColor: Colors.white,
-                            initialLabelIndex: isThereGarbage ? 0:1,
-                            totalSwitches: 2,
-                            labels: const ['Evet', 'Hayır'],
-                            radiusStyle: true,
-                            onToggle: (index) async {
-                              toggleSwitchProvider.setCurrentIndex(index!);
-                              if(index == 0) {
-                                _applyGarbage();
-                              }
-                              else {
-                                _removeGarbage();
-                              }
-                            },
-                          ),
-                        ],
+                      child: FutureBuilder<bool>(
+                        future: ap.getGarbage('garbage'),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.teal,
+                                ));
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            bool isThereGarbage = snapshot.data ?? false;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 20.0),
+                                  child: Text(
+                                    "Çöpüm var",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                                ToggleSwitch(
+                                  minWidth: 60.0,
+                                  minHeight: 35.0,
+                                  cornerRadius: 20.0,
+                                  activeBgColors: [
+                                    [Colors.green[800]!],
+                                    [Colors.red[800]!]
+                                  ],
+                                  activeFgColor: Colors.white,
+                                  inactiveBgColor: Colors.grey,
+                                  inactiveFgColor: Colors.white,
+                                  initialLabelIndex: isThereGarbage ? 0 : 1,
+                                  totalSwitches: 2,
+                                  labels: const ['Evet', 'Hayır'],
+                                  radiusStyle: true,
+                                  onToggle: (index) async {
+                                    toggleSwitchProvider.setCurrentIndex(
+                                        index!);
+                                    if (index == 0) {
+                                      _applyGarbage();
+                                    }
+                                    else {
+                                      _removeGarbage();
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          }
+                        }
                       ),),
-
                   ],
                 ),
               ),
@@ -238,6 +253,84 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
       },
     );
   }
+
+  void _applyGarbage() async{
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      await firestore
+          .collection('flats')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('selectedFlat', isEqualTo: true)
+      // buraya selectedFlat eklenecek
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) async {
+          // Update the garbage field
+          await firestore
+              .collection('flats')
+              .doc(doc.id)
+              .update({'garbage': true});
+        });
+      });
+      showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
+    }
+    catch (e) {
+      showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
+    }
+  }
+
+  void _getSwitch(bool isThereGarbage) async {
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+      DocumentSnapshot flatDoc = flatSnapshot.docs.first;
+      Map<String, dynamic>? userData = flatDoc.data() as Map<String, dynamic>?;
+
+      if (userData != null && userData.containsKey('garbage')) {
+        bool garbage = userData['garbage'] as bool;
+        isThereGarbage = garbage;
+      }
+      else {
+        showSnackBar('Çöp durumu gözükmesinde hata var.');
+      }
+    } else {
+      showSnackBar('Çöp durumu gözükmesinde hata var.');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+  }
+
+  void _removeGarbage() async{
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      await firestore
+          .collection('flats')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      // buraya selectedFlat eklenecek
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) async {
+          // Update the garbage field
+          await firestore
+              .collection('flats')
+              .doc(doc.id)
+              .update({'garbage': false});
+        });
+      });
+      showSnackBar('Çöpünüzün olmadığı kapıcıya bildirildi.');
+    }
+    catch (e) {
+      showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
+    }
+  }
+
 }
 
 void createList({required bool saveList, required Null Function(dynamic createdList) onListCreated}) {
@@ -254,74 +347,3 @@ class ToggleSwitchProvider with ChangeNotifier {
   }
 }
 
-void _applyGarbage() async{
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  try {
-    await firestore
-        .collection('flats')
-        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        .where('selectedFlat', isEqualTo: true)
-    // buraya selectedFlat eklenecek
-        .get()
-        .then((querySnapshot) {
-      querySnapshot.docs.forEach((doc) async {
-        // Update the garbage field
-        await firestore
-            .collection('flats')
-            .doc(doc.id)
-            .update({'garbage': true});
-      });
-    });
-    showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
-  }
-  catch (e) {
-    showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
-  }
-}
-
-  void _getSwitch(String uid,bool isThereGarbage) async {
-  QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
-      .collection('flats')
-      .where('uid', isEqualTo: uid)
-      .get();
-
-  if (flatSnapshot.docs.isNotEmpty) {
-    DocumentSnapshot userDoc = flatSnapshot.docs.first;
-    Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
-
-    if (userData != null && userData.containsKey('garbage')) {
-      bool garbage = userData['garbage'] as bool;
-      isThereGarbage = garbage;
-
-    }
-    else {
-      showSnackBar('Çöp durumu gözükmesinde hata var.');
-    }
-  } else {
-    showSnackBar('Çöp durumu gözükmesinde hata var.');
-  }
-}
-
-void _removeGarbage() async{
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  try {
-    await firestore
-        .collection('flats')
-        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-    // buraya selectedFlat eklenecek
-        .get()
-        .then((querySnapshot) {
-      querySnapshot.docs.forEach((doc) async {
-        // Update the garbage field
-        await firestore
-            .collection('flats')
-            .doc(doc.id)
-            .update({'garbage': false});
-      });
-    });
-    showSnackBar('Çöpünüzün olmadığı kapıcıya bildirildi.');
-  }
-  catch (e) {
-    showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
-  }
-}

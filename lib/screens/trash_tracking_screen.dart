@@ -168,10 +168,9 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   }
 
   void sendNotificationToResident(String flatId) {
-    // Retrieve the resident's token from Firestore using flatId
     FirebaseFirestore.instance.collection('flats').doc(flatId).get().then((doc) {
       if (doc.exists) {
-        String uid = doc['uid']; // Assuming you have a field named 'residentToken' in your flat document
+        String uid = doc['uid'];
         // Construct a notification
         AwesomeNotifications().createNotification(
           content: NotificationContent(
@@ -186,7 +185,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   }
 
   void updateFloorAndFlatLists(String uid) async {
-    // Clear floor and flat lists
       floors.clear();
 
     selectedApartment = await getApartmentIdForUser(uid);
@@ -214,7 +212,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
         }
       }
       setState(() {
-        // Set loading state to false after fetching data
         _isLoading = false;
       });
   }
