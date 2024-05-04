@@ -23,10 +23,18 @@ class FirstModuleScreen extends StatefulWidget {
 
 class FirstModuleScreenState extends State<FirstModuleScreen> {
   get createdList => null;
+  bool _isLoading = true;
+  bool isThereGarbage = false;
 
-
-
-
+  @override
+  void initState() {
+    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
+    _getSwitch(currentUserUid,isThereGarbage);
+    setState(() {
+      _isLoading = false;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,117 +107,121 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                 ),
               ],
             ),
-            body: Center(
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 80.0,
-                  ),
-                  Container(
-                    height: 180,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
+            body: SafeArea(
+              child: _isLoading ? const Center(child: CircularProgressIndicator(
+                color: Colors.teal,
+              )) : Center(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 80.0,
                     ),
-                    child: Image.asset(
-                      "images/kapıcı.jpg",
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 80),
-                  ElevatedButton(
-                    onPressed: () {
-                      if(userRole == "Kapıcı") {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
-                        );
-                      }
-                      else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-                        );                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                    ),
-                    child: const Text(
-                      'Kapıcıya Alışveriş Listesi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
+                    Container(
+                      height: 180,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: Image.asset(
+                        "images/kapıcı.jpg",
+                        fit: BoxFit.contain,
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  userRole == 'Kapıcı' // Show button for 'Doorman'
-                      ? ElevatedButton(
-                    onPressed: () {
-                      // Handle button tap for Doorman
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
+                    const SizedBox(height: 80),
+                    ElevatedButton(
+                      onPressed: () {
+                        if(userRole == "Kapıcı") {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
+                          );
+                        }
+                        else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                          );                      }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                      ),
+                      child: const Text(
+                        'Kapıcıya Alışveriş Listesi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20.0,
+                    ),
+                    userRole == 'Kapıcı' // Show button for 'Doorman'
+                        ? ElevatedButton(
+                      onPressed: () {
+                        // Handle button tap for Doorman
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
 
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                    ),
-                    child: const Text(
-                      'Çöp Takibi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
                       ),
-                    ),
-                  )
-                      : Container(
-                    height: 45.0,
-                    width: 300.0,
-                    decoration: const BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 20.0),
-                          child: Text(
-                            "Çöpüm var",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400),
+                      child: const Text(
+                        'Çöp Takibi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    )
+                        : Container(
+                      height: 45.0,
+                      width: 300.0,
+                      decoration: const BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(right: 20.0),
+                            child: Text(
+                              "Çöpüm var",
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400),
+                            ),
                           ),
-                        ),
-                        ToggleSwitch(
-                          minWidth: 60.0,
-                          minHeight: 35.0,
-                          cornerRadius: 20.0,
-                          activeBgColors: [[Colors.green[800]!], [Colors.red[800]!]],
-                          activeFgColor: Colors.white,
-                          inactiveBgColor: Colors.grey,
-                          inactiveFgColor: Colors.white,
-                          initialLabelIndex: toggleSwitchProvider.currentIndex,
-                          totalSwitches: 2,
-                          labels: const ['Evet', 'Hayır'],
-                          radiusStyle: true,
-                          onToggle: (index) async {
-                            toggleSwitchProvider.setCurrentIndex(index!);
-                            if(index == 0) {
-                              _applyGarbage();
-                            }
-                            else {
-                              _removeGarbage();
-                            }
-                          },
-                        ),
-                      ],
-                    ),),
+                          ToggleSwitch(
+                            minWidth: 60.0,
+                            minHeight: 35.0,
+                            cornerRadius: 20.0,
+                            activeBgColors: [[Colors.green[800]!], [Colors.red[800]!]],
+                            activeFgColor: Colors.white,
+                            inactiveBgColor: Colors.grey,
+                            inactiveFgColor: Colors.white,
+                            initialLabelIndex: isThereGarbage ? 0:1,
+                            totalSwitches: 2,
+                            labels: const ['Evet', 'Hayır'],
+                            radiusStyle: true,
+                            onToggle: (index) async {
+                              toggleSwitchProvider.setCurrentIndex(index!);
+                              if(index == 0) {
+                                _applyGarbage();
+                              }
+                              else {
+                                _removeGarbage();
+                              }
+                            },
+                          ),
+                        ],
+                      ),),
 
-                ],
+                  ],
+                ),
               ),
             ),
             floatingActionButton: FloatingActionButton(
@@ -264,6 +276,29 @@ void _applyGarbage() async{
   }
   catch (e) {
     showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
+  }
+}
+
+  void _getSwitch(String uid,bool isThereGarbage) async {
+  QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+      .collection('flats')
+      .where('uid', isEqualTo: uid)
+      .get();
+
+  if (flatSnapshot.docs.isNotEmpty) {
+    DocumentSnapshot userDoc = flatSnapshot.docs.first;
+    Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+
+    if (userData != null && userData.containsKey('garbage')) {
+      bool garbage = userData['garbage'] as bool;
+      isThereGarbage = garbage;
+
+    }
+    else {
+      showSnackBar('Çöp durumu gözükmesinde hata var.');
+    }
+  } else {
+    showSnackBar('Çöp durumu gözükmesinde hata var.');
   }
 }
 

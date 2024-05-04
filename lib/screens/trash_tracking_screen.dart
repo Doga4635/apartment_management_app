@@ -1,10 +1,10 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../models/apartment_model.dart';
 import '../models/flat_model.dart';
 import '../models/user_model.dart';
@@ -22,6 +22,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   late List<UserModel> users;
   List<int> floors = [];
   bool _isLoading = true;
+  String? selectedApartment;
 
   @override
   void initState() {
@@ -33,7 +34,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,7 +65,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
         ],
       ),
       body: SafeArea(
-        child: isLoading == true ? const Center(child: CircularProgressIndicator(
+        child: _isLoading == true ? const Center(child: CircularProgressIndicator(
           color: Colors.teal,
         )) : Center(
           child: Column(
@@ -91,6 +91,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                 .collection('flats')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('garbage', isEqualTo: true)
+                .where('apartmentId', isEqualTo: selectedApartment)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -123,6 +124,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                 .collection('flats')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('garbage', isEqualTo: true)
+                .where('apartmentId', isEqualTo: selectedApartment)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -156,6 +158,8 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     FirebaseFirestore.instance.collection('flats').doc(flatId).update({
       'garbage': false,
     }).then((value) {
+      // Send notification to resident
+      sendNotificationToResident(flatId);
       Navigator.pop(context);
       showSnackBar('Çöp atıldı.');
     }).catchError((error) {
@@ -163,11 +167,29 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     });
   }
 
+  void sendNotificationToResident(String flatId) {
+    // Retrieve the resident's token from Firestore using flatId
+    FirebaseFirestore.instance.collection('flats').doc(flatId).get().then((doc) {
+      if (doc.exists) {
+        String uid = doc['uid']; // Assuming you have a field named 'residentToken' in your flat document
+        // Construct a notification
+        AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: 0,
+            channelKey: 'basic_channel', // Channel key you defined
+            title: 'Çöp alındı',
+            body: 'Çöp alındı.',
+          ),
+        );
+      }
+    });
+  }
+
   void updateFloorAndFlatLists(String uid) async {
     // Clear floor and flat lists
       floors.clear();
 
-    String? selectedApartment = await getApartmentIdForUser(uid);
+    selectedApartment = await getApartmentIdForUser(uid);
     QuerySnapshot productSnapshot = await FirebaseFirestore.instance
         .collection('apartments')
         .where('name', isEqualTo: selectedApartment)
