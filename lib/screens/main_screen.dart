@@ -54,7 +54,7 @@ class MainScreenState extends State<MainScreen> {
         actions: [
 
           FutureBuilder(
-    future: ap.getField('role'), // Assuming 'role' is the field that contains the user's role
+    future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
     builder: (context, snapshot) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Center(child: CircularProgressIndicator(
@@ -64,6 +64,7 @@ class MainScreenState extends State<MainScreen> {
         return Text('Error: ${snapshot.error}');
       } else {
         String userRole = snapshot.data ?? '';
+        print(userRole);
         return userRole == 'Apartman Yöneticisi' ? IconButton(
           onPressed: () async {
             String apartmentName = ap.userModel.apartmentName;

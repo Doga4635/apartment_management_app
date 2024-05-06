@@ -43,6 +43,7 @@ Future<String?> getRoleForFlat(String flatUid) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('flats')
         .where('uid', isEqualTo: flatUid)
+        .where('selectedFlat', isEqualTo: true)
         .limit(1)
         .get();
 
