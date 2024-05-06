@@ -12,6 +12,8 @@ import 'package:apartment_management_app/utils/utils.dart';
 
 import '../services/auth_supplier.dart';
 import 'alisveris_listesi_screen.dart';
+import 'ana_menü_yardım_screen.dart';
+import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class FirstModuleScreen extends StatefulWidget {
@@ -29,7 +31,6 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
   @override
   void initState() {
     _getSwitch(isThereGarbage);
-    print(isThereGarbage);
     super.initState();
   }
 
@@ -61,7 +62,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
                 },
               ),
               actions: [
@@ -239,14 +240,38 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                 ),
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {},
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AnnoucementScreen()),
+                    );
+                  },
+                  tooltip: 'Duyuru',
+                  backgroundColor: Colors.teal,
+                  child: const Icon(Icons.announcement,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                FloatingActionButton(
+                  onPressed: () {Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
+                  );},
+                  tooltip: 'Yardım',
+                  backgroundColor: Colors.teal,
+                  child: const Icon(Icons.question_mark,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+
             ),
           );
         }

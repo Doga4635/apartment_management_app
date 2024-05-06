@@ -50,6 +50,15 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     'Pazar',
     'Her gün'
   ];
+  final List<String> _normalDays = [
+    'Pazartesi',
+    'Salı',
+    'Çarşamba',
+    'Perşembe',
+    'Cuma',
+    'Cumartesi',
+    'Pazar',
+  ];
 
 
   @override
@@ -178,10 +187,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         ),
       ),
 
-
-
-
-
     );
   }
 
@@ -290,6 +295,17 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }).toList(),
           initialValue: _selectedDays,
           selectedColor: Colors.teal,
+          onSelectionChanged: (value) {
+            setState(() {
+            if(value.contains('Her gün')) {
+              value.clear();
+              value.addAll(_normalDays);
+            }
+            else if(value.contains('Bir kez')) {
+              value.clear();
+              value.add('Bir kez');
+            }
+          });},
         );
       },
     );

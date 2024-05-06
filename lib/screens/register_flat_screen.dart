@@ -466,6 +466,7 @@ void getApartments() async {
       role: selectedRoleValue,
       garbage: false,
       selectedFlat: true,
+      isAllowed: selectedRoleValue == 'Apartman Yöneticisi' ? true : false,
     );
 
     if (nameController.text.trim() == "") {
@@ -541,7 +542,7 @@ void getApartments() async {
                     } else {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const MainScreen()),
+                        MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false,)),
                             (route) => false,
                       );
                     }

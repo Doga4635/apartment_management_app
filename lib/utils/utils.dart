@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:apartment_management_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -54,6 +55,29 @@ Future<String?> getRoleForFlat(String flatUid) async {
 
   return role;
 }
+
+Future<UserModel?> getUserById(String uid) async {
+  try {
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    if (doc.exists) {
+      UserModel userModel = UserModel(
+        uid: doc['uid'],
+        role: doc['role'],
+        profilePic: doc['profilePic'],
+        name: doc['name'],
+        apartmentName: doc['apartmentName'],
+        flatNumber: doc['flatNumber'],
+      );
+      return userModel;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    showSnackBar('Kullanıcı tanımlanırken hata oldu.');
+    return null;
+  }
+}
+
 
 Future<String?> getApartmentIdForUser(String uid) async {
   String? apartmentId;
@@ -157,6 +181,25 @@ Future<String?> getFlatIdForUser(String uid) async {
   return flatId;
 }
 
+Future<bool> getAllowedForUser(String uid) async {
+  late bool isAllowed;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      isAllowed = querySnapshot.docs.first['isAllowed'];
+    }
+  } catch (error) {
+    showSnackBar('Daire ismi alınamadı.');
+  }
+  return isAllowed;
+}
+
 Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
@@ -188,7 +231,7 @@ Future<String> fetchFlatId(String userUid) async {
       }
     }
   } catch (error) {
-    print('Error fetching flatId: $error');
+    showSnackBar('Daire alınırken hata oluştu: $error');
   }
 
   return ''; // Return an empty string if flatId is not valid or not found
@@ -204,7 +247,7 @@ Future<bool> validateFlatId(String flatId) async {
 
     return snapshot.docs.isNotEmpty;
   } catch (error) {
-    print('Error validating flatId: $error');
+    showSnackBar('Daire doğrulanırken hata oluştu: $error');
     return false;
   }
 
