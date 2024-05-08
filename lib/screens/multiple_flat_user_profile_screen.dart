@@ -66,8 +66,6 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
       ));
     }
 
-
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -221,9 +219,10 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                 ),
                                 onPressed: () async {
                                   String selectedFlatId = flatIDList[index];
-                                  updateSelectedFlatIdentityFalse(currentUserUid);
-                                  updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
+                                  await updateSelectedFlatIdentityFalse(currentUserUid);
+                                  await updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
                                   updateUserIdentity(currentUserUid, selectedFlatId);
+                                  bool isAllowed = await getAllowedForUser(currentUserUid);
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop();
 
@@ -237,7 +236,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
 
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                                    MaterialPageRoute(builder: (context) => MainScreen(isAllowed: isAllowed)),
                                   );
 
                                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -365,7 +364,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
   editProfileButton({required Null Function() onPressed}) {}
 }
 
-void updateSelectedFlatIdentityFalse(String currentUserUid) async {
+Future<void> updateSelectedFlatIdentityFalse(String currentUserUid) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
       .where('uid', isEqualTo: currentUserUid)
@@ -379,7 +378,7 @@ void updateSelectedFlatIdentityFalse(String currentUserUid) async {
   });
 }
 
-void updateSelectedFlatIdentityTrue(String currentUserUid, String flatId) async {
+Future<void> updateSelectedFlatIdentityTrue(String currentUserUid, String flatId) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
       .where('uid', isEqualTo: currentUserUid)

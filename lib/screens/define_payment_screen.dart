@@ -11,10 +11,10 @@ class DefinePaymentScreen extends StatefulWidget {
   const DefinePaymentScreen({Key? key}) : super(key: key);
 
   @override
-  _DefinePaymentScreenState createState() => _DefinePaymentScreenState();
+  DefinePaymentScreenState createState() => DefinePaymentScreenState();
 }
 
-class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
+class DefinePaymentScreenState extends State<DefinePaymentScreen> {
   String randomPaymentId = "";
 
   String selectedPaymentName = '';
@@ -89,7 +89,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 24.0),
+                      padding: EdgeInsets.only(left: 28.0),
                       child: Column(
                         children: [
                           Text(
@@ -116,9 +116,8 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 ),
                 TextField(
                   controller: paymentNameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Ödeme Adı',
-                    labelText: 'Ödeme Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -162,9 +161,8 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 ),
                 TextField(
                   controller: apartmentNameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Apartman Adı',
-                    labelText: 'Apartman Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -209,9 +207,8 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 ),
                 TextField(
                   controller: priceController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Ödeme Miktarı',
-                    labelText: 'Ödeme Miktarı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -229,7 +226,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 24.0),
+                      padding: EdgeInsets.only(left: 16.0),
                       child: Column(
                         children: [
                           Text(
@@ -256,9 +253,8 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 ),
                 TextField(
                   controller: descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Açıklama Adı',
-                    labelText: 'Açıklama Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -304,14 +300,13 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 const SizedBox(height: 15.0),
                 TextField(
                   controller: flatController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Daire Numarası',
-                    labelText: 'Daire Numarası',
                   ),
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(0.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
                     onPressed: () {setState(() {
                       String flatNumber = flatController.text.trim(); // Get the text from the text field and remove leading/trailing spaces
@@ -319,7 +314,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                         selectedFlats[flatNumber] = false; // Add the flat number to the map
                         flatController.clear(); // Clear the text field after adding the flat number
                       }
-                      storeData();
+                      storeData(context);
                     });
                     },
                     style: ElevatedButton.styleFrom(
@@ -352,8 +347,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
     );
   }
 
-  void storeData() async {
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
+  void storeData(context) async {
     randomPaymentId = generateRandomId(10);
 
     PaymentModel paymentModel = PaymentModel(
@@ -395,7 +389,6 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
           MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
         );
       } catch (error) {
-        print("Error saving payment data: $error");
         showSnackBar("Ödeme kaydedilirken bir hata oluştu.");
       }
     }

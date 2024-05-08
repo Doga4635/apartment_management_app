@@ -68,13 +68,13 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
               if (querySnapshot.docs.length > 1) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
                 );
               }
               else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
                 );
               }
             },

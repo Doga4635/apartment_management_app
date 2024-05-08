@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:apartment_management_app/screens/apartment_payment_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
+import 'package:apartment_management_app/screens/permission_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
@@ -17,7 +18,8 @@ import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final bool isAllowed;
+  const MainScreen({super.key, required this.isAllowed});
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -50,6 +52,46 @@ class MainScreenState extends State<MainScreen> {
           },
         ),
         actions: [
+
+          FutureBuilder(
+    future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator(
+          color: Colors.teal,
+        ));
+      } else if (snapshot.hasError) {
+        return Text('Error: ${snapshot.error}');
+      } else {
+        String userRole = snapshot.data ?? '';
+        print(userRole);
+        return userRole == 'Apartman Yöneticisi' ? IconButton(
+          onPressed: () async {
+            String apartmentName = ap.userModel.apartmentName;
+
+            //Checking if the user has more than 1 role
+            QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                .collection('flats')
+                .where('apartmentId', isEqualTo: apartmentName)
+                .where('isAllowed', isEqualTo: false)
+                .get();
+
+            if (querySnapshot.docs.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (
+                    context) => const PermissionScreen()),
+              );
+            } else {
+              showSnackBar(
+                  'Kayıt olmak için izin isteyen kullanıcı bulunmamaktadır.');
+            }
+          },
+          icon: const Icon(Icons.verified_user),
+        ) : const SizedBox(width: 2,height: 2);
+      }
+    }
+          ),
           IconButton(
             onPressed: () async {
               String currentUserUid = ap.userModel.uid;
@@ -87,78 +129,90 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FirstModuleScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(290, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+            child: widget.isAllowed ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (
+                          context) => const FirstModuleScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(290, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: const Text(
+                    "Kapıcı İşlemleri",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400),
                   ),
                 ),
-                child: const Text(
-                  "Kapıcı İşlemleri",
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400),
-                ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(290, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (
+                          context) => const ApartmentPaymentScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(290, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: const Text(
+                    "Bireysel Ödeme İşlemleri",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400),
                   ),
                 ),
-                child: const Text(
-                  "Bireysel Ödeme İşlemleri",
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400),
-                ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(290, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(290, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: const Text(
+                    "Apartman Muhasebe İşlemleri",
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400),
                   ),
                 ),
-                child: const Text(
-                  "Apartman Muhasebe İşlemleri",
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400),
+                const SizedBox(height: 30),
+              ],
+            ) : Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Container(
+                padding: const EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
+                decoration: BoxDecoration(
+                  color: Colors.teal,
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
-              ),
-              const SizedBox(height: 30),
-            ],
+                child: const Text('Henüz daire girişiniz yönetici tarafından onaylanmadı.',
+                  style: TextStyle(color: Colors.white,fontSize: 36),
+                ),),
+            ),
           ),
-
-      ),
 
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,

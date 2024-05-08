@@ -9,6 +9,7 @@ class FlatModel {
   String role;
   bool garbage;
   bool selectedFlat;
+  bool isAllowed;
 
   FlatModel({
     required this.uid,
@@ -19,6 +20,7 @@ class FlatModel {
     required this.role,
     required this.garbage,
     required this.selectedFlat,
+    required this.isAllowed,
   });
 
   factory FlatModel.fromMap(Map<String,dynamic> map) {
@@ -31,6 +33,7 @@ class FlatModel {
       role: map['role'] ?? '',
       garbage: map['garbage'] ?? '',
       selectedFlat: map['selectedFlat'] ?? '',
+      isAllowed: map['isAllowed'] ?? '',
     );
   }
 
@@ -44,6 +47,7 @@ class FlatModel {
       "role": role,
       "garbage": garbage,
       "selectedFlat": selectedFlat,
+      "isAllowed": isAllowed,
     };
   }
 
@@ -57,6 +61,7 @@ class FlatModel {
       role: snapshot['role'] ?? '',
       garbage: snapshot['garbage'] ?? false,
       selectedFlat: snapshot['selectedFlat'] ?? false,
+      isAllowed: snapshot['isAllowed'] ?? false,
     );
   }
 
