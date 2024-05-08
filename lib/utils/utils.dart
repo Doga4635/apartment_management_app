@@ -264,7 +264,7 @@ Future<bool> getAllowedForUser(String uid) async {
   return isAllowed;
 }
 
-Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day) async {
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day, String apartmentId) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
       .where('flatNo', isEqualTo: flatNo)
