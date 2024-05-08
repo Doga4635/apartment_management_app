@@ -1,89 +1,91 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-
-
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:apartment_management_app/models/flat_model.dart';
 
 class FlatScreen extends StatefulWidget {
-  final String flatId;
+  final List<FlatModel> flats;
 
-
-
-
-  const FlatScreen({Key? key, required this.flatId}) : super(key: key);
-
+  const FlatScreen({Key? key, required this.flats}) : super(key: key);
 
   @override
   _FlatScreenState createState() => _FlatScreenState();
 }
 
-
 class _FlatScreenState extends State<FlatScreen> {
-  late List<Map<String, dynamic>> orders;
-
+  late Map<String, List<Map<String, dynamic>>> ordersByFlat = {};
 
   @override
   void initState() {
     super.initState();
-    orders = [];
-    getOrdersForFlat(widget.flatId);
+   // fetchOrders();
   }
 
+ /* Future<void> fetchOrders() async {
+    try {
+      for (final flat in widget.flats) {
+        final apartmentId = flat.apartmentId;
+        final flatNo = flat.flatNo;
 
-  Future<void> getOrdersForFlat(String flatId) async {
-    // Retrieve the flatId value from the flats collection
-    final QuerySnapshot flatSnapshot = await FirebaseFirestore.instance.collection('flats').where('flatId', isEqualTo: flatId).get();
-    if (flatSnapshot.docs.isNotEmpty) {
-      final Map<String, dynamic> flat = flatSnapshot.docs.first.data() as Map<String, dynamic>;
+        final QuerySnapshot orderSnapshot = await FirebaseFirestore.instance
+            .collection('orders')
+            .where('apartmentId', isEqualTo: apartmentId)
+            .where('flatNo', isEqualTo: flatNo)
+            .get();
 
+        final flatOrders = orderSnapshot.docs.map((orderDoc) {
+          final orderData = orderDoc.data()!;
+          return {
+           // 'name': orderData['name'],
+          //  'amount': orderData['amount'],
+           // 'price': orderData['price'],
+          };
+        }).toList();
 
-      // Use the flatId value to update the flatId field in the orders collection
-      await FirebaseFirestore.instance.collection('orders').where('flatId', isEqualTo: '').get().then((querySnapshot) {
-        querySnapshot.docs.forEach((doc) {
-          if (flat != null) {
-            FirebaseFirestore.instance.collection('orders').doc(doc.id).update({'flatId': flat['flatId']});
-          }
-        });
-      });
+        final key = '$apartmentId-$flatNo';
+        if (!ordersByFlat.containsKey(key)) {
+          ordersByFlat[key] = [];
+        }
+        ordersByFlat[key]!.addAll(flatOrders);
+     }
 
-
-      // Use the updated flatId value to filter the orders collection
-      final List<Map<String, dynamic>> ordersList =
-      await FirebaseFirestore.instance.collection('orders').where('flatId', isEqualTo: flatId).get().then((querySnapshot) {
-        return querySnapshot.docs.map((doc) => doc.data()).toList();
-      });
-      setState(() {
-        orders = ordersList;
-      });
-    } else {
-      print('Flat not found');
+      setState(() {});
+    } catch (error) {
+      print('Error fetching orders: $error');
+      // Handle error gracefully, e.g., show error message to the user
     }
   }
-
-
+*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Orders for Flat'),
+        title: Text('Orders by Flat'),
         backgroundColor: Colors.teal,
       ),
-      body: orders.isEmpty
+      body: ordersByFlat.isEmpty
           ? Center(
         child: CircularProgressIndicator(),
       )
-          : ListView.builder(
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return ListTile(
-            title: Text(order['name']),
-            subtitle: Text('${order['amount']} x ${order['price']}'),
+          : ListView(
+        children: ordersByFlat.entries.map((entry) {
+          final key = entry.key;
+          final flatOrders = entry.value;
+          final apartmentId = key.split('-')[0];
+          final flatNo = key.split('-')[1];
+
+          return Card(
+            child: ListTile(
+              title: Text('Apartment: $apartmentId, Flat: $flatNo'),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: flatOrders.map<Widget>((order) {
+                  return Text(
+                      '${order['name']}: ${order['amount']} x ${order['price']}');
+                }).toList(),
+              ),
+            ),
           );
-        },
+        }).toList(),
       ),
     );
   }

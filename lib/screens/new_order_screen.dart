@@ -15,8 +15,12 @@ class NewOrderScreen extends StatefulWidget {
   final String listId;
   final List<String> days;
   final String flatId;
+  final String apartmentId;
+  final String floorNo;
+  final String flatNo;
+  final String role;
 
-  const NewOrderScreen({Key? key, required this.listId, required this.days, required this.flatId}) : super(key: key);
+  const NewOrderScreen({Key? key, required this.listId, required this.days, required this.flatId, required this.apartmentId, required this.floorNo, required this.flatNo, required this.role}) : super(key: key);
 
 
   @override
@@ -331,6 +335,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           place: placeNameController.text.trim(),
           days: widget.days,
           flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          flatNo: widget.flatNo,
+          floorNo: widget.floorNo,
+          role: widget.role,
         );
 
 
@@ -357,6 +365,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           place: _selectedPlace,
           days: widget.days,
           flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          flatNo: widget.flatNo,
+          floorNo: widget.floorNo,
+          role: widget.role,
         );
 
 
@@ -382,6 +394,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           place: placeNameController.text.trim(),
           days: widget.days,
           flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          flatNo: widget.flatNo,
+          floorNo: widget.floorNo,
+          role: widget.role,
         );
 
 
@@ -409,6 +425,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         place: _selectedPlace,
         days: widget.days,
         flatId: widget.flatId,
+        apartmentId: widget.apartmentId,
+        flatNo: widget.flatNo,
+        floorNo: widget.floorNo,
+        role: widget.role,
       );
 
 

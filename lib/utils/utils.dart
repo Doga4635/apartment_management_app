@@ -157,12 +157,13 @@ Future<String?> getFlatIdForUser(String uid) async {
   return flatId;
 }
 
-Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day) async {
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo, String day, String apartmentId) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
       .where('flatNo', isEqualTo: flatNo)
       .where('floorNo', isEqualTo: floorNo)
-      .where('days',arrayContains: 'day')
+      .where('days', arrayContains: day)
+      .where('apartmentId', isEqualTo: apartmentId)
       .get();
 
   return result.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
@@ -222,5 +223,22 @@ Future<String> fetchFirstFlatIdForFloor(String floor) async {
     return querySnapshot.docs.first.get('flatId');
   } else {
     return '';
+  }
+}
+
+
+Future<void> updateOrderApartmentIds(String apartmentId) async {
+  // Retrieve all orders for the apartment
+  final QuerySnapshot orderSnapshot = await FirebaseFirestore.instance.collection('orders').where('apartmentId', isEqualTo: '').get();
+
+  // Retrieve all flats for the apartment
+  final QuerySnapshot flatSnapshot = await FirebaseFirestore.instance.collection('flats').where('apartmentId', isEqualTo: apartmentId).get();
+
+  // Update the apartmentId field in the orders collection
+  if (flatSnapshot.docs.isNotEmpty) {
+    final Map<String, dynamic> flat = flatSnapshot.docs.first.data() as Map<String, dynamic>;
+    orderSnapshot.docs.forEach((orderDoc) {
+      FirebaseFirestore.instance.collection('orders').doc(orderDoc.id).update({'apartmentId': flat['apartmentId']});
+    });
   }
 }

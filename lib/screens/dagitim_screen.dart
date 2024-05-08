@@ -3,6 +3,7 @@ import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/flat_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
@@ -129,7 +130,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
               } else {
                 bool hasGrocery = snapshot.data!.docs.isNotEmpty;
                 return Icon(
-                  hasGrocery ? Icons.check_circle : Icons.close,
+                  hasGrocery ? Icons.check_circle : Icons.cancel,
                   color: hasGrocery ? Colors.green : Colors.red,
                 );
               }
@@ -148,25 +149,39 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
 
-                          if (flatId.isNotEmpty) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],
+
+                                ),
                               ),
                             );
-                          }
+
                         },
                         child: const Text('Daire 1'),
                       ),
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],
+
+                                ),
                               ),
                             );
                           }
@@ -176,11 +191,23 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],
+
+                                ),
                               ),
                             );
                           }
@@ -190,18 +217,28 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],                                ),
                               ),
                             );
                           }
                         },
                         child: const Text('Daire 4'),
                       ),
-                    ],
+                     ],
                   ),
                 );
               },
@@ -212,9 +249,8 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
     );
   }
 
-
-  Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo) async {
-    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo,_currentDay);
+  Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo, String apartmentId) async {
+    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo, _currentDay, apartmentId);
 
     if (orders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

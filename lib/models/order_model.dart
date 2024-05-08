@@ -11,6 +11,10 @@ class OrderModel {
   String place;
   List<String> days;
   String flatId;
+  String apartmentId;
+  String floorNo;
+  String flatNo;
+  String role;
 
   OrderModel({
     required this.listId,
@@ -22,7 +26,11 @@ class OrderModel {
     required this.details,
     required this.place,
     required this.days,
-   required this.flatId,
+    required this.flatId,
+    required this.apartmentId,
+    required this.floorNo,
+    required this.flatNo,
+    required this.role,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -37,7 +45,10 @@ class OrderModel {
       place: map['place'] ?? '',
       days: (map['days'] as List<dynamic>).cast<String>(),
       flatId: map['flatId'] ?? '',
-
+      apartmentId: map['apartmentId'] ?? '',
+      flatNo: map['flatNo'] ?? '',
+      floorNo: map['floorNo'] ?? '',
+      role: map['role'] ?? '',
     );
   }
 
@@ -55,6 +66,10 @@ class OrderModel {
       "place": place,
       "days": days,
       "flatId": flatId,
+      "apartmentId": apartmentId,
+      "flatNo": flatNo,
+      "floorNo": floorNo,
+      "role": role,
 
     };
   }
@@ -71,6 +86,10 @@ class OrderModel {
       place: snapshot['place'] ?? '',
       days: (snapshot['days'] as List<dynamic>).cast<String>(),
       flatId: snapshot['flatId'] ?? '',
+      apartmentId: snapshot['apartmentId'] ?? '',
+      floorNo: snapshot['floorNo'] ?? '',
+      flatNo: snapshot['flatNo'] ?? '',
+      role: snapshot['role'] ?? '',
 
     );
   }

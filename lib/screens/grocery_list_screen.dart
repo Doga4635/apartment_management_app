@@ -232,7 +232,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NewOrderScreen(listId: randomListId, days: days, flatId: '',),
+                    builder: (context) => NewOrderScreen(listId: randomListId, days: days, flatId: '', apartmentId: '', floorNo: '', flatNo: '', role: '',),
                   ),
                 );
               },
@@ -270,7 +270,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         setState(() {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: '',)),
+            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: '', apartmentId: '', floorNo: '', flatNo: '', role: '',)),
                 (route) => false,
           );
         });
