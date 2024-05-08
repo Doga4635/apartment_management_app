@@ -116,6 +116,7 @@ class AnnouncementScreenState extends State<AnnoucementScreen> {
                                 createdAt: Timestamp.now(),
                                 role: userModel.role,
                                 messageId: randomId,
+                                apartmentName: userModel.apartmentName
                               );
                               createMessage(messageModel);
                               _controller.clear();

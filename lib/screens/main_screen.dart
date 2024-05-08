@@ -1,6 +1,4 @@
 import 'dart:io';
-
-
 import 'package:apartment_management_app/screens/apartment_payment_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/permission_screen.dart';
@@ -9,10 +7,11 @@ import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-
+import 'package:google_sign_in/google_sign_in.dart';
 import 'ana_menü_yardım_screen.dart';
 import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
@@ -26,11 +25,14 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   File? image;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['https://www.googleapis.com/auth/firebase.messaging']);
 
   @override
   void initState() {
     super.initState();
+    getToken();
   }
 
   void selectImage() async {
@@ -64,7 +66,6 @@ class MainScreenState extends State<MainScreen> {
         return Text('Error: ${snapshot.error}');
       } else {
         String userRole = snapshot.data ?? '';
-        print(userRole);
         return userRole == 'Apartman Yöneticisi' ? IconButton(
           onPressed: () async {
             String apartmentName = ap.userModel.apartmentName;
@@ -248,5 +249,20 @@ class MainScreenState extends State<MainScreen> {
 
       ),
     );
+  }
+
+  void getToken() async {
+    String? accessToken = await FirebaseAuth.instance.currentUser!.getIdToken();
+
+    FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+      'accessToken': accessToken,
+    });
+
+    await _firebaseMessaging.getToken().then((value) {
+      FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).update({
+        'deviceToken': value,
+      });
+      print(value);
+    });
   }
 }

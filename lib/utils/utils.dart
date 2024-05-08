@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../models/flat_model.dart';
@@ -57,7 +59,7 @@ Future<String?> getRoleForFlat(String flatUid) async {
   return role;
 }
 
-Future<UserModel?> getUserById(String uid) async {
+Future<UserModel?> getUserById(String? uid) async {
   try {
     DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
     if (doc.exists) {
@@ -68,6 +70,8 @@ Future<UserModel?> getUserById(String uid) async {
         name: doc['name'],
         apartmentName: doc['apartmentName'],
         flatNumber: doc['flatNumber'],
+        deviceToken: doc['deviceToken'],
+          accessToken: doc['accessToken'],
       );
       return userModel;
     } else {
@@ -76,6 +80,65 @@ Future<UserModel?> getUserById(String uid) async {
   } catch (error) {
     showSnackBar('Kullanıcı tanımlanırken hata oldu.');
     return null;
+  }
+}
+
+void sendNotificationToResident(String flatId, String body) async {
+  String? uid;
+  String serverKey = 'AAAA-IJA9G4:APA91bGibOwdCxMOkoJKMcO5kzIZtYpXzYDOggE8qNJ4K-jFTZ2miuCqjoD0tfSU4olwyqOhNukvniWuSNEBCZiYMHmSjxb77qF46t3JsrnviwxKQrjyFV3ygKvD5t5H7mqodPK2VU5z';
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      uid = querySnapshot.docs.first['uid'];
+    }
+  } catch (error) {
+    showSnackBar('Apartman ismi alınamadı.');
+  }
+
+  UserModel? userModel = await getUserById(uid);
+
+  // Define the endpoint URL of your FCM server
+  String url = 'https://fcm.googleapis.com/fcm/send';
+
+  // Define the headers required for sending a notification
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'key=$serverKey',
+  };
+
+  // Define the notification message
+  Map<String, dynamic> notification = {
+    'notification': {
+      'title': '${userModel!.apartmentName} Daire: ${userModel.flatNumber}',
+      'body': body},
+    'to': userModel.deviceToken,
+  };
+
+  // Convert the notification message to JSON format
+  String jsonBody = json.encode(notification);
+
+  try {
+    // Send the notification using HTTP POST request
+    final http.Response response = await http.post(
+      Uri.parse(url),
+      headers: headers,
+      body: jsonBody,
+    );
+
+    // Check the response status
+    if (response.statusCode == 200) {
+      print('Notification sent successfully.');
+    } else {
+      print('Failed to send notification. Status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  } catch (e) {
+    print('Error sending notification: $e');
   }
 }
 

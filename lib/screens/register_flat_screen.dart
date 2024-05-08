@@ -3,7 +3,6 @@ import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/create_apartment_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
-import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
@@ -455,6 +454,8 @@ void getApartments() async {
       role: selectedRoleValue,
       apartmentName: selectedApartmentName,
       flatNumber: selectedFlatNumber.toString(), profilePic: '',
+      deviceToken: "",
+      accessToken: "",
     );
 
     FlatModel flatModel = FlatModel(
@@ -499,8 +500,6 @@ void getApartments() async {
         i++;
       }
 
-      print(i);
-
       QuerySnapshot doormanSnapshot = await FirebaseFirestore.instance
           .collection('flats')
           .where('apartmentId', isEqualTo: selectedApartmentName)
@@ -510,8 +509,6 @@ void getApartments() async {
       for (var doc in doormanSnapshot.docs) {
         j++;
       }
-
-      print(j);
 
       if(managerCount < i && selectedRoleValue == 'Apartman Yöneticisi') {
         showSnackBar('Seçili apartmanda olması gereken yönetici sayısına erişildiği için kayıt gerçekleşmedi.');
@@ -536,15 +533,24 @@ void getApartments() async {
                     if (selectedRoleValue == 'Kapıcı') {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const FirstModuleScreen()),
+                        MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false)),
                             (route) => false,
                       );
                     } else {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false,)),
-                            (route) => false,
-                      );
+                      if(selectedRoleValue == 'Apartman Yöneticisi') {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)),
+                              (route) => false,
+                        );
+                      }
+                      else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false,)),
+                              (route) => false,
+                        );
+                      }
                     }
                   },
                 );

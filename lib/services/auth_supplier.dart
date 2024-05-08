@@ -274,7 +274,10 @@ class AuthSupplier extends ChangeNotifier {
           name: snapshot['name'],
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
-          flatNumber: snapshot['flatNumber'], profilePic: '',
+          flatNumber: snapshot['flatNumber'],
+          profilePic: '',
+          deviceToken: snapshot['deviceToken'],
+          accessToken: snapshot['accessToken'],
       );
       _uid = userModel.uid;
     });

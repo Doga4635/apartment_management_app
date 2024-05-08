@@ -1,6 +1,5 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -159,7 +158,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
       'garbage': false,
     }).then((value) {
       // Send notification to resident
-      sendNotificationToResident(flatId);
+      sendNotificationToResident(flatId,'Çöpünüz atıldı.');
       Navigator.pop(context);
       showSnackBar('Çöp atıldı.');
     }).catchError((error) {
@@ -167,22 +166,66 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     });
   }
 
-  void sendNotificationToResident(String flatId) {
-    FirebaseFirestore.instance.collection('flats').doc(flatId).get().then((doc) {
-      if (doc.exists) {
-        String uid = doc['uid'];
-        // Construct a notification
-        AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: 0,
-            channelKey: 'basic_channel', // Channel key you defined
-            title: 'Çöp alındı',
-            body: 'Çöp alındı.',
-          ),
-        );
-      }
-    });
-  }
+
+  // void sendNotificationToResident(String flatId) async {
+  //   String? uid;
+  //   String serverKey = 'AAAA-IJA9G4:APA91bGibOwdCxMOkoJKMcO5kzIZtYpXzYDOggE8qNJ4K-jFTZ2miuCqjoD0tfSU4olwyqOhNukvniWuSNEBCZiYMHmSjxb77qF46t3JsrnviwxKQrjyFV3ygKvD5t5H7mqodPK2VU5z';
+  //
+  //   try {
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('flats')
+  //         .where('flatId', isEqualTo: flatId)
+  //         .get();
+  //
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       uid = querySnapshot.docs.first['uid'];
+  //     }
+  //   } catch (error) {
+  //     showSnackBar('Apartman ismi alınamadı.');
+  //   }
+  //
+  //   UserModel? userModel = await getUserById(uid);
+  //
+  //   // Define the endpoint URL of your FCM server
+  //   String url = 'https://fcm.googleapis.com/fcm/send';
+  //
+  //   // Define the headers required for sending a notification
+  //   Map<String, String> headers = {
+  //     'Content-Type': 'application/json',
+  //     'Authorization': 'key=$serverKey',
+  //   };
+  //
+  //   // Define the notification message
+  //   Map<String, dynamic> notification = {
+  //     'notification': {
+  //       'title': '${userModel!.apartmentName} Daire: ${userModel.flatNumber}',
+  //       'body': 'Çöpünüz atıldı'},
+  //     'to': userModel.deviceToken,
+  //   };
+  //
+  //   // Convert the notification message to JSON format
+  //   String jsonBody = json.encode(notification);
+  //
+  //   try {
+  //     // Send the notification using HTTP POST request
+  //     final http.Response response = await http.post(
+  //       Uri.parse(url),
+  //       headers: headers,
+  //       body: jsonBody,
+  //     );
+  //
+  //     // Check the response status
+  //     if (response.statusCode == 200) {
+  //       print('Notification sent successfully.');
+  //     } else {
+  //       print('Failed to send notification. Status code: ${response.statusCode}');
+  //       print('Response body: ${response.body}');
+  //     }
+  //   } catch (e) {
+  //     print('Error sending notification: $e');
+  //   }
+  // }
+
 
   void updateFloorAndFlatLists(String uid) async {
       floors.clear();

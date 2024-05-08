@@ -6,6 +6,8 @@ class UserModel {
   String role;
   String apartmentName;
   String flatNumber;
+  String deviceToken;
+  String accessToken;
   
   UserModel({
     required this.uid, 
@@ -13,7 +15,9 @@ class UserModel {
     required this.profilePic,
     required this.name,
     required this.apartmentName,
-    required this.flatNumber
+    required this.flatNumber,
+    required this.deviceToken,
+    required this.accessToken,
     });
 
   
@@ -26,6 +30,8 @@ class UserModel {
         role: map['role'] ?? '',
         apartmentName: map['apartmentName'] ?? '',
         flatNumber: map['flatNumber'] ?? '',
+        deviceToken: map['deviceToken'] ?? '',
+        accessToken: map['accessToken'] ?? '',
     );
   }
 
@@ -37,6 +43,8 @@ class UserModel {
       "role": role,
       "apartmentName": apartmentName,
       "flatNumber": flatNumber,
+      "deviceToken": deviceToken,
+      "accessToken": accessToken,
     };
   }
 

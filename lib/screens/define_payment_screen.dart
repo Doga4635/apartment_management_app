@@ -117,7 +117,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 TextField(
                   controller: paymentNameController,
                   decoration: const InputDecoration(
-                    hintText: 'Ödeme Adı',
+                    labelText: 'Ödeme Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -162,7 +162,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 TextField(
                   controller: apartmentNameController,
                   decoration: const InputDecoration(
-                    hintText: 'Apartman Adı',
+                    labelText: 'Apartman Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -208,7 +208,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 TextField(
                   controller: priceController,
                   decoration: const InputDecoration(
-                    hintText: 'Ödeme Miktarı',
+                    labelText: 'Ödeme Miktarı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -254,7 +254,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(
-                    hintText: 'Açıklama Adı',
+                    labelText: 'Açıklama Adı',
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -301,7 +301,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 TextField(
                   controller: flatController,
                   decoration: const InputDecoration(
-                    hintText: 'Daire Numarası',
+                    labelText: 'Daire Numarası',
                   ),
                 ),
 
