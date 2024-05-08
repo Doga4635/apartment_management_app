@@ -3,6 +3,7 @@ import 'package:apartment_management_app/screens/register_flat_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
 class CreateApartmentScreen extends StatefulWidget {
@@ -43,6 +44,17 @@ class CreateApartmentScreenState extends State<CreateApartmentScreen> {
   Widget build(BuildContext context) {
     final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Apartman Oluştur',style: TextStyle(
+          fontSize: 28,
+        ),
+        ),
+        leading: IconButton(onPressed: () {
+          Navigator.pop(context);
+        },
+          icon: const Icon(FontAwesomeIcons.angleLeft),
+        ),
+      ),
       body: SafeArea(
         child: isLoading == true ? const Center(child: CircularProgressIndicator(
           color: Colors.teal,

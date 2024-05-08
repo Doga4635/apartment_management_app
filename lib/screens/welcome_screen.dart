@@ -3,6 +3,7 @@ import 'package:apartment_management_app/screens/register_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,16 +11,27 @@ import '../utils/utils.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+  static const route = '/welcome-screen';
 
   @override
   WelcomeScreenState createState() => WelcomeScreenState();
 }
 
 class WelcomeScreenState extends State<WelcomeScreen> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
   void initState() {
     super.initState();
+    _firebaseMessaging.requestPermission();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Handle incoming message when the app is in the foreground
+      print('Received message: ${message.notification!.body}');
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      // Handle notification when the app is opened from a terminated state
+      print('Opened from terminated state: ${message.notification!.body}');
+    });
   }
 
   @override

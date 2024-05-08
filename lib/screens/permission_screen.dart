@@ -154,15 +154,29 @@ class PermissionScreenState extends State<PermissionScreen> {
   }
 
   void _removeFlat(String flatId, bool isAllowed) {
-    FirebaseFirestore.instance.collection('flats').doc(flatId).update({
-      'isAllowed': isAllowed,
-    }).then((value) {
-      setState(() {
-        showSnackBar('Çöp atıldı.');
+    if(isAllowed) {
+      FirebaseFirestore.instance.collection('flats').doc(flatId).update({
+        'isAllowed': isAllowed,
+      }).then((value) {
+        setState(() {
+          showSnackBar('Dairenin kaydı onaylandı.');
+        });
+        sendNotificationToResident(flatId, 'Dairenizin kaydı onaylandı.');
+      }).catchError((error) {
+        showSnackBar('Kayıt onaylamasında sorun oluştu.');
       });
-    }).catchError((error) {
-      showSnackBar('Çöp atımında hata oldu.');
-    });
+    }
+    else {
+      FirebaseFirestore.instance.collection('flats').doc(flatId).delete().then((value) {
+        setState(() {
+          showSnackBar('Dairenin kaydı reddedildi.');
+        });
+        sendNotificationToResident(flatId, 'Dairenizin kaydı reddedildi.');
+      }).catchError((error) {
+        showSnackBar('Kayıt onaylamasında sorun oluştu.');
+      });
+    }
+
   }
 }
 
