@@ -68,7 +68,7 @@ class MainScreenState extends State<MainScreen> {
         String userRole = snapshot.data ?? '';
         return userRole == 'Apartman Yöneticisi' ? IconButton(
           onPressed: () async {
-            String apartmentName = ap.userModel.apartmentName;
+            String? apartmentName = await getApartmentIdForUser(ap.userModel.uid);
 
             //Checking if the user has more than 1 role
             QuerySnapshot querySnapshot = await FirebaseFirestore.instance
