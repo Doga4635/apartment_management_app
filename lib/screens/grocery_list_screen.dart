@@ -1,5 +1,6 @@
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/new_order_screen.dart';
+import 'package:apartment_management_app/screens/order_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -66,28 +67,32 @@ class GroceryListScreenState extends State<GroceryListScreen> {
     super.initState();
 
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    getCurrentUserListDays(currentUserUid ,listDays);
-    getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
-    getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
-    getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
-    getCurrentUserListDaysThursday(currentUserUid, listDayThursday);
-    getCurrentUserListDaysFriday(currentUserUid, listDayFriday);
-    getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
-    getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
-    getCurrentUserListNames(currentUserUid ,listNameList).then((_) {
+
+    Future.wait([
+      getCurrentUserListDays(currentUserUid, listDays),
+      getCurrentUserListDaysOneTime(currentUserUid, listDayOneTime),
+      getCurrentUserListDaysMonday(currentUserUid, listDayMonday),
+      getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday),
+      getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday),
+      getCurrentUserListDaysThursday(currentUserUid, listDayThursday),
+      getCurrentUserListDaysFriday(currentUserUid, listDayFriday),
+      getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday),
+      getCurrentUserListDaysSunday(currentUserUid, listDaySunday),
+      getCurrentUserListNames(currentUserUid, listNameList),
+    ]).then((_) {
       setState(() {
         _isLoading = false;
       });
     });
-
   }
+
 
   @override
   Widget build(BuildContext context) {
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Lists'),
+        title: const Text('Listeler'),
         backgroundColor: Colors.teal,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -231,15 +236,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 Navigator.of(context).pop();
 
                 // Create the list
-                 createList(name, days);
-
-                // Navigate to the NewOrderScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NewOrderScreen(listId: randomListId, days: days, flatId: '',),
-                  ),
-                );
+                createList(name, days);
               },
               child: const Text('Oluştur',style: TextStyle(color: Colors.teal),),
             ),
@@ -258,8 +255,30 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   void createList(String name, List<String> days) async {
 
 
+
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String? flatId = await getSelectedFlatIdForUser(ap.userModel.uid);
+
+    String apartmentId = '';
+    String floorNo = '';
+    String flatNo = '';
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      for (var doc in querySnapshot.docs) {
+        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          apartmentId = data['apartmentId'];
+          floorNo = data['floorNo'];
+          flatNo = data['flatNo'];
+
+        }
+      }
+    }
 
     ListModel listModel = ListModel(
       listId: randomListId,
@@ -275,7 +294,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         setState(() {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: '',)),
+            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: flatId, apartmentId: apartmentId, floorNo: floorNo, flatNo: flatNo,)),
                 (route) => false,
           );
         });
@@ -297,15 +316,15 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           selectedColor: Colors.teal,
           onSelectionChanged: (value) {
             setState(() {
-            if(value.contains('Her gün')) {
-              value.clear();
-              value.addAll(_normalDays);
-            }
-            else if(value.contains('Bir kez')) {
-              value.clear();
-              value.add('Bir kez');
-            }
-          });},
+              if(value.contains('Her gün')) {
+                value.clear();
+                value.addAll(_normalDays);
+              }
+              else if(value.contains('Bir kez')) {
+                value.clear();
+                value.add('Bir kez');
+              }
+            });},
         );
       },
     );
@@ -317,9 +336,11 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   Future<String?> getCurrentUserListNames(String currentUserUid, List<String> listNameList) async {
 
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -341,9 +362,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<List<String>> getCurrentUserListDays(String currentUserUid, List<String> filteredDays) async {
+    String? flatId = await getFlatIdForUser(currentUserUid);
+
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
+        .where('flatId', isEqualTo: flatId)
         .get();
     List<String> listDays = [];
     List<String> orderedDays = [
@@ -384,11 +408,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysOneTime(String currentUserUid, List<String> listDayOneTime) async {
+    String? flatId = await getFlatIdForUser(currentUserUid);
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Bir kez')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -412,11 +438,13 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysMonday(String currentUserUid, List<String> listDayMonday) async {
+    String? flatId = await getFlatIdForUser(currentUserUid);
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Pazartesi')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -440,11 +468,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysTuesday(String currentUserUid, List<String> listDayTuesday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Salı')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -468,11 +497,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysWednesday(String currentUserUid, List<String> listDayWednesday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Çarşamba')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -496,11 +526,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysThursday(String currentUserUid, List<String> listDayThursday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Perşembe')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -524,11 +555,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   }
 
   Future<String?> getCurrentUserListDaysFriday(String currentUserUid, List<String> listDayFriday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Cuma')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -553,11 +585,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
   Future<String?> getCurrentUserListDaysSaturday(String currentUserUid, List<String> listDaySaturday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Cumartesi')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -582,11 +615,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
   Future<String?> getCurrentUserListDaysSunday(String currentUserUid, List<String> listDaySunday) async {
-
+    String? flatId = await getFlatIdForUser(currentUserUid);
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
         .where('uid', isEqualTo: currentUserUid)
         .where('days', arrayContains: 'Pazar')
+        .where('flatId', isEqualTo: flatId)
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -629,11 +663,36 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -646,49 +705,79 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                   IconButton(
                     icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Bir kez');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysOneTime(currentUserUid, listDayOneTime);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Bir kez" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Bir kez');
+
+                            if (days.isEmpty) {
+                              String? flatId = await getFlatIdForUser(currentUserUid);
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysOneTime(currentUserUid, listDayOneTime);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Bir kez" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -716,11 +805,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -731,48 +844,76 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Pazartesi');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Pazartesi" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Pazartesi');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysMonday(currentUserUid, listDayMonday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Pazartesi" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
                       }
                     },
                   ),
@@ -804,11 +945,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -819,51 +984,81 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Salı');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Salı" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Salı');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysTuesday(currentUserUid, listDayTuesday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Salı" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
+
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -892,11 +1087,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -907,51 +1126,80 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Çarşamba');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Çarşamba" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Çarşamba');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysWednesday(currentUserUid, listDayWednesday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Çarşamba" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -980,11 +1228,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -995,51 +1267,81 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Perşembe');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysThursday(currentUserUid, listDayThursday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Perşembe" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Perşembe');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysThursday(currentUserUid, listDayThursday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Perşembe" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
+
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -1067,11 +1369,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -1082,51 +1408,81 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Cuma');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysFriday(currentUserUid, listDayFriday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          showSnackBar('Cuma günü başarılı bir şekilde silindi.');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Cuma');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysFriday(currentUserUid, listDayFriday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            showSnackBar('Cuma günü başarılı bir şekilde silindi.');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
+
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -1154,11 +1510,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -1169,51 +1549,80 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Cumartesi');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});}
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Cumartesi" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Cumartesi');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});}
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysSaturday(currentUserUid, listDaySaturday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Cumartesi" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -1241,11 +1650,35 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
+                      key: Key('button_$i'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.teal[50],
                         minimumSize: const Size(250, 85),
                       ),
-                      onPressed: () async {},
+                      onPressed: () async {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var listId = doc.id; // Get the listId from the document
+                          print(listId);
+
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  OrderViewScreen(listId: listId),
+                            ),
+                          );
+                        }
+                      },
                       child: Text(
                         dayList[i],
                         style: const TextStyle(
@@ -1256,52 +1689,82 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: () async {
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('lists')
-                          .where('uid', isEqualTo: currentUserUid)
-                          .where('name', isEqualTo: dayList[i])
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        var doc = querySnapshot.docs.first;
-                        var docId = doc.id;
-                        var data = doc.data() as Map<String, dynamic>?;
-                        if (data != null && data.containsKey('days')) {
-                          var days = data['days'] as List<dynamic>;
-                          days.remove('Pazar');
-
-                          if (days.isEmpty) {
-                            await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
-                            print('Document deleted successfully');
-                          } else {
-                            await FirebaseFirestore.instance
-                                .collection('lists')
-                                .doc(docId)
-                                .update({'days': days});
-                          }
-
-                          setState(() {
-                            getCurrentUserListDays(currentUserUid ,listDays);
-                            print(listDays);
-                            getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
-                          });
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const GroceryListScreen(),
-                            ),
+                      bool confirmDelete = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text("Emin misiniz?"),
+                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false); // User doesn't confirm
+                                },
+                                child: Text("İptal"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true); // User confirms
+                                },
+                                child: Text("Sil"),
+                              ),
+                            ],
                           );
-                          print('Element "Pazar" deleted successfully');
+                        },
+                      );
+
+                      if (confirmDelete == true) {
+                        String? flatId = await getFlatIdForUser(currentUserUid);
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('lists')
+                            .where('uid', isEqualTo: currentUserUid)
+                            .where('name', isEqualTo: dayList[i])
+                            .where('flatId', isEqualTo: flatId)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          var doc = querySnapshot.docs.first;
+                          var docId = doc.id;
+                          var data = doc.data() as Map<String, dynamic>?;
+                          if (data != null && data.containsKey('days')) {
+                            var days = data['days'] as List<dynamic>;
+                            days.remove('Pazar');
+
+                            if (days.isEmpty) {
+                              await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+                              print('Document deleted successfully');
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('lists')
+                                  .doc(docId)
+                                  .update({'days': days});
+                            }
+
+                            setState(() {
+                              getCurrentUserListDays(currentUserUid ,listDays);
+                              print(listDays);
+                              getCurrentUserListDaysSunday(currentUserUid, listDaySunday);
+                            });
+
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const GroceryListScreen(),
+                              ),
+                            );
+                            print('Element "Pazar" deleted successfully');
+                          } else {
+                            print('Document data is null or "days" not found');
+                          }
                         } else {
-                          print('Document data is null or "days" not found');
+                          print('Document not found');
                         }
-                      } else {
-                        print('Document not found');
+
                       }
                     },
                   ),
+
                 ],
               ),
             ),
@@ -1314,10 +1777,12 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   Future<void> deleteDocument(String documentName, String currentUserUid) async {
     try {
+      String? flatId = await getFlatIdForUser(currentUserUid);
       await FirebaseFirestore.instance
           .collection('lists')
           .where('uid', isEqualTo: currentUserUid)
           .where('name', isEqualTo: documentName)
+          .where('flatId', isEqualTo: flatId)
           .get();
 
       print('Document $documentName deleted successfully');
@@ -1329,4 +1794,5 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
 }
+
 

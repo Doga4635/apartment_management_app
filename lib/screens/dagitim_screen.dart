@@ -3,6 +3,7 @@ import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/flat_model.dart';
 import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
@@ -10,8 +11,12 @@ import 'flat_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 
+
+
 class DagitimScreen extends StatefulWidget {
   const DagitimScreen({Key? key}) : super(key: key);
+
+
 
 
   @override
@@ -19,9 +24,12 @@ class DagitimScreen extends StatefulWidget {
 }
 
 
+
+
 class TrashTrackingScreenState extends State<DagitimScreen> {
   late List<UserModel> users;
   late String _currentDay;
+
 
   @override
   void initState() {
@@ -35,9 +43,12 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
     _currentDay = getDayOfWeek(now.weekday);
   }
 
+
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
+
+
 
 
     return Scaffold(
@@ -55,7 +66,11 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
             onPressed: () async {
 
 
+
+
               String currentUserUid = ap.userModel.uid;
+
+
 
 
               //Checking if the user has more than 1 role
@@ -65,16 +80,18 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                   .get();
 
 
+
+
               if (querySnapshot.docs.length > 1) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
                 );
               }
               else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
                 );
               }
             },
@@ -106,9 +123,13 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
   }
 
 
+
+
   Widget buildFloorList() {
     // Assume you have 5 floors
     List<String> floors = ['1', '2', '3', '4', '5'];
+
+
 
 
     return Column(
@@ -129,7 +150,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
               } else {
                 bool hasGrocery = snapshot.data!.docs.isNotEmpty;
                 return Icon(
-                  hasGrocery ? Icons.check_circle : Icons.close,
+                  hasGrocery ? Icons.check_circle : Icons.cancel,
                   color: hasGrocery ? Colors.green : Colors.red,
                 );
               }
@@ -148,25 +169,45 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
 
-                          if (flatId.isNotEmpty) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FlatScreen(
+                                flats: [],
+
+
                               ),
-                            );
-                          }
+                            ),
+                          );
+
+
                         },
                         child: const Text('Daire 1'),
                       ),
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],
+
+
+                                ),
                               ),
                             );
                           }
@@ -176,11 +217,26 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],
+
+
+                                ),
                               ),
                             );
                           }
@@ -190,11 +246,23 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                       ElevatedButton(
                         onPressed: () async {
                           String flatId = await fetchFirstFlatIdForFloor(floor);
+
+
                           if (flatId.isNotEmpty) {
+                            FlatModel flatModel = await FirebaseFirestore.instance
+                                .collection('flats')
+                                .where('flatId', isEqualTo: flatId)
+                                .limit(1)
+                                .get()
+                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
+
+
+                            String apartmentId = flatModel.apartmentId;
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => FlatScreen(flatId: flatId),
+                                builder: (context) => FlatScreen(
+                                  flats: [],                                ),
                               ),
                             );
                           }
@@ -213,8 +281,9 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
   }
 
 
-  Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo) async {
-    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo,_currentDay);
+  Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo, String apartmentId) async {
+    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo, _currentDay, apartmentId);
+
 
     if (orders.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -222,6 +291,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
       );
       return;
     }
+
 
     showDialog(
       context: context,
