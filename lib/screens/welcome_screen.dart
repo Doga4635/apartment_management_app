@@ -69,8 +69,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
               ),
               ElevatedButton(
                 onPressed:  () async {
-                  bool isAllowed = await getAllowedForUser(FirebaseAuth.instance.currentUser!.uid);
                   if(ap.isSignedIn == true) {
+                    bool isAllowed = await getAllowedForUser(FirebaseAuth.instance.currentUser!.uid);
                     await ap.getDataFromSP().whenComplete(() => Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
