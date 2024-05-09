@@ -237,14 +237,6 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                 // Create the list
                 createList(name, days);
-
-                // Navigate to the NewOrderScreen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NewOrderScreen(listId: randomListId, days: days, flatId: '', apartmentId: '', floorNo: '', flatNo: '',),
-                  ),
-                );
               },
               child: const Text('Oluştur',style: TextStyle(color: Colors.teal),),
             ),
