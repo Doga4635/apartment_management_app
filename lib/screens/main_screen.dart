@@ -222,7 +222,7 @@ class MainScreenState extends State<MainScreen> {
             onPressed: () {
               Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AnnoucementScreen()),
+          MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
         );
             },
             tooltip: 'Duyuru',
