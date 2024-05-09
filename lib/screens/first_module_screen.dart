@@ -247,7 +247,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AnnoucementScreen()),
+                      MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
                     );
                   },
                   tooltip: 'Duyuru',
