@@ -101,8 +101,8 @@ class FlatScreenState extends State<FlatScreen> {
         ),
       )
           : Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
           Expanded(
             child: ListView(
               children: orders.map((order) {
@@ -118,13 +118,12 @@ class FlatScreenState extends State<FlatScreen> {
               }).toList(),
             ),
           ),
-        ],
-      ),
+                  ],
+                ),
       bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Container(
-            padding: const EdgeInsets.only(left: 16.0,bottom: 20.0,right: 170.0,top: 16.0),
+            padding: const EdgeInsets.only(left: 16.0,bottom: 20.0,right: 150.0,top: 16.0),
             color: Colors.white,
             child: Text(
               'Toplam: $totalPrice TL',

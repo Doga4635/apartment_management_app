@@ -36,7 +36,7 @@ class FlatModel {
       garbage: map['garbage'] ?? '',
       selectedFlat: map['selectedFlat'] ?? '',
       isAllowed: map['isAllowed'] ?? '',
-      balance: map['balance'] ?? '',
+      balance: map['balance'] != null ? double.parse(map['balance'].toString()) : 0.0,
     );
   }
 

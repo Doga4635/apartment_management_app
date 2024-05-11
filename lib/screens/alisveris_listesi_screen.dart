@@ -1,4 +1,3 @@
-
 import 'package:apartment_management_app/screens/alim_screen.dart';
 import 'package:apartment_management_app/screens/permission_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
@@ -25,7 +24,7 @@ class AlisverisListesiScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+            Navigator.pop(context);
           },
         ),
         actions: [
