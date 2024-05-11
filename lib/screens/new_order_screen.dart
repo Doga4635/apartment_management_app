@@ -32,11 +32,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   String _selectedPlace = 'Yeri seçiniz';
   final productNameController = TextEditingController();
   final placeNameController = TextEditingController();
+  final detailsController = TextEditingController();
 
 
   List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
   int _quantity = 1;
-  String _details = '';
   bool _isLoading = true;
 
 
@@ -53,6 +53,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
     productNameController.dispose();
     placeNameController.dispose();
+    detailsController.dispose();
   }
 
   Future<void> _getProducts() async {
@@ -107,7 +108,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0,right: 8.0),
               child: TextField(
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: productNameController,
                 decoration: const InputDecoration(
                   hintText: 'Yeni ürünün adını yazın',
@@ -152,12 +154,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: detailsController,
               maxLength: 18,
-              onChanged: (value) {
-                setState(() {
-                  _details = value;
-                });
-              },
               decoration: const InputDecoration(
                 labelText: 'Not',
                 border: OutlineInputBorder(),
@@ -181,7 +179,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0,right: 8.0),
               child: TextField(
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: placeNameController,
                 decoration: const InputDecoration(
                   hintText: 'Yeni yerin adını yazın',
@@ -244,11 +243,11 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 createList(saveList: true);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => AlimScreen()),
+                  MaterialPageRoute(builder: (context) => const AlimScreen()),
                 );
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => GroceryListScreen()),
+                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
@@ -310,16 +309,6 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
-    // Get the current user's flatId
-    String currentUserUid = ap.userModel.uid;
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('flats')
-        .where('uid', isEqualTo: currentUserUid)
-        .get()
-        .then((querySnapshot) => querySnapshot.docs.first);
-    String flatId = userDoc['flatId'];
-
-
 
     if(_selectedProduct == 'Diğer' || _selectedPlace == 'Diğer') {
       if(_selectedProduct != 'Diğer') {
@@ -330,7 +319,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           name: _selectedProduct,
           amount: _quantity,
           price: 0,
-          details: _details,
+          details: detailsController.text.trim(),
           place: placeNameController.text.trim(),
           days: widget.days,
           flatId: widget.flatId,
@@ -360,7 +349,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           name: productNameController.text.trim(),
           amount: _quantity,
           price: 0,
-          details: _details,
+          details: detailsController.text.trim(),
           place: _selectedPlace,
           days: widget.days,
           flatId: widget.flatId,
@@ -388,7 +377,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           name: productNameController.text.trim(),
           amount: _quantity,
           price: 0,
-          details: _details,
+          details: detailsController.text.trim(),
           place: placeNameController.text.trim(),
           days: widget.days,
           flatId: widget.flatId,
@@ -418,7 +407,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         name: _selectedProduct,
         amount: _quantity,
         price: 0,
-        details: _details,
+        details: detailsController.text.trim(),
         place: _selectedPlace,
         days: widget.days,
         flatId: widget.flatId,
@@ -442,9 +431,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     setState(() {
       _selectedProduct = 'Ürün adı giriniz';
       _selectedPlace = 'Yeri seçiniz';
-      _details = '';
+      detailsController.clear();
       productNameController.clear();
       placeNameController.clear();
+      _quantity = 1;
     });
 
   }
@@ -466,10 +456,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: quantityController,
                 decoration: const InputDecoration(labelText: 'Miktar'),
               ),
               TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: detailsController,
                 decoration: const InputDecoration(labelText: 'Ayrıntılar'),
               ),

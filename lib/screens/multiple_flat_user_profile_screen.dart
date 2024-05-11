@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:apartment_management_app/screens/add_flat_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
@@ -21,7 +20,6 @@ class MultipleFlatUserProfileScreen extends StatefulWidget {
 }
 
 class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileScreen> {
-  File? image;
   List<String> flatList = [];
   List<String> flatIDList = [];
   List<String> apartmentList = [];
@@ -33,12 +31,6 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
     getCurrentUserFlats(currentUserUid, flatList, flatIDList, apartmentList).then((_) {
       setState(() {});
     });
-  }
-
-
-  void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
   }
 
   @override
@@ -61,9 +53,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
         apartmentList.removeAt(index);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Flat deleted successfully.'),
-      ));
+      showSnackBar('Daire başarılı bir şekilde silindi.');
     }
 
     return Scaffold(
@@ -222,11 +212,11 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                   await updateSelectedFlatIdentityFalse(currentUserUid);
                                   await updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
                                   updateUserIdentity(currentUserUid, selectedFlatId);
-                                  bool isAllowed = await getAllowedForUser(currentUserUid);
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).pop();
+                                  getAllowedForUser(currentUserUid).then((value) {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
 
-                                  /*
+                                    /*
                                   setState(() {
                                     apartmentName = getUserApartmentName(currentUserUid);
                                     role = getUserRole(currentUserUid);
@@ -234,14 +224,15 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                   });
                                   */
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => MainScreen(isAllowed: isAllowed)),
-                                  );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => MainScreen(isAllowed: value)),
+                                    );
 
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                    content: Text('Daire başarıyla değiştirildi.'),
-                                  ));
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                      content: Text('Daire başarıyla değiştirildi.'),
+                                    ));
+                                  });
 
 
 

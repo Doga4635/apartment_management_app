@@ -421,6 +421,7 @@ class AddFlatScreenState extends State<AddFlatScreen> {
       garbage: false,
       selectedFlat: false,
       isAllowed: selectedRoleValue == 'Apartman Yöneticisi' ? true : false,
+      balance: 0,
     );
 
     if (selectedRoleValue == "Rol") {

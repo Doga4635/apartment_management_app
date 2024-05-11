@@ -39,7 +39,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   List<String> listDaySaturday = [];
   List<String> listDaySunday = [];
   bool _isLoading = true;
-  double? balance = 0.0;
+  double? balance = 0;
 
 
 

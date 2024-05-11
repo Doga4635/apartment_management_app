@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:apartment_management_app/screens/add_flat_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
-import 'package:apartment_management_app/utils/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -18,16 +16,10 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class UserProfileScreenState extends State<UserProfileScreen> {
-  File? image;
 
   @override
   void initState() {
     super.initState();
-  }
-
-  void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
   }
 
   @override
