@@ -248,6 +248,7 @@ Future<String?> getFlatIdForUser(String uid) async {
 Future<bool> getAllowedForUser(String uid) async {
   late bool isAllowed;
 
+
   try {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('flats')
@@ -264,7 +265,7 @@ Future<bool> getAllowedForUser(String uid) async {
   return isAllowed;
 }
 
-Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day, String apartmentId) async {
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day, apartmentId) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
       .where('flatNo', isEqualTo: flatNo)
