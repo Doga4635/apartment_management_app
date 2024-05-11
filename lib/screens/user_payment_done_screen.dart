@@ -1,34 +1,27 @@
+import 'package:apartment_management_app/screens/flat_done_details_screen.dart';
 import 'package:apartment_management_app/screens/flat_details_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../models/payment_model.dart';
-import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 
-class UserPaymentScreen extends StatefulWidget {
-  const UserPaymentScreen({Key? key}) : super(key: key);
+class UserPaymentDoneScreen extends StatefulWidget {
+  const UserPaymentDoneScreen({Key? key}) : super(key: key);
 
   @override
-  _UserPaymentScreenState createState() => _UserPaymentScreenState();
+  _UserPaymentDoneScreenState createState() => _UserPaymentDoneScreenState();
 }
 
-class _UserPaymentScreenState extends State<UserPaymentScreen> {
+class _UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
   @override
   Widget build(BuildContext context) {
-
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String currentUserFlatNo = ap.userModel.flatNumber;
-
-    ///TO DO
-    ///final user = FirebaseAuth.instance.currentUser;
-    ///final userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
-    ///final userData = userDoc.get();
-    ///final userModel = UserModel.fromMap(userData.data()!);
+    print(currentUserFlatNo);
 
 
 
@@ -37,7 +30,6 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
         title: const Text('Daire Ödemeleri'),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-
         stream: _firestore.collection('paymentss').snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -47,15 +39,10 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           if (snapshot.hasError) {
             return const Center(child: Text('Error fetching data'));
           }
-          /*if (userModel.role == 'Apartman Yöneticisi'){
-
-          }*/
 
           List<PaymentModel> payments = snapshot.data!.docs
               .map((doc) => PaymentModel.fromSnapshot(doc))
-              .where((payment) => !payment.paid
-              //&& currentUserFlatNo == payment.flatNo
-          ) // Filter out payments where paid is true
+              .where((payment) => payment.paid && currentUserFlatNo == payment.flatNo) // Filter out payments where paid is true
               .toList();
 
           // Map to store total balance per flat ID
@@ -79,8 +66,8 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           return Column(
             children: [
               Text(
-                'Toplam Apartman Borcu: ${totalBalance.toStringAsFixed(2)}',
-                style: const TextStyle(color: Colors.red, fontSize: 18),
+                'Toplam Apartman Ödenen: ${totalBalance.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.green, fontSize: 18),
               ),
               const Divider(),
               Expanded(
@@ -92,13 +79,13 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
 
                     return ListTile(
                       title: Text('Daire Numarası: $flatId'),
-                      subtitle: Text('Toplam Borç: ${balance.toStringAsFixed(2)}'),
+                      subtitle: Text('Toplam Ödenen: ${balance.toStringAsFixed(2)}'),
                       onTap: () {
                         // Navigate to a separate screen to show the details of payments for the selected flat ID
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FlatDetailsScreen(selectedFlatId: flatId),
+                            builder: (context) => FlatDoneDetailsScreen(selectedFlatId: flatId),
                           ),
                         );
                       },

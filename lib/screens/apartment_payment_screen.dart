@@ -1,7 +1,8 @@
 import 'package:apartment_management_app/screens/define_payment_screen.dart';
-import 'package:apartment_management_app/screens/done_payment_screen.dart';
+import 'package:apartment_management_app/screens/flat_done_details_screen.dart';
+import 'package:apartment_management_app/screens/user_payment_done_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen.dart';
-import 'package:apartment_management_app/screens/user_payment_screen_admin.dart';
+import 'package:apartment_management_app/screens/flat_details_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'main_screen.dart';
 
 class ApartmentPaymentScreen extends StatefulWidget {
   const ApartmentPaymentScreen({Key? key}) : super(key: key);
@@ -36,7 +38,7 @@ class _ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+                MaterialPageRoute(builder: (context) => const MainScreen()));
           },
         ),
         actions: [
@@ -120,9 +122,8 @@ class _ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
               InkWell(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const DonePaymentScreen()));
+                      MaterialPageRoute(builder: (context) => const UserPaymentDoneScreen()));
                   // Add your functionality here
-
                 },
                 child: Container(
                   width: 300,
