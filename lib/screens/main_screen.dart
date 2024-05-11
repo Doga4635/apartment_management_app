@@ -26,7 +26,6 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  File? image;
   final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['https://www.googleapis.com/auth/firebase.messaging']);
 
   @override
@@ -35,10 +34,6 @@ class MainScreenState extends State<MainScreen> {
     getToken();
   }
 
-  void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -209,7 +204,7 @@ class MainScreenState extends State<MainScreen> {
                   color: Colors.teal,
                   borderRadius: BorderRadius.circular(6.0),
                 ),
-                child: const Text('Henüz daire girişiniz yönetici tarafından onaylanmadı.',
+                child: const Text('Daire girişiniz için yönetici izni beklenmektedir.',
                   style: TextStyle(color: Colors.white,fontSize: 36),
                 ),),
             ),
@@ -221,9 +216,9 @@ class MainScreenState extends State<MainScreen> {
           FloatingActionButton(
             onPressed: () {
               Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
-        );
+                context,
+                MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
+              );
             },
             tooltip: 'Duyuru',
             backgroundColor: Colors.teal,
@@ -236,9 +231,9 @@ class MainScreenState extends State<MainScreen> {
           ),
           FloatingActionButton(
             onPressed: () {Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const YardimScreen()),
-    );},
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
             tooltip: 'Yardım',
             backgroundColor: Colors.teal,
             child: const Icon(Icons.question_mark,

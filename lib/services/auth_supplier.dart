@@ -275,7 +275,6 @@ class AuthSupplier extends ChangeNotifier {
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
           flatNumber: snapshot['flatNumber'],
-          profilePic: '',
           deviceToken: snapshot['deviceToken'],
           accessToken: snapshot['accessToken'],
       );

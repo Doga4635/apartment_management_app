@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:apartment_management_app/screens/add_flat_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
@@ -21,7 +20,6 @@ class MultipleFlatUserProfileScreen extends StatefulWidget {
 }
 
 class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileScreen> {
-  File? image;
   List<String> flatList = [];
   List<String> flatIDList = [];
   List<String> apartmentList = [];
@@ -33,12 +31,6 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
     getCurrentUserFlats(currentUserUid, flatList, flatIDList, apartmentList).then((_) {
       setState(() {});
     });
-  }
-
-
-  void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
   }
 
   @override

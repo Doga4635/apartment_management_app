@@ -2,7 +2,6 @@
 class UserModel {
   String uid;
   String name;
-  String? profilePic;
   String role;
   String apartmentName;
   String flatNumber;
@@ -12,7 +11,6 @@ class UserModel {
   UserModel({
     required this.uid, 
     required this.role,
-    required this.profilePic,
     required this.name,
     required this.apartmentName,
     required this.flatNumber,
@@ -26,7 +24,6 @@ class UserModel {
     return UserModel(
         uid: map['uid'] ?? '',
         name: map['name'] ?? '',
-        profilePic: map['profilePic'] ?? '',
         role: map['role'] ?? '',
         apartmentName: map['apartmentName'] ?? '',
         flatNumber: map['flatNumber'] ?? '',
@@ -39,7 +36,6 @@ class UserModel {
     return {
       "uid": uid,
       "name": name,
-      "profilePic": profilePic,
       "role": role,
       "apartmentName": apartmentName,
       "flatNumber": flatNumber,

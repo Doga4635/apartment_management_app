@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../utils/utils.dart';
 
@@ -13,6 +14,7 @@ class AlimScreen extends StatefulWidget {
 class AlimScreenState extends State<AlimScreen> {
   late String _currentDay;
   String? price;
+  String? apartmentId;
 
   @override
   void initState() {
@@ -20,10 +22,11 @@ class AlimScreenState extends State<AlimScreen> {
     _updateCurrentDay();
   }
   // Function to update the current day
-  void _updateCurrentDay() {
+  void _updateCurrentDay() async {
     final now = DateTime.now();
     // Convert the current date to a string representation of the day (e.g., Monday, Tuesday, etc.)
     _currentDay = getDayOfWeek(now.weekday);
+    apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
   }
 
   void showMarketQuantity(String location) {
@@ -32,12 +35,13 @@ class AlimScreenState extends State<AlimScreen> {
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: AlertDialog(
-            title: Text('$location Orders'),
+            title: Text('$location Siparişleri'),
             content: FutureBuilder<QuerySnapshot>(
               future: FirebaseFirestore.instance
                   .collection('orders')
                   .where('place', isEqualTo: location)
                   .where('days', arrayContains: _currentDay)
+                  .where('apartmentId', isEqualTo: apartmentId)
                   .get(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -95,6 +99,7 @@ class AlimScreenState extends State<AlimScreen> {
                                   if (snapshot.connectionState == ConnectionState.waiting) {
                                     return const CircularProgressIndicator();
                                   } else if (snapshot.hasError) {
+                                    print('Error: ${snapshot.error}');
                                     return Text('Error: ${snapshot.error}');
                                   } else {
                                     priceController = TextEditingController(text: snapshot.data);
@@ -113,7 +118,7 @@ class AlimScreenState extends State<AlimScreen> {
                                   List<String> orderId = await getOrderIds(productName,details);
                                   for(String id in orderId) {
                                     FirebaseFirestore.instance.collection('orders').doc(id).update({
-                                      'price': int.parse(newPrice),
+                                      'price': double.parse(newPrice),
                                     });
                                   }
                                   updateProductPrice(productName, newPrice);
@@ -226,6 +231,9 @@ class AlimScreenState extends State<AlimScreen> {
 
   Future<List<String>> getOrderIds(String productName, String details) async {
     List<String> orderIds = [];
+    if(details == 'Normal') {
+      details = '';
+    }
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('orders')
@@ -249,7 +257,7 @@ class AlimScreenState extends State<AlimScreen> {
 
     for (var doc in querySnapshot.docs) {
       FirebaseFirestore.instance.collection('products').doc(doc.id).update({
-        'price': int.parse(price),
+        'price': double.parse(price),
       });
     }
 

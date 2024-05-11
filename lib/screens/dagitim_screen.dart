@@ -1,40 +1,38 @@
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/apartment_model.dart';
 import '../models/flat_model.dart';
-import '../models/user_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 import 'flat_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 
-
-
 class DagitimScreen extends StatefulWidget {
   const DagitimScreen({Key? key}) : super(key: key);
 
 
-
-
   @override
-  TrashTrackingScreenState createState() => TrashTrackingScreenState();
+  DagitimScreenState createState() => DagitimScreenState();
 }
 
 
-
-
-class TrashTrackingScreenState extends State<DagitimScreen> {
-  late List<UserModel> users;
+class DagitimScreenState extends State<DagitimScreen> {
   late String _currentDay;
+  List<int> floors = [];
+  bool _isLoading = true;
+  String? selectedApartment;
 
 
   @override
   void initState() {
     super.initState();
-    users = [];
+    updateFloorAndFlatLists(FirebaseAuth.instance.currentUser!.uid);
+    _updateCurrentDay();
   }
   // Function to update the current day
   void _updateCurrentDay() {
@@ -43,12 +41,9 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
     _currentDay = getDayOfWeek(now.weekday);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-
-
 
 
     return Scaffold(
@@ -64,15 +59,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-
-
-
-
               String currentUserUid = ap.userModel.uid;
-
-
-
-
               //Checking if the user has more than 1 role
               QuerySnapshot querySnapshot = await FirebaseFirestore.instance
                   .collection('flats')
@@ -80,18 +67,16 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
                   .get();
 
 
-
-
               if (querySnapshot.docs.length > 1) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MultipleFlatUserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
                 );
               }
               else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => UserProfileScreen()),
+                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
                 );
               }
             },
@@ -109,7 +94,9 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
         ],
       ),
       body: SafeArea(
-        child: Center(
+        child: _isLoading == true ? const Center(child: CircularProgressIndicator(
+          color: Colors.teal,
+        )) : Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -123,14 +110,7 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
   }
 
 
-
-
   Widget buildFloorList() {
-    // Assume you have 5 floors
-    List<String> floors = ['1', '2', '3', '4', '5'];
-
-
-
 
     return Column(
       children: floors.map((floor) {
@@ -138,9 +118,10 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
           title: Text('$floor. Kat'),
           trailing: StreamBuilder(
             stream: FirebaseFirestore.instance
-                .collection('flats')
-                .where('floorNo', isEqualTo: floor)
-                .where('grocery', isEqualTo: false)
+                .collection('orders')
+                .where('floorNo', isEqualTo: floor.toString())
+                .where('apartmentId', isEqualTo: selectedApartment!)
+                .where('days', arrayContains: _currentDay)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,166 +131,141 @@ class TrashTrackingScreenState extends State<DagitimScreen> {
               } else {
                 bool hasGrocery = snapshot.data!.docs.isNotEmpty;
                 return Icon(
-                  hasGrocery ? Icons.check_circle : Icons.cancel,
+                  hasGrocery ? Icons.check_circle : Icons.close,
                   color: hasGrocery ? Colors.green : Colors.red,
                 );
               }
             },
           ),
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text('$floor. Kat'),
-                      ElevatedButton(
-                        onPressed: () async {
-                          String flatId = await fetchFirstFlatIdForFloor(floor);
-
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FlatScreen(
-                                flats: [],
-
-
-                              ),
-                            ),
-                          );
-
-
-                        },
-                        child: const Text('Daire 1'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          String flatId = await fetchFirstFlatIdForFloor(floor);
-
-
-                          if (flatId.isNotEmpty) {
-                            FlatModel flatModel = await FirebaseFirestore.instance
-                                .collection('flats')
-                                .where('flatId', isEqualTo: flatId)
-                                .limit(1)
-                                .get()
-                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
-
-
-                            String apartmentId = flatModel.apartmentId;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FlatScreen(
-                                  flats: [],
-
-
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Daire 2'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          String flatId = await fetchFirstFlatIdForFloor(floor);
-
-
-                          if (flatId.isNotEmpty) {
-                            FlatModel flatModel = await FirebaseFirestore.instance
-                                .collection('flats')
-                                .where('flatId', isEqualTo: flatId)
-                                .limit(1)
-                                .get()
-                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
-
-
-                            String apartmentId = flatModel.apartmentId;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FlatScreen(
-                                  flats: [],
-
-
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Daire 3'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () async {
-                          String flatId = await fetchFirstFlatIdForFloor(floor);
-
-
-                          if (flatId.isNotEmpty) {
-                            FlatModel flatModel = await FirebaseFirestore.instance
-                                .collection('flats')
-                                .where('flatId', isEqualTo: flatId)
-                                .limit(1)
-                                .get()
-                                .then((querySnapshot) => FlatModel.fromSnapshot(querySnapshot.docs.first));
-
-
-                            String apartmentId = flatModel.apartmentId;
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FlatScreen(
-                                  flats: [],                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Daire 4'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
+          onTap: () => _showFloorDetails(floor),
         );
       }).toList(),
     );
   }
 
-
-  Future<void> displayOrdersForFlat(BuildContext context, String flatNo, String floorNo, String apartmentId) async {
-    final List<Map<String, dynamic>> orders = await getOrdersForFlat(flatNo, floorNo, _currentDay, apartmentId);
-
-
-    if (orders.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No orders found for this flat')),
-      );
-      return;
-    }
-
-
+  void _showFloorDetails(int floor) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Orders for Flat $flatNo'),
-          content: ListView.builder(
-            itemCount: orders.length,
-            itemBuilder: (BuildContext context, int index) {
-              final Map<String, dynamic> order = orders[index];
-              return ListTile(
-                title: Text(order['name']),
-                subtitle: Text('${order['amount']} x ${order['price']}'),
-              );
+          title: Text('$floor. Kat Daireleri'),
+          content: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('flats')
+                .where('floorNo', isEqualTo: floor.toString())
+                .where('apartmentId', isEqualTo: selectedApartment)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return const Text('Error fetching data');
+              } else {
+                List<FlatModel> flats = snapshot.data!.docs
+                    .map((doc) => FlatModel.fromSnapshot(doc))
+                    .toList();
+                flats.sort((a, b) => int.parse(a.flatNo).compareTo(int.parse(b.flatNo)));
+                return flats.isEmpty ? Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 24.0,right: 8.0,top: 8.0,bottom: 8.0),
+                      child: Text(
+                        'Bu katta kayıtlı daire bulunmamaktadır.',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ) :
+                Column(
+                  children: flats.map((flat) {
+                    return ListTile(
+                      title: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => FlatScreen(
+                              apartmentId: flat.apartmentId,
+                              floorNo: flat.floorNo,
+                              flatNo: flat.flatNo,
+                            )),
+                          );
+                        },
+                        child: Text('Daire ${flat.flatNo}',
+                          style: const TextStyle(color: Colors.teal),
+                        ),
+                      ),
+                      trailing: SizedBox(
+                        width: 24.0,
+                        height: 24.0,
+                        child: StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection('orders')
+                              .where('floorNo', isEqualTo: floor.toString())
+                              .where('flatNo', isEqualTo: flat.flatNo)
+                              .where('apartmentId', isEqualTo: selectedApartment!)
+                              .where('days', arrayContains: _currentDay)
+                              .snapshots(),
+                          builder: (context, grocerySnapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return const Icon(Icons.error);
+                            } else {
+                              bool hasGrocery = grocerySnapshot.data?.docs.isNotEmpty ?? false;
+                              return Icon(
+                                hasGrocery ? Icons.check_circle : Icons.close,
+                                color: hasGrocery ? Colors.green : Colors.red,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              }
             },
           ),
         );
       },
     );
   }
+
+  void updateFloorAndFlatLists(String uid) async {
+    floors.clear();
+
+    selectedApartment = await getApartmentIdForUser(uid);
+    QuerySnapshot productSnapshot = await FirebaseFirestore.instance
+        .collection('apartments')
+        .where('name', isEqualTo: selectedApartment)
+        .get();
+
+    if (productSnapshot.docs.isNotEmpty) {
+      // Get the first document
+      var doc = productSnapshot.docs.first;
+
+      ApartmentModel apartment = ApartmentModel(
+        id: doc.id,
+        name: doc['name'],
+        floorCount: doc['floorCount'],
+        flatCount: doc['flatCount'],
+        managerCount: doc['managerCount'],
+        doormanCount: doc['doormanCount'],
+      );
+      int floorNo = apartment.floorCount;
+
+      for (int i = 1; i <= floorNo; i++) {
+        floors.add(i);
+      }
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+
 }

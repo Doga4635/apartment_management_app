@@ -1,6 +1,9 @@
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/new_order_screen.dart';
 import 'package:apartment_management_app/screens/order_view_screen.dart';
+import 'package:apartment_management_app/screens/permission_screen.dart';
+import 'package:apartment_management_app/screens/user_profile_screen.dart';
+import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,6 +14,7 @@ import '../models/list_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 import 'ana_menü_yardım_screen.dart';
+import 'multiple_flat_user_profile_screen.dart';
 
 
 class GroceryListScreen extends StatefulWidget {
@@ -35,6 +39,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   List<String> listDaySaturday = [];
   List<String> listDaySunday = [];
   bool _isLoading = true;
+  double? balance = 0;
 
 
 
@@ -89,6 +94,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ap = Provider.of<AuthSupplier>(context, listen: false);
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(
@@ -100,6 +106,80 @@ class GroceryListScreenState extends State<GroceryListScreen> {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const FirstModuleScreen()));
           },
         ),
+        actions: [
+          FutureBuilder(
+              future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator(
+                    color: Colors.teal,
+                  ));
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  String userRole = snapshot.data ?? '';
+                  return userRole == 'Apartman Yöneticisi' ? IconButton(
+                    onPressed: () async {
+                      String? apartmentName = await getApartmentIdForUser(ap.userModel.uid);
+
+                      //Checking if the user has more than 1 role
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('flats')
+                          .where('apartmentId', isEqualTo: apartmentName)
+                          .where('isAllowed', isEqualTo: false)
+                          .get();
+
+                      if (querySnapshot.docs.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (
+                              context) => const PermissionScreen()),
+                        );
+                      } else {
+                        showSnackBar(
+                            'Kayıt olmak için izin isteyen kullanıcı bulunmamaktadır.');
+                      }
+                    },
+                    icon: const Icon(Icons.verified_user),
+                  ) : const SizedBox(width: 2,height: 2);
+                }
+              }
+          ),
+          IconButton(
+            onPressed: () async {
+              String currentUserUid = ap.userModel.uid;
+
+              //Checking if the user has more than 1 role
+              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                  .collection('flats')
+                  .where('uid', isEqualTo: currentUserUid)
+                  .get();
+
+              if (querySnapshot.docs.length > 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+
+                );
+              }
+            },
+            icon: const Icon(Icons.person),
+          ),
+          IconButton(
+            onPressed: () {
+              ap.userSignOut().then((value) => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+              ));
+            },
+            icon: const Icon(Icons.exit_to_app),
+          ),
+        ],
       ),
 
       body: _isLoading ? const Center(child: CircularProgressIndicator(
@@ -117,7 +197,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.rectangle,
                     color: Colors.white,
-                    border: Border.all(color: Colors.grey, width: 1.0),
+                    border: Border.all(color: Colors.teal, width: 1.0),
                   ),
                   child: SingleChildScrollView(
                     child: Column(
@@ -174,6 +254,16 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
+            const Text('Bütçeniz: ',style: TextStyle(fontSize: 20.0),),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Text('${balance?.abs()}',
+                style: TextStyle(
+                  color: balance!.isNegative ? Colors.red: Colors.teal,
+                  fontSize: 20.0,
+                ),
+              ),
+            ),
             FloatingActionButton(
               onPressed: () {
                 Navigator.push(
@@ -257,7 +347,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
 
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    String? flatId = await getSelectedFlatIdForUser(ap.userModel.uid);
+    String? flatId = await getFlatIdForUser(ap.userModel.uid);
 
     String apartmentId = '';
     String floorNo = '';
@@ -363,6 +453,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   Future<List<String>> getCurrentUserListDays(String currentUserUid, List<String> filteredDays) async {
     String? flatId = await getFlatIdForUser(currentUserUid);
+    balance = await getBalanceForFlat(currentUserUid);
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')
@@ -418,7 +509,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      querySnapshot.docs.forEach((doc) {
+      for (var doc in querySnapshot.docs) {
         Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
         if (data != null) {
           String? listName = data['name'] as String?;
@@ -428,7 +519,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
           }
 
         }
-      });
+      }
       print('Bir kez: ');
       print(listDayOneTime);
     } else {
@@ -703,26 +794,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -747,8 +838,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Bir kez');
 
                             if (days.isEmpty) {
-                              String? flatId = await getFlatIdForUser(currentUserUid);
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -764,7 +872,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                builder: (context) => GroceryListScreen(),
+                                builder: (context) => const GroceryListScreen(),
                               ),
                             );
                             print('Element "Bir kez" deleted successfully');
@@ -844,26 +952,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -888,7 +996,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Pazartesi');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -984,26 +1110,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1028,7 +1154,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Salı');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -1126,26 +1270,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1170,7 +1314,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Çarşamba');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -1267,26 +1429,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1311,7 +1473,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Perşembe');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -1408,26 +1588,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1452,7 +1632,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Cuma');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -1549,26 +1747,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1593,7 +1791,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Cumartesi');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
@@ -1689,26 +1905,26 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () async {
                       bool confirmDelete = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: Text("Emin misiniz?"),
-                            content: Text("Bu listeyi silmek istediğinizden emin misiniz?"),
+                            title: const Text("Emin misiniz?"),
+                            content: const Text("Bu listeyi silmek istediğinizden emin misiniz?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false); // User doesn't confirm
                                 },
-                                child: Text("İptal"),
+                                child: const Text("İptal"),
                               ),
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(true); // User confirms
                                 },
-                                child: Text("Sil"),
+                                child: const Text("Sil"),
                               ),
                             ],
                           );
@@ -1733,7 +1949,25 @@ class GroceryListScreenState extends State<GroceryListScreen> {
                             days.remove('Pazar');
 
                             if (days.isEmpty) {
+                              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                                  .collection('orders')
+                                  .where('listId', isEqualTo: docId)
+                                  .where('flatId', isEqualTo: flatId)
+                                  .get();
+
+                              List<DocumentSnapshot> documents = querySnapshot.docs;
+
+                              for (DocumentSnapshot document in documents) {
+                                String orderId = document.id;
+
+                                // Delete the document
+                                await FirebaseFirestore.instance
+                                    .collection('orders')
+                                    .doc(orderId)
+                                    .delete();
+                              }
                               await FirebaseFirestore.instance.collection('lists').doc(docId).delete();
+
                               print('Document deleted successfully');
                             } else {
                               await FirebaseFirestore.instance
