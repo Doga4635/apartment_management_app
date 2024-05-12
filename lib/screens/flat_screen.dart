@@ -99,11 +99,6 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchBalance(String flatId) async {
     try {
-      // Retrieve the current balance for the flat from Firestore
-      DocumentSnapshot flatSnapshot = await FirebaseFirestore.instance
-          .collection('flats')
-          .doc(flatId)
-          .get();
 
 
       // Perform your calculations
