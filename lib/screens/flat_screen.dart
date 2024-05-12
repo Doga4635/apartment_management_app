@@ -9,38 +9,53 @@ class FlatScreen extends StatefulWidget {
   final String apartmentId;
   final String floorNo;
   final String flatNo;
+  final String flatId;
 
-
-  const FlatScreen({Key? key,  required this.apartmentId, required this.floorNo, required this.flatNo }) : super(key: key);
+  const FlatScreen({Key? key, required this.apartmentId, required this.floorNo, required this.flatNo, required this.flatId }) : super(key: key);
 
   @override
   FlatScreenState createState() => FlatScreenState();
 }
 
 class FlatScreenState extends State<FlatScreen> {
-  List<OrderModel> orders = []; // Define orders property
+  List<OrderModel> orders = [];
   late String _currentDay;
   bool _isLoading = true;
   double totalPrice = 0;
+  double givenAmount = 0;
+  double? balance = 0;
 
   @override
   void initState() {
     super.initState();
     _updateCurrentDay();
     fetchOrders(widget.apartmentId, widget.floorNo, widget.flatNo);
+
   }
 
   void _updateCurrentDay() {
     final now = DateTime.now();
-    // Convert the current date to a string representation of the day (e.g., Monday, Tuesday, etc.)
     _currentDay = getDayOfWeek(now.weekday);
   }
 
-  Future<void> fetchOrders(String apartmentId, String floorNo,
-      String flatNo) async {
+  Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
+    String uid = '';
+
+      final QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .where('apartmentId', isEqualTo: apartmentId)
+          .where('floorNo', isEqualTo: floorNo)
+          .where('flatNo', isEqualTo: flatNo)
+           .get();
+      if (flatSnapshot.docs.isNotEmpty) {
+        var doc = flatSnapshot.docs.first;
+         uid = doc['uid'];
+      }
+
+    balance = await getBalanceForFlat(uid);
+
     orders.clear();
     try {
-      // Fetch orders for a specific apartment, floor, and flat
       final QuerySnapshot orderSnapshot = await FirebaseFirestore.instance
           .collection('orders')
           .where('apartmentId', isEqualTo: apartmentId)
@@ -82,18 +97,59 @@ class FlatScreenState extends State<FlatScreen> {
     });
   }
 
+  Future<void> fetchBalance(String flatId) async {
+    try {
+      // Retrieve the current balance for the flat from Firestore
+      DocumentSnapshot flatSnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .doc(flatId)
+          .get();
+
+
+      // Perform your calculations
+      double newBalance = totalPrice - givenAmount - balance!;
+
+      // Update the balance in Firestore
+      await FirebaseFirestore.instance
+          .collection('flats')
+          .doc(flatId)
+          .update({'balance': newBalance});
+
+setState(() {
+  balance = newBalance;
+});
+
+      print('Balance updated successfully in Firestore.');
+    } catch (error) {
+      print('Error fetching or updating balance: $error');
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Daire ${widget.flatNo} Siparişleri'),
         backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+
+            storeBalance();
+
+            Navigator.pop(context);
+          },
+        ),
       ),
-      body: _isLoading == true ? const Center(
+      body: _isLoading == true
+          ? const Center(
         child: CircularProgressIndicator(
           color: Colors.teal,
         ),
-      ) : orders.isEmpty
+      )
+          : orders.isEmpty
           ? const Center(
         child: Text(
           'Bu dairenin hiç siparişi bulunmamaktadır.',
@@ -101,30 +157,22 @@ class FlatScreenState extends State<FlatScreen> {
         ),
       )
           : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           Expanded(
             child: ListView(
               children: orders.map((order) {
                 return ListTile(
-                  title: Text('${order.amount} Adet',
-                      style: const TextStyle(fontSize: 14)),
-                  leading: Text(
-                      order.name, style: const TextStyle(fontSize: 16)),
+                  title: Text('${order.amount} Adet', style: const TextStyle(fontSize: 14)),
+                  leading: Text(order.name, style: const TextStyle(fontSize: 16)),
                   subtitle: Text('${order.price} TL'),
-                  trailing: Text('${order.price * order.amount}',
-                      style: const TextStyle(fontSize: 16)),
+                  trailing: Text('${order.price * order.amount}', style: const TextStyle(fontSize: 16)),
                 );
               }).toList(),
             ),
           ),
-                  ],
-                ),
-      bottomNavigationBar: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(left: 16.0,bottom: 20.0,right: 150.0,top: 16.0),
-            color: Colors.white,
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, bottom: 20.0, right: 150.0, top: 16.0),
             child: Text(
               'Toplam: $totalPrice TL',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -132,22 +180,79 @@ class FlatScreenState extends State<FlatScreen> {
             ),
           ),
           Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Verilen Tutar',
+              ),
+              onChanged: (value) {
+                setState(() {
+                  givenAmount = double.tryParse(value) ?? 0;
+                });
+              },
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+
+              fetchBalance(widget.flatId); // Call fetchBalance with the flatId
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal, // background color
+            ),
+            child: Text('Bakiye Hesapla', style: TextStyle(color: Colors.white)),
+          ),
+
+
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Bakiye: $balance TL',
+              style: TextStyle(
+                fontSize: 16,
+                color: balance!.isNegative ? Colors.red : Colors.green,
+              ),
+            ),
+          ),
+
+        ],
+      ),
+      bottomNavigationBar: Row(
+        children: [
+          Padding(
             padding: const EdgeInsets.all(12.0),
             child: FloatingActionButton(
-              onPressed: () {Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const YardimScreen()),
-              );},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
+                );
+              },
               tooltip: 'Yardım',
               backgroundColor: Colors.teal,
-              child: const Icon(Icons.question_mark,
+              child: const Icon(
+                Icons.question_mark,
                 color: Colors.white,
               ),
             ),
           ),
         ],
-
       ),
     );
+  }
+
+
+  Future<void> storeBalance() async {
+    try {
+      // Update the balance in Firestore when leaving the page
+      await FirebaseFirestore.instance
+          .collection('flats')
+          .doc(widget.flatId)
+          .update({'balance': balance});
+      print('Balance stored successfully in Firestore.');
+    } catch (error) {
+      print('Error storing balance: $error');
+    }
   }
 }

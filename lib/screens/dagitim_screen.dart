@@ -26,6 +26,8 @@ class DagitimScreenState extends State<DagitimScreen> {
   List<int> floors = [];
   bool _isLoading = true;
   String? selectedApartment;
+  late String apartmentId;
+  double totalApartmentBalance = 0;
 
 
   @override
@@ -33,6 +35,7 @@ class DagitimScreenState extends State<DagitimScreen> {
     super.initState();
     updateFloorAndFlatLists(FirebaseAuth.instance.currentUser!.uid);
     _updateCurrentDay();
+    fetchTotalApartmentBalance();
   }
   // Function to update the current day
   void _updateCurrentDay() {
@@ -41,10 +44,36 @@ class DagitimScreenState extends State<DagitimScreen> {
     _currentDay = getDayOfWeek(now.weekday);
   }
 
+  Future<void> fetchTotalApartmentBalance() async {
+    try {
+      double totalBalance = 0;
+
+      // Query all flats in the apartment
+      QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .where('apartmentId', isEqualTo: apartmentId)
+          .get();
+
+      // Calculate the total balance by summing up balances from all flats
+      flatSnapshot.docs.forEach((doc) {
+        totalBalance += (doc['balance'] ?? 0).toDouble(); // Add balance to totalBalance
+      });
+
+      setState(() {
+        totalApartmentBalance = totalBalance;
+      });
+
+      print('Total apartment balance fetched successfully.');
+    } catch (error) {
+      print('Error fetching total apartment balance: $error');
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -106,8 +135,22 @@ class DagitimScreenState extends State<DagitimScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+
+            Text(
+              'Toplam Bakiye: ${totalApartmentBalance.toStringAsFixed(2)} TL',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+
+          ],
+        ),
+      ),
     );
   }
+
 
 
   Widget buildFloorList() {
@@ -190,7 +233,7 @@ class DagitimScreenState extends State<DagitimScreen> {
                             MaterialPageRoute(builder: (context) => FlatScreen(
                               apartmentId: flat.apartmentId,
                               floorNo: flat.floorNo,
-                              flatNo: flat.flatNo,
+                              flatNo: flat.flatNo, flatId: flat.flatId,
                             )),
                           );
                         },
