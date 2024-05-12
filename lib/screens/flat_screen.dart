@@ -24,6 +24,7 @@ class FlatScreenState extends State<FlatScreen> {
   double totalPrice = 0;
   double givenAmount = 0;
   double? balance = 0;
+  double? doormanBalance = 0;
 
   @override
   void initState() {
@@ -39,20 +40,25 @@ class FlatScreenState extends State<FlatScreen> {
   }
 
   Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
-    String uid = '';
+    String? flatId;
 
-      final QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+    try {
+      QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
           .collection('flats')
           .where('apartmentId', isEqualTo: apartmentId)
           .where('floorNo', isEqualTo: floorNo)
           .where('flatNo', isEqualTo: flatNo)
-           .get();
-      if (flatSnapshot.docs.isNotEmpty) {
-        var doc = flatSnapshot.docs.first;
-         uid = doc['uid'];
-      }
+          .get();
 
-    balance = await getBalanceForFlat(uid);
+      if (flatSnapshot.docs.isNotEmpty) {
+        flatId = flatSnapshot.docs.first['flatId'];
+      }
+    } catch (error) {
+      showSnackBar('Kullanıcı id si alınamadı.');
+    }
+
+    balance = await getBalanceWithFlatId(flatId);
+    doormanBalance = balance!*(-1);
 
     orders.clear();
     try {
@@ -103,15 +109,17 @@ class FlatScreenState extends State<FlatScreen> {
 
       // Perform your calculations
       double newBalance = totalPrice - givenAmount - balance!;
+      double flatBalance = newBalance * (-1);
 
       // Update the balance in Firestore
       await FirebaseFirestore.instance
           .collection('flats')
           .doc(flatId)
-          .update({'balance': newBalance});
+          .update({'balance': flatBalance});
 
 setState(() {
-  balance = newBalance;
+  balance = flatBalance;
+  doormanBalance = balance! * (-1);
 });
 
       print('Balance updated successfully in Firestore.');
@@ -129,7 +137,7 @@ setState(() {
         title: Text('Daire ${widget.flatNo} Siparişleri'),
         backgroundColor: Colors.teal,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
 
             storeBalance();
@@ -178,7 +186,7 @@ setState(() {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Verilen Tutar',
               ),
               onChanged: (value) {
@@ -196,17 +204,17 @@ setState(() {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal, // background color
             ),
-            child: Text('Bakiye Hesapla', style: TextStyle(color: Colors.white)),
+            child: const Text('Bakiye Hesapla', style: TextStyle(color: Colors.white)),
           ),
 
 
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Bakiye: $balance TL',
+              'Bakiye: ${doormanBalance!.abs()} TL',
               style: TextStyle(
                 fontSize: 16,
-                color: balance!.isNegative ? Colors.red : Colors.green,
+                color: doormanBalance!.isNegative ? Colors.red : Colors.green,
               ),
             ),
           ),

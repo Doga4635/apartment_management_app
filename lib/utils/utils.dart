@@ -145,7 +145,7 @@ Future<String?> getApartmentIdForUser(String uid) async {
   return apartmentId;
 }
 
-Future<double?> getBalanceForFlat(String uid) async {
+Future<double?> getBalanceForSelectedFlat(String? uid) async {
   double? balance;
 
   try {
@@ -159,7 +159,28 @@ Future<double?> getBalanceForFlat(String uid) async {
       balance = querySnapshot.docs.first['balance'];
     }
   } catch (error) {
-    showSnackBar('Apartman ismi alınamadı.');
+    showSnackBar('Daire bakiyesi alınamadı.');
+  }
+
+  return balance;
+}
+
+Future<double?> getBalanceWithFlatId(String? flatId) async {
+  double? balance;
+
+  DocumentSnapshot flatSnapshot = await FirebaseFirestore.instance.collection('flats').doc(flatId).get();
+
+  if (flatSnapshot.exists) {
+    // Access the data of the document
+    Map<String, dynamic> data = flatSnapshot.data() as Map<String, dynamic>;
+
+    // Access the 'balance' attribute
+    balance = data['balance'] as double?;
+
+    print(balance);
+  } else {
+    // Handle case when the document doesn't exist
+    print('Document with flatId $flatId does not exist.');
   }
 
   return balance;

@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/models/order_model.dart';
 import 'package:apartment_management_app/screens/permission_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -21,11 +22,16 @@ class AlimScreenState extends State<AlimScreen> {
   late String _currentDay;
   String? price;
   String? apartmentId;
+  List<String> places = [];
+  List<String> marketOrders = [];
+  List<String> firinOrders = [];
+  List<String> manavOrders = [];
 
   @override
   void initState() {
     super.initState();
     _updateCurrentDay();
+    getPlaces();
   }
   // Function to update the current day
   void _updateCurrentDay() async {
@@ -33,6 +39,52 @@ class AlimScreenState extends State<AlimScreen> {
     // Convert the current date to a string representation of the day (e.g., Monday, Tuesday, etc.)
     _currentDay = getDayOfWeek(now.weekday);
     apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+  }
+
+  void getPlaces() async {
+    QuerySnapshot orderSnapshot = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('apartmentId', isEqualTo: apartmentId)
+        .where('days', arrayContains: _currentDay)
+        .get();
+
+    List<OrderModel> orders = orderSnapshot.docs.map((doc) {
+      return OrderModel(
+        listId: doc['listId'] ?? '',
+        orderId: doc['orderId'] ?? '',
+        productId: doc['productId'] ?? '',
+        name: doc['name'] ?? '',
+        amount: doc['amount'] ?? 0,
+        price: doc['price'] ?? 0,
+        details: doc['details'] ?? '',
+        place: doc['place'] ?? '',
+        days: (doc['days'] as List<dynamic>).cast<String>(),
+        flatId: doc['flatId'] ?? '',
+        apartmentId: doc['apartmentId'] ?? '',
+        floorNo: doc['floorNo'] ?? '',
+        flatNo: doc['flatNo'] ?? '',
+      );
+    }).toList();
+
+    for(int i = 0; i<orders.length;i++) {
+
+      if(orders[i].place == 'Market') {
+        marketOrders.add(orders[i].place);
+      }
+      else if(orders[i].place == 'Fırın') {
+        firinOrders.add(orders[i].place);
+      }
+      else if(orders[i].place == 'Manav') {
+        manavOrders.add(orders[i].place);
+      }
+      else if(places.contains(orders[i].place)) {
+        continue;
+      }
+      else {
+        places.add(orders[i].place);
+      }
+    }
+
   }
 
   void showMarketQuantity(String location) {
@@ -169,6 +221,143 @@ class AlimScreenState extends State<AlimScreen> {
     );
   }
 
+  void showOtherQuantity(List<String> places) {
+    Map<String, List<Map<String, dynamic>>> ordersByPlace = {};
+
+    // Group orders by place
+    for (var place in places) {
+      ordersByPlace[place] = [];
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: AlertDialog(
+            title: const Text('Diğer Yerlerin Siparişleri'),
+            content: FutureBuilder(
+              future: Future.wait(
+                places.map((place) => FirebaseFirestore.instance
+                    .collection('orders')
+                    .where('place', isEqualTo: place)
+                    .where('days', arrayContains: _currentDay)
+                    .where('apartmentId', isEqualTo: apartmentId)
+                    .get()),
+              ),
+              builder: (context, AsyncSnapshot<List<QuerySnapshot>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else {
+                  for (var querySnapshot in snapshot.data!) {
+                    var place = querySnapshot.docs.first['place']; // get place name from the first document
+                    for (var doc in querySnapshot.docs) {
+                      String productName = doc['name'];
+                      String details = doc['details'];
+                      int productAmount = doc['amount'];
+
+                      // For showing non-detailed orders
+                      if (details == "") {
+                        details = "Normal";
+                      }
+
+                      ordersByPlace[place]!.add({
+                        'productName': productName,
+                        'details': details,
+                        'amount': productAmount,
+                      });
+                    }
+                  }
+
+                  // Build a list of widgets to display orders by place
+                  List<Widget> placeWidgets = [];
+                  ordersByPlace.forEach((place, orders) {
+                    List<Widget> orderWidgets = [];
+                    orders.forEach((order) {
+                      TextEditingController priceController = TextEditingController();
+
+                      orderWidgets.add(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 16.0, bottom: 8.0),
+                                  child: Text(
+                                    '${order['productName']}: ${order['details']} - ${order['amount']}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 40,
+                                  height: 15,
+                                  child: TextField(
+                                    controller: priceController,
+                                    keyboardType: TextInputType.number,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ),
+                                const Text(' TL '),
+                                TextButton(
+                                  onPressed: () async {
+                                    String newPrice = priceController.text;
+                                    List<String> orderId = await getOrderIds(order['productName'], order['details']);
+                                    for (String id in orderId) {
+                                      FirebaseFirestore.instance.collection('orders').doc(id).update({
+                                        'price': double.parse(newPrice),
+                                      });
+                                    }
+                                  },
+                                  child: const Icon(Icons.check, color: Colors.teal),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    });
+
+                    placeWidgets.add(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('> $place', style: const TextStyle(fontSize: 16)),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: orderWidgets,
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: placeWidgets,
+                  );
+                }
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close', style: TextStyle(color: Colors.teal)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
@@ -273,7 +462,12 @@ class AlimScreenState extends State<AlimScreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle Dağıtım button tap
+                  if(places.isNotEmpty) {
+                    showOtherQuantity(places);
+                  }
+                  else {
+                    showSnackBar('Bu yerde sipariş bulunmamaktadır.');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
@@ -300,7 +494,18 @@ class AlimScreenState extends State<AlimScreen> {
       height: 50,
       child: ElevatedButton(
         onPressed: () {
-          showMarketQuantity(location);
+          if(location=='Market' && marketOrders.isNotEmpty) {
+            showMarketQuantity(location);
+          }
+          else if(location=='Fırın' && firinOrders.isNotEmpty) {
+            showMarketQuantity(location);
+          }
+          else if(location=='Manav' && manavOrders.isNotEmpty) {
+            showMarketQuantity(location);
+          }
+          else {
+            showSnackBar('Bu yerde sipariş bulunmamaktadır.');
+          }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.teal,

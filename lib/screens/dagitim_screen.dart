@@ -26,8 +26,7 @@ class DagitimScreenState extends State<DagitimScreen> {
   List<int> floors = [];
   bool _isLoading = true;
   String? selectedApartment;
-  late String apartmentId;
-  double totalApartmentBalance = 0;
+  double? totalApartmentBalance = 0;
 
 
   @override
@@ -45,25 +44,24 @@ class DagitimScreenState extends State<DagitimScreen> {
   }
 
   Future<void> fetchTotalApartmentBalance() async {
+    selectedApartment = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
     try {
       double totalBalance = 0;
 
       // Query all flats in the apartment
       QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
           .collection('flats')
-          .where('apartmentId', isEqualTo: apartmentId)
+          .where('apartmentId', isEqualTo: selectedApartment)
           .get();
 
       // Calculate the total balance by summing up balances from all flats
-      flatSnapshot.docs.forEach((doc) {
+      for (var doc in flatSnapshot.docs) {
         totalBalance += (doc['balance'] ?? 0).toDouble(); // Add balance to totalBalance
-      });
+      }
 
       setState(() {
-        totalApartmentBalance = totalBalance;
+        totalApartmentBalance = totalBalance * (-1);
       });
-
-      print('Total apartment balance fetched successfully.');
     } catch (error) {
       print('Error fetching total apartment balance: $error');
     }
@@ -137,14 +135,22 @@ class DagitimScreenState extends State<DagitimScreen> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
           children: [
-
-            Text(
-              'Toplam Bakiye: ${totalApartmentBalance.toStringAsFixed(2)} TL',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            const Text(
+              'Toplam Bakiye:  ',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-
+            Text(
+              '${totalApartmentBalance!.abs()} TL',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: totalApartmentBalance!.isNegative ? Colors.red : Colors.teal,
+              ),
+            ),
           ],
         ),
       ),

@@ -453,7 +453,7 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   Future<List<String>> getCurrentUserListDays(String currentUserUid, List<String> filteredDays) async {
     String? flatId = await getFlatIdForUser(currentUserUid);
-    balance = await getBalanceForFlat(currentUserUid);
+    balance = await getBalanceForSelectedFlat(currentUserUid);
 
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('lists')

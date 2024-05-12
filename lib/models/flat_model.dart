@@ -29,7 +29,7 @@ class FlatModel {
     return FlatModel(
       uid: map['uid'] ?? '',
       flatId: map['flatId'] ?? '',
-      apartmentId: map['apartmentId'] ?? '0',
+      apartmentId: map['apartmentId'] ?? '',
       floorNo: map['floorNo'] ?? '',
       flatNo: map['flatNo'] ?? '',
       role: map['role'] ?? '',
