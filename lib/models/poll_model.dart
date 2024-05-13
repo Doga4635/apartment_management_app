@@ -1,4 +1,3 @@
-// poll_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PollModel {
@@ -6,16 +5,19 @@ class PollModel {
   String apartmentId;
   String title;
   List<String> options;
+  Map<String, int> scores;
   Timestamp createdAt;
-  Timestamp updatedAt;
+  Timestamp finishedAt;
 
-  PollModel(
-      {required this.id,
-        required this.apartmentId,
-        required this.title,
-        required this.options,
-        required this.createdAt,
-        required this.updatedAt});
+  PollModel({
+    required this.id,
+    required this.apartmentId,
+    required this.title,
+    required this.options,
+    required this.scores,
+    required this.createdAt,
+    required this.finishedAt,
+  });
 
   factory PollModel.fromMap(Map<String, dynamic> map) {
     return PollModel(
@@ -23,8 +25,9 @@ class PollModel {
       apartmentId: map['apartmentId'],
       title: map['title'],
       options: List<String>.from(map['options']),
+      scores: Map<String, int>.from(map['scores']),
       createdAt: map['createdAt'],
-      updatedAt: map['updatedAt'],
+      finishedAt: map['finishedAt'],
     );
   }
 
@@ -34,8 +37,9 @@ class PollModel {
       'apartmentId': apartmentId,
       'title': title,
       'options': options,
+      'scores': scores,
       'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'finishedAt': finishedAt,
     };
   }
 }

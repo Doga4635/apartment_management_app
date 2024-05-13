@@ -165,11 +165,44 @@ setState(() {
           Expanded(
             child: ListView(
               children: orders.map((order) {
-                return ListTile(
-                  title: Text('${order.amount} Adet', style: const TextStyle(fontSize: 14)),
-                  leading: Text(order.name, style: const TextStyle(fontSize: 16)),
-                  subtitle: Text('${order.price} TL'),
-                  trailing: Text('${order.price * order.amount}', style: const TextStyle(fontSize: 16)),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 130, // Adjust the width of the leading widget as needed
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(order.name, style: const TextStyle(fontSize: 18)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${order.amount} Adet', style: const TextStyle(fontSize: 16)),
+                            Text('${order.price} TL\n${order.details}', style: const TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 50,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('${order.price * order.amount} TL', style: const TextStyle(fontSize: 18)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
@@ -198,7 +231,6 @@ setState(() {
           ),
           ElevatedButton(
             onPressed: () {
-
               fetchBalance(widget.flatId); // Call fetchBalance with the flatId
             },
             style: ElevatedButton.styleFrom(
@@ -206,8 +238,6 @@ setState(() {
             ),
             child: const Text('Bakiye Hesapla', style: TextStyle(color: Colors.white)),
           ),
-
-
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
@@ -218,10 +248,12 @@ setState(() {
               ),
             ),
           ),
-
         ],
       ),
+
+
       bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Padding(
             padding: const EdgeInsets.all(12.0),

@@ -1,4 +1,3 @@
-import 'package:apartment_management_app/models/order_model.dart';
 import 'package:apartment_management_app/screens/permission_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -38,56 +37,34 @@ class AlimScreenState extends State<AlimScreen> {
     final now = DateTime.now();
     // Convert the current date to a string representation of the day (e.g., Monday, Tuesday, etc.)
     _currentDay = getDayOfWeek(now.weekday);
-    apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
   }
 
   void getPlaces() async {
+    apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
     QuerySnapshot orderSnapshot = await FirebaseFirestore.instance
         .collection('orders')
         .where('apartmentId', isEqualTo: apartmentId)
         .where('days', arrayContains: _currentDay)
         .get();
 
-    List<OrderModel> orders = orderSnapshot.docs.map((doc) {
-      return OrderModel(
-        listId: doc['listId'] ?? '',
-        orderId: doc['orderId'] ?? '',
-        productId: doc['productId'] ?? '',
-        name: doc['name'] ?? '',
-        amount: doc['amount'] ?? 0,
-        price: doc['price'] ?? 0,
-        details: doc['details'] ?? '',
-        place: doc['place'] ?? '',
-        days: (doc['days'] as List<dynamic>).cast<String>(),
-        flatId: doc['flatId'] ?? '',
-        apartmentId: doc['apartmentId'] ?? '',
-        floorNo: doc['floorNo'] ?? '',
-        flatNo: doc['flatNo'] ?? '',
-      );
-    }).toList();
+    for (var doc in orderSnapshot.docs) {
+      String place = doc['place'] ?? '';
 
-    for(int i = 0; i<orders.length;i++) {
-
-      if(orders[i].place == 'Market') {
-        marketOrders.add(orders[i].place);
-      }
-      else if(orders[i].place == 'Fırın') {
-        firinOrders.add(orders[i].place);
-      }
-      else if(orders[i].place == 'Manav') {
-        manavOrders.add(orders[i].place);
-      }
-      else if(places.contains(orders[i].place)) {
-        continue;
-      }
-      else {
-        places.add(orders[i].place);
+      if (place == 'Market') {
+        marketOrders.add(place);
+      } else if (place == 'Fırın') {
+        firinOrders.add(place);
+      } else if (place == 'Manav') {
+        manavOrders.add(place);
+      } else if (!places.contains(place)) {
+        places.add(place);
       }
     }
-
   }
 
   void showMarketQuantity(String location) {
+    Map<String, Map<String, int>> productsDetailsMap = {};
+    Map<String, TextEditingController> priceControllersMap = {};
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -107,31 +84,27 @@ class AlimScreenState extends State<AlimScreen> {
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  Map<String, Map<String, int>> productsDetailsMap = {};
-                  Map<String, int> productsMap = {};
+                  // Map to hold price controllers for each product
+
                   snapshot.data?.docs.forEach((doc) {
                     String productName = doc['name'];
                     String details = doc['details'];
                     int productAmount = doc['amount'];
 
                     // For showing non-detailed orders
-                    if(details == "") {
+                    if (details == "") {
                       details = "Normal";
                     }
 
                     // If the product already exists in the map, update its details and amount
                     if (productsDetailsMap.containsKey(productName)) {
-                      productsMap[productName] = productsMap[productName]! + productAmount;
-                      if (productsDetailsMap[productName]!.containsKey(details)) {
-                        productsDetailsMap[productName]![details] =
-                            productsDetailsMap[productName]![details]! + productAmount;
-                      } else {
-                        productsDetailsMap[productName]![details] = productAmount;
-                      }
+                      productsDetailsMap[productName]![details] = productAmount;
                     } else {
-                      productsMap[productName] = productAmount;
                       productsDetailsMap[productName] = {details: productAmount};
                     }
+
+                    // Initialize price controllers map
+                    priceControllersMap[details] = TextEditingController(text: doc['price'].toString());
                   });
 
                   List<Widget> productsList = [];
@@ -140,47 +113,23 @@ class AlimScreenState extends State<AlimScreen> {
                     List<Widget> detailsList = [];
 
                     detailsMap.forEach((details, amount) {
-                      TextEditingController priceController = TextEditingController();
                       detailsList.add(
                         Row(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(left: 8.0,top: 8.0,right: 16.0,bottom: 8.0),
-                              child: Text('$details: $amount',style: const TextStyle(fontSize: 14),),
+                              padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 16.0, bottom: 8.0),
+                              child: Text('$details: $amount', style: const TextStyle(fontSize: 14)),
                             ),
                             SizedBox(
                               width: 40, // Adjust width according to your preference
                               height: 15,
-                              child: FutureBuilder(
-                                future: getProductPrice(productName),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    return const CircularProgressIndicator();
-                                  } else if (snapshot.hasError) {
-                                    print('Error: ${snapshot.error}');
-                                    return Text('Error: ${snapshot.error}');
-                                  } else {
-                                    priceController = TextEditingController(text: snapshot.data);
-                                    return TextField(
-                                      controller: priceController,
-                                      keyboardType: TextInputType.number,
-                                      style: const TextStyle(fontSize: 14),
-                                    );
-                                  }
-                                },
+                              child: TextField(
+                                controller: priceControllersMap[details],
+                                keyboardType: TextInputType.number,
+                                style: const TextStyle(fontSize: 14),
                               ),
                             ),
                             const Text(' TL '),
-                            TextButton(onPressed: () async {
-                                String newPrice = priceController.text;
-                                  List<String> orderId = await getOrderIds(productName,details);
-                                  for(String id in orderId) {
-                                    FirebaseFirestore.instance.collection('orders').doc(id).update({
-                                      'price': double.parse(newPrice),
-                                    });
-                                  }
-                                  updateProductPrice(productName, newPrice);
-                            } , child: const Icon(Icons.check,color: Colors.teal,),)
                           ],
                         ),
                       );
@@ -190,7 +139,7 @@ class AlimScreenState extends State<AlimScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('> $productName: ${productsMap[productName]}',style: const TextStyle(fontSize: 16),),
+                          Text('> $productName', style: const TextStyle(fontSize: 16)),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: detailsList,
@@ -202,21 +151,48 @@ class AlimScreenState extends State<AlimScreen> {
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: productsList,
+                    children: [
+                      ...productsList,
+                    ],
                   );
                 }
               },
             ),
             actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close',style: TextStyle(color: Colors.teal),),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () async {
+                      // Save the prices to orders
+                      productsDetailsMap.forEach((productName, detailsMap) {
+                        detailsMap.forEach((details, _) async {
+                          String newPrice = priceControllersMap[details]!.text;
+                          List<String> orderId = await getOrderIds(productName, details);
+                          for (String id in orderId) {
+                            await FirebaseFirestore.instance.collection('orders').doc(id).update({
+                              'price': double.parse(newPrice),
+                            });
+                          }
+                          updateProductPrice(productName, newPrice);
+                        });
+                      });
+                    },
+                    child: const Text('Fiyatları Kaydet', style: TextStyle(color: Colors.teal)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Kapat', style: TextStyle(color: Colors.teal)),
+                  ),
+                ],
               ),
             ],
           ),
         );
+
+
       },
     );
   }

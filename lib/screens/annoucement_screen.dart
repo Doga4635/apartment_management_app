@@ -18,14 +18,36 @@ class AnnouncementScreen extends StatefulWidget {
 
 class AnnouncementScreenState extends State<AnnouncementScreen> {
   final _formKey1 = GlobalKey<FormState>();
-  final _formKey2 = GlobalKey<FormState>();
   final _controller = TextEditingController();
   final user = FirebaseAuth.instance.currentUser;
+  String? apartmentId;
+  bool _isLoading = true;
+  int colorIndex = 0;
+  int clickIndex = 0;
+
+  List<Color> colors = [
+    Colors.green,Colors.red,Colors.blue,Colors.yellow,Colors.deepPurpleAccent,Colors.orange
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    getApartmentId();
+  }
+
+  void getApartmentId() async {
+    apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    return FutureBuilder<String?>(
+    return _isLoading ?  const Center(child: CircularProgressIndicator(
+      color: Colors.teal,
+    )) : FutureBuilder<String?>(
       future: ap.getField('role'), // Assuming roleStream is a Stream<String>
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -34,7 +56,7 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
           String userRole = snapshot.data?? '';
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Duyuru'),
+              title: const Text('Duyurular / Oylamalar'),
             ),
             body: Column(
               children: [
@@ -42,15 +64,15 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                   flex: 1,
                   child: _buildPollsSection(ap, userRole),
                 ),
+                userRole == 'Apartman Yöneticisi'
+                    ? _buildPollCreationButton(ap)
+                    : Container(),
                 Expanded(
                   flex: 1,
-                  child: _buildMessagesSection(ap, userRole),
+                  child: _buildMessagesSection(userRole),
                 ),
                 userRole == 'Apartman Yöneticisi'
                     ? _buildMessageInputSection(ap)
-                    : Container(),
-                userRole == 'Apartman Yöneticisi'
-                    ? _buildPollCreationButton(ap)
                     : Container(),
               ],
             ),
@@ -64,8 +86,8 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('polls')
+          .where('apartmentId', isEqualTo: apartmentId)
           .orderBy('createdAt', descending: true)
-          .where('apartmentId', isEqualTo: getApartmentIdForUser(ap.userModel.uid))
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
@@ -80,44 +102,70 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
           itemCount: snapshot.data!.docs.length,
           itemBuilder: (context, index) {
             final poll = PollModel.fromMap(snapshot.data!.docs[index].data() as Map<String, dynamic>);
-            DateTime createdAt = poll.createdAt.toDate();
-            String formattedCreatedAt = DateFormat('dd-MM-yyyy').format(createdAt);
+            colorIndex = 0;
+            List<bool> isClicked = List.filled(poll.options.length, false); // Initialize the list of clicked options
             return Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.only(left: 24.0, top: 5.0, right: 24.0, bottom: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(6.0),
+                IntrinsicWidth(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.only(left: 16.0, top: 5.0, right: 16.0, bottom: 5.0),
+                        decoration: BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        child: Text(poll.title, style: const TextStyle(color: Colors.white),textAlign: TextAlign.center,),
+                      ),
+                      Row(
+                        children: List.generate(poll.options.length, (optionIndex) {
+                          // Ensure colorIndex does not exceed the length of colors list
+                          colorIndex %= colors.length;
+                          return ElevatedButton(
+                            onPressed: userRole == 'Apartman Yöneticisi' ? null : isClicked[optionIndex] // Check if the button is already clicked
+                                ? null // Disable the button if it's already clicked
+                                : () {
+                              // If the button is not clicked, update scores and disable the button
+                              poll.scores.update(poll.options[optionIndex], (value) => value + 1, ifAbsent: () => 1); // Use the option as the key
+                              FirebaseFirestore.instance.collection('polls').doc(poll.id).update({
+                                'scores': poll.scores,
+                              });
+                              setState(() {
+                                // Update the list of clicked options
+                                isClicked[optionIndex] = true;
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: colors[colorIndex++],
+                              padding: const EdgeInsets.symmetric(horizontal: 36.0), // Adjust padding as needed
+                            ),
+                            child: Text(userRole=='Apartman Yöneticisi' ? '${poll.options[optionIndex]} : ${poll.scores[poll.options[optionIndex]]}' : poll.options[optionIndex],
+                                style: TextStyle(color: userRole == 'Apartman Yöneticisi' ? Colors.black : Colors.white)),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 16,)
+                    ],
                   ),
-                  child: Text(poll.title, style: const TextStyle(color: Colors.white),),
                 ),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {} ,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                      child: Text(poll.options[0]),
-                    ),
-                    ElevatedButton(
-                        onPressed: () {} ,
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                        child: Text(poll.options[1])
-                    ),
-                  ],
-                )
               ],
             );
           },
         );
-      },
+
+
+
+      }
     );
   }
 
-  Widget _buildMessagesSection(AuthSupplier ap, String userRole) {
+  Widget _buildMessagesSection(String userRole) {
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('messages')
+          .where('apartmentId', isEqualTo: apartmentId)
           .orderBy('createdAt', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
@@ -215,18 +263,18 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('Oylama Oluştur'),
+                title: const Text('Oylama Oluştur'),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: pollTitleController,
-                      decoration: InputDecoration(labelText: 'Oylama Başlığı'),
+                      decoration: const InputDecoration(labelText: 'Oylama Başlığı'),
                     ),
                     TextField(
                       controller: pollOptionsController,
-                      decoration: InputDecoration(
-                          labelText: 'Oylama Seçenekleri (virgülle ayrılmış)'),
+                      decoration: const InputDecoration(
+                          labelText: 'Seçenekler ( , ile ayrı yazın)'),
                     ),
                   ],
                 ),
@@ -237,14 +285,20 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                       final pollOptions = pollOptionsController.text.split(',');
                       String? apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
 
+                      Map<String, int> scores = {};
+                      for (int i = 0; i < pollOptions.length; i++) {
+                        scores[pollOptions[i]] = 0;
+                      }
+
                       if (pollTitle.isNotEmpty && pollOptions.isNotEmpty) {
                         final pollModel = PollModel(
                           id: generateRandomId(10),
                           apartmentId: apartmentId!,
                           title: pollTitle,
                           options: pollOptions,
+                          scores: scores,
                           createdAt: Timestamp.now(),
-                          updatedAt: Timestamp.now(),
+                          finishedAt: Timestamp.now(),
                         );
 
                         await FirebaseFirestore.instance
@@ -258,20 +312,20 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                         showSnackBar('Lütfen tüm alanları doldurun.');
                       }
                     },
-                    child: Text('Oylama Oluştur'),
+                    child: const Text('Oylama Oluştur', style: TextStyle(color: Colors.teal),),
                   ),
                 ],
               );
             },
           );
         } else {
-          showSnackBar(
-              'Sadece Apartman Yöneticisi rolünde oylama oluşturma özelliği sağlanmaktadır.');
+          showSnackBar('Sadece Apartman Yöneticisi rolünde oylama oluşturma özelliği sağlanmaktadır.');
         }
       },
-      child: Text('Oylama Oluştur'),
+      child: const Text('Oylama Oluştur', style: TextStyle(color: Colors.teal),),
     );
   }
+
 
   Future<void> createMessage(MessageModel messageModel) async {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
