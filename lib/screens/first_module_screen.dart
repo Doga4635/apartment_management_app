@@ -12,6 +12,8 @@ import 'package:apartment_management_app/utils/utils.dart';
 
 import '../services/auth_supplier.dart';
 import 'alisveris_listesi_screen.dart';
+import 'ana_menü_yardım_screen.dart';
+import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class FirstModuleScreen extends StatefulWidget {
@@ -23,10 +25,14 @@ class FirstModuleScreen extends StatefulWidget {
 
 class FirstModuleScreenState extends State<FirstModuleScreen> {
   get createdList => null;
+  bool _isLoading = true;
+  bool isThereGarbage = false;
 
-
-
-
+  @override
+  void initState() {
+    _getSwitch(isThereGarbage);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +43,9 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
       future: ap.getField('role'), // Assuming 'role' is the field that contains the user's role
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          ));
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else {
@@ -54,7 +62,7 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
                 },
               ),
               actions: [
@@ -97,133 +105,257 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                 ),
               ],
             ),
-            body: Center(
-              child: Column(
-                children: [
-                  const SizedBox(
-                    height: 80.0,
-                  ),
-                  Container(
-                    height: 180,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
+            body: SafeArea(
+              child: _isLoading ? const Center(child: CircularProgressIndicator(
+                color: Colors.teal,
+              )) : Center(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 80.0,
                     ),
-                    child: Image.asset(
-                      "images/kapıcı.jpg",
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const SizedBox(height: 80),
-                  ElevatedButton(
-                    onPressed: () {
-                      if(userRole == "Kapıcı") {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
-                        );
-                      }
-                      else {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-                        );                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                    ),
-                    child: const Text(
-                      'Kapıcıya Alışveriş Listesi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
+                    Container(
+                      height: 180,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: Image.asset(
+                        "images/kapıcı.jpg",
+                        fit: BoxFit.contain,
                       ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  userRole == 'Kapıcı' // Show button for 'Doorman'
-                      ? ElevatedButton(
-                    onPressed: () {
-                      // Handle button tap for Doorman
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
-
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                    ),
-                    child: const Text(
-                      'Çöp Takibi',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
+                    const SizedBox(height: 80),
+                    ElevatedButton(
+                      onPressed: () {
+                        if(userRole == "Kapıcı") {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
+                          );
+                        }
+                        else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                          );                      }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                      ),
+                      child: const Text(
+                        'Kapıcıya Alışveriş Listesi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
-                  )
-                      : Container(
-                    height: 45.0,
-                    width: 300.0,
-                    decoration: const BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                    const SizedBox(
+                      height: 20.0,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.only(right: 20.0),
-                          child: Text(
-                            "Çöpüm var",
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ),
-                        ToggleSwitch(
-                          minWidth: 60.0,
-                          minHeight: 35.0,
-                          cornerRadius: 20.0,
-                          activeBgColors: [[Colors.green[800]!], [Colors.red[800]!]],
-                          activeFgColor: Colors.white,
-                          inactiveBgColor: Colors.grey,
-                          inactiveFgColor: Colors.white,
-                          initialLabelIndex: toggleSwitchProvider.currentIndex,
-                          totalSwitches: 2,
-                          labels: const ['Evet', 'Hayır'],
-                          radiusStyle: true,
-                          onToggle: (index) async {
-                            toggleSwitchProvider.setCurrentIndex(index!);
-                            if(index == 0) {
-                              _applyGarbage();
-                            }
-                            else {
-                              _removeGarbage();
-                            }
-                          },
-                        ),
-                      ],
-                    ),),
+                    userRole == 'Kapıcı' // Show button for 'Doorman'
+                        ? ElevatedButton(
+                      onPressed: () {
+                        // Handle button tap for Doorman
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
 
-                ],
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                      ),
+                      child: const Text(
+                        'Çöp Takibi',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    )
+                        : Container(
+                      height: 45.0,
+                      width: 300.0,
+                      decoration: const BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: FutureBuilder<bool>(
+                        future: ap.getGarbage('garbage'),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.teal,
+                                ));
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            bool isThereGarbage = snapshot.data ?? false;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.only(right: 20.0),
+                                  child: Text(
+                                    "Çöpüm var",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w400),
+                                  ),
+                                ),
+                                ToggleSwitch(
+                                  minWidth: 60.0,
+                                  minHeight: 35.0,
+                                  cornerRadius: 20.0,
+                                  activeBgColors: [
+                                    [Colors.green[800]!],
+                                    [Colors.red[800]!]
+                                  ],
+                                  activeFgColor: Colors.white,
+                                  inactiveBgColor: Colors.grey,
+                                  inactiveFgColor: Colors.white,
+                                  initialLabelIndex: isThereGarbage ? 0 : 1,
+                                  totalSwitches: 2,
+                                  labels: const ['Evet', 'Hayır'],
+                                  radiusStyle: true,
+                                  onToggle: (index) async {
+                                    toggleSwitchProvider.setCurrentIndex(
+                                        index!);
+                                    if (index == 0) {
+                                      _applyGarbage();
+                                    }
+                                    else {
+                                      _removeGarbage();
+                                    }
+                                  },
+                                ),
+                              ],
+                            );
+                          }
+                        }
+                      ),),
+                  ],
+                ),
               ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {},
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
+                    );
+                  },
+                  tooltip: 'Duyuru',
+                  backgroundColor: Colors.teal,
+                  child: const Icon(Icons.announcement,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                FloatingActionButton(
+                  onPressed: () {Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
+                  );},
+                  tooltip: 'Yardım',
+                  backgroundColor: Colors.teal,
+                  child: const Icon(Icons.question_mark,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+
             ),
           );
         }
       },
     );
   }
+
+  void _applyGarbage() async{
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      await firestore
+          .collection('flats')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .where('selectedFlat', isEqualTo: true)
+      // buraya selectedFlat eklenecek
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) async {
+          // Update the garbage field
+          await firestore
+              .collection('flats')
+              .doc(doc.id)
+              .update({'garbage': true});
+        });
+      });
+      showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
+    }
+    catch (e) {
+      showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
+    }
+  }
+
+  void _getSwitch(bool isThereGarbage) async {
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+      DocumentSnapshot flatDoc = flatSnapshot.docs.first;
+      Map<String, dynamic>? userData = flatDoc.data() as Map<String, dynamic>?;
+
+      if (userData != null && userData.containsKey('garbage')) {
+        bool garbage = userData['garbage'] as bool;
+        isThereGarbage = garbage;
+      }
+      else {
+        showSnackBar('Çöp durumu gözükmesinde hata var.');
+      }
+    } else {
+      showSnackBar('Çöp durumu gözükmesinde hata var.');
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+  }
+
+  void _removeGarbage() async{
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    try {
+      await firestore
+          .collection('flats')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+      // buraya selectedFlat eklenecek
+          .get()
+          .then((querySnapshot) {
+        querySnapshot.docs.forEach((doc) async {
+          // Update the garbage field
+          await firestore
+              .collection('flats')
+              .doc(doc.id)
+              .update({'garbage': false});
+        });
+      });
+      showSnackBar('Çöpünüzün olmadığı kapıcıya bildirildi.');
+    }
+    catch (e) {
+      showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
+    }
+  }
+
 }
 
 void createList({required bool saveList, required Null Function(dynamic createdList) onListCreated}) {
@@ -240,51 +372,3 @@ class ToggleSwitchProvider with ChangeNotifier {
   }
 }
 
-void _applyGarbage() async{
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  try {
-    await firestore
-        .collection('flats')
-        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        .where('selectedFlat', isEqualTo: true)
-    // buraya selectedFlat eklenecek
-        .get()
-        .then((querySnapshot) {
-      querySnapshot.docs.forEach((doc) async {
-        // Update the garbage field
-        await firestore
-            .collection('flats')
-            .doc(doc.id)
-            .update({'garbage': true});
-      });
-    });
-    showSnackBar('Çöpünüzün olduğu kapıcıya bildirildi.');
-  }
-  catch (e) {
-    showSnackBar('Çöpünüzün olduğunu bildirirken bir hata oluştu: $e');
-  }
-}
-
-void _removeGarbage() async{
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
-  try {
-    await firestore
-        .collection('flats')
-        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-    // buraya selectedFlat eklenecek
-        .get()
-        .then((querySnapshot) {
-      querySnapshot.docs.forEach((doc) async {
-        // Update the garbage field
-        await firestore
-            .collection('flats')
-            .doc(doc.id)
-            .update({'garbage': false});
-      });
-    });
-    showSnackBar('Çöpünüzün olmadığı kapıcıya bildirildi.');
-  }
-  catch (e) {
-    showSnackBar('Çöpünüzün olmadığını bildirirken bir hata oluştu: $e');
-  }
-}

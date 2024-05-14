@@ -3,7 +3,6 @@ import 'package:apartment_management_app/models/flat_model.dart';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:apartment_management_app/screens/create_apartment_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
-import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
 import 'package:apartment_management_app/utils/utils.dart';
@@ -405,6 +404,8 @@ void getApartments() async {
       // Clear floor and flat lists
       _floorList.clear();
       _flatList.clear();
+      selectedFloorNumber = 0;
+      selectedFlatNumber = 0;
     });
 
     QuerySnapshot productSnapshot = await FirebaseFirestore.instance
@@ -442,6 +443,8 @@ void getApartments() async {
 
 
   void storeData() async {
+    int i = 0;
+    int j = 0;
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     randomFlatId = generateRandomId(10);
 
@@ -450,7 +453,9 @@ void getApartments() async {
       name: nameController.text.trim(),
       role: selectedRoleValue,
       apartmentName: selectedApartmentName,
-      flatNumber: selectedFlatNumber.toString(), profilePic: '',
+      flatNumber: selectedFlatNumber.toString(),
+      deviceToken: "",
+      accessToken: "",
     );
 
     FlatModel flatModel = FlatModel(
@@ -462,6 +467,8 @@ void getApartments() async {
       role: selectedRoleValue,
       garbage: false,
       selectedFlat: true,
+      isAllowed: selectedRoleValue == 'Apartman Yöneticisi' ? true : false,
+      balance: 0,
     );
 
     if (nameController.text.trim() == "") {
@@ -470,41 +477,89 @@ void getApartments() async {
       showSnackBar("Lütfen rolünüzü seçiniz.");
     } else if (selectedApartmentName == 'Apartman Adı') {
       showSnackBar("Lütfen apartman adınızı seçiniz.");
-    } else if (selectedApartmentName == 'Flat Number') {
+    } else if (selectedFloorNumber == 0) {
+      showSnackBar("Lütfen katınızı seçiniz.");
+    } else if (selectedFlatNumber == 0) {
       showSnackBar("Lütfen daire numaranızı seçiniz.");
     } else {
-      ap.saveFlatDataToFirebase(
-        context: context,
-        flatModel: flatModel,
-        onSuccess: () {},
-      );
-      ap.saveUserDataToFirebase(
-        context: context,
-        userModel: userModel,
-        onSuccess: () {
-          ap.saveUserDataToSP().then(
-                (value) {
-              ap.setSignIn().then(
-                    (value) {
-                  if (selectedRoleValue == 'Kapıcı') {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const FirstModuleScreen()),
-                          (route) => false,
-                    );
-                  } else {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MainScreen()),
-                          (route) => false,
-                    );
-                  }
-                },
-              );
-            },
-          );
-        },
-      );
+      DocumentSnapshot apartmentDoc = await FirebaseFirestore.instance
+          .collection('apartments')
+          .where('name', isEqualTo: selectedApartmentName)
+          .get()
+          .then((apartmentDoc) => apartmentDoc.docs.first);
+
+      int managerCount = apartmentDoc['managerCount'];
+      int doormanCount = apartmentDoc['doormanCount'];
+
+      QuerySnapshot managerSnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .where('apartmentId', isEqualTo: selectedApartmentName)
+          .where('role', isEqualTo: 'Apartman Yöneticisi')
+          .get();
+
+      for (var doc in managerSnapshot.docs) {
+        i++;
+      }
+
+      QuerySnapshot doormanSnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .where('apartmentId', isEqualTo: selectedApartmentName)
+          .where('role', isEqualTo: 'Kapıcı')
+          .get();
+
+      for (var doc in doormanSnapshot.docs) {
+        j++;
+      }
+
+      if(managerCount < i && selectedRoleValue == 'Apartman Yöneticisi') {
+        showSnackBar('Seçili apartmanda olması gereken yönetici sayısına erişildiği için kayıt gerçekleşmedi.');
+      }
+      else if(doormanCount < j && selectedRoleValue == 'Kapıcı') {
+        showSnackBar('Seçili apartmanda olması gereken kapıcı sayısına erişildiği için kayıt gerçekleşmedi.');
+      }
+      else {
+        ap.saveFlatDataToFirebase(
+          context: context,
+          flatModel: flatModel,
+          onSuccess: () {},
+        );
+        ap.saveUserDataToFirebase(
+          context: context,
+          userModel: userModel,
+          onSuccess: () {
+            ap.saveUserDataToSP().then(
+                  (value) {
+                ap.setSignIn().then(
+                      (value) {
+                    if (selectedRoleValue == 'Kapıcı') {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false)),
+                            (route) => false,
+                      );
+                    } else {
+                      if(selectedRoleValue == 'Apartman Yöneticisi') {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)),
+                              (route) => false,
+                        );
+                      }
+                      else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false,)),
+                              (route) => false,
+                        );
+                      }
+                    }
+                  },
+                );
+              },
+            );
+          },
+        );
+      }
     }
   }
 

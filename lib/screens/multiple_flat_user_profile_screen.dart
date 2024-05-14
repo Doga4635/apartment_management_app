@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:apartment_management_app/screens/add_flat_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
@@ -21,7 +20,6 @@ class MultipleFlatUserProfileScreen extends StatefulWidget {
 }
 
 class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileScreen> {
-  File? image;
   List<String> flatList = [];
   List<String> flatIDList = [];
   List<String> apartmentList = [];
@@ -33,12 +31,6 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
     getCurrentUserFlats(currentUserUid, flatList, flatIDList, apartmentList).then((_) {
       setState(() {});
     });
-  }
-
-
-  void selectImage() async {
-    image = await pickImage(context);
-    setState(() {});
   }
 
   @override
@@ -61,12 +53,8 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
         apartmentList.removeAt(index);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Flat deleted successfully.'),
-      ));
+      showSnackBar('Daire başarılı bir şekilde silindi.');
     }
-
-
 
     return Scaffold(
       appBar: AppBar(
@@ -221,13 +209,14 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                 ),
                                 onPressed: () async {
                                   String selectedFlatId = flatIDList[index];
-                                  updateSelectedFlatIdentityFalse(currentUserUid);
-                                  updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
+                                  await updateSelectedFlatIdentityFalse(currentUserUid);
+                                  await updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
                                   updateUserIdentity(currentUserUid, selectedFlatId);
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).pop();
+                                  getAllowedForUser(currentUserUid).then((value) {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
 
-                                  /*
+                                    /*
                                   setState(() {
                                     apartmentName = getUserApartmentName(currentUserUid);
                                     role = getUserRole(currentUserUid);
@@ -235,14 +224,15 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                                   });
                                   */
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const MainScreen()),
-                                  );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => MainScreen(isAllowed: value)),
+                                    );
 
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                    content: Text('Daire başarıyla değiştirildi.'),
-                                  ));
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                      content: Text('Daire başarıyla değiştirildi.'),
+                                    ));
+                                  });
 
 
 
@@ -365,7 +355,7 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
   editProfileButton({required Null Function() onPressed}) {}
 }
 
-void updateSelectedFlatIdentityFalse(String currentUserUid) async {
+Future<void> updateSelectedFlatIdentityFalse(String currentUserUid) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
       .where('uid', isEqualTo: currentUserUid)
@@ -379,7 +369,7 @@ void updateSelectedFlatIdentityFalse(String currentUserUid) async {
   });
 }
 
-void updateSelectedFlatIdentityTrue(String currentUserUid, String flatId) async {
+Future<void> updateSelectedFlatIdentityTrue(String currentUserUid, String flatId) async {
   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
       .collection('flats')
       .where('uid', isEqualTo: currentUserUid)

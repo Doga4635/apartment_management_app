@@ -7,14 +7,19 @@ import '../models/product_model.dart';
 import '../screens/grocery_list_screen.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'alim_screen.dart';
 
 
 class NewOrderScreen extends StatefulWidget {
 
   final String listId;
   final List<String> days;
+  final String flatId;
+  final String apartmentId;
+  final String floorNo;
+  final String flatNo;
 
-  const NewOrderScreen({Key? key, required this.listId, required this.days}) : super(key: key);
+  const NewOrderScreen({Key? key, required this.listId, required this.days, required this.flatId, required this.apartmentId, required this.floorNo, required this.flatNo}) : super(key: key);
 
 
   @override
@@ -27,12 +32,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   String _selectedPlace = 'Yeri seçiniz';
   final productNameController = TextEditingController();
   final placeNameController = TextEditingController();
+  final detailsController = TextEditingController();
 
 
   List<String> placeList = ['Market', 'Fırın', 'Manav', 'Diğer'];
   int _quantity = 1;
-  String _details = '';
   bool _isLoading = true;
+
+
 
 
   @override
@@ -46,6 +53,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     super.dispose();
     productNameController.dispose();
     placeNameController.dispose();
+    detailsController.dispose();
   }
 
   Future<void> _getProducts() async {
@@ -100,7 +108,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0,right: 8.0),
               child: TextField(
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: productNameController,
                 decoration: const InputDecoration(
                   hintText: 'Yeni ürünün adını yazın',
@@ -145,12 +154,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             ),
             const SizedBox(height: 20),
             TextFormField(
+              controller: detailsController,
               maxLength: 18,
-              onChanged: (value) {
-                setState(() {
-                  _details = value;
-                });
-              },
               decoration: const InputDecoration(
                 labelText: 'Not',
                 border: OutlineInputBorder(),
@@ -174,7 +179,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             Padding(
               padding: const EdgeInsets.only(left: 8.0,right: 8.0),
               child: TextField(
-                keyboardType: TextInputType.name,
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: placeNameController,
                 decoration: const InputDecoration(
                   hintText: 'Yeni yerin adını yazın',
@@ -237,6 +243,10 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 createList(saveList: true);
                 Navigator.pushReplacement(
                   context,
+                  MaterialPageRoute(builder: (context) => const AlimScreen()),
+                );
+                Navigator.pushReplacement(
+                  context,
                   MaterialPageRoute(builder: (context) => const GroceryListScreen()),
                 );
               },
@@ -246,6 +256,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
                 style: TextStyle(color: Colors.white),
               ),
             ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -298,6 +309,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String randomOrderId = generateRandomId(10);
 
+
     if(_selectedProduct == 'Diğer' || _selectedPlace == 'Diğer') {
       if(_selectedProduct != 'Diğer') {
         OrderModel orderModel = OrderModel(
@@ -306,10 +318,15 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           productId: '1',
           name: _selectedProduct,
           amount: _quantity,
-          price: 0,
-          details: _details,
+          price: 0.0,
+          details: detailsController.text.trim(),
           place: placeNameController.text.trim(),
           days: widget.days,
+          flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          floorNo: widget.floorNo,
+          flatNo: widget.flatNo,
+
         );
 
 
@@ -323,6 +340,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           },
         );
       }
+
       else if(_selectedPlace != 'Diğer') {
         OrderModel orderModel = OrderModel(
           listId: widget.listId,
@@ -330,10 +348,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           productId: '1',
           name: productNameController.text.trim(),
           amount: _quantity,
-          price: 0,
-          details: _details,
+          price: 0.0,
+          details: detailsController.text.trim(),
           place: _selectedPlace,
           days: widget.days,
+          flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          floorNo: widget.floorNo,
+          flatNo: widget.flatNo,
         );
 
 
@@ -354,10 +376,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           productId: '1',
           name: productNameController.text.trim(),
           amount: _quantity,
-          price: 0,
-          details: _details,
+          price: 0.0,
+          details: detailsController.text.trim(),
           place: placeNameController.text.trim(),
           days: widget.days,
+          flatId: widget.flatId,
+          apartmentId: widget.apartmentId,
+          floorNo: widget.floorNo,
+          flatNo: widget.flatNo,
         );
 
 
@@ -381,29 +407,34 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         name: _selectedProduct,
         amount: _quantity,
         price: 0,
-        details: _details,
+        details: detailsController.text.trim(),
         place: _selectedPlace,
         days: widget.days,
+        flatId: widget.flatId,
+        apartmentId: widget.apartmentId,
+        floorNo: widget.floorNo,
+        flatNo: widget.flatNo,
       );
 
 
-      ap.saveOrderDataToFirebase(
-        context: context,
-        orderModel: orderModel,
-        onSuccess: () {
-          setState(() {
-            addedProducts.add(orderModel);
-          });
-        },
-      );
-    }
+    ap.saveOrderDataToFirebase(
+      context: context,
+      orderModel: orderModel,
+      onSuccess: () {
+        setState(() {
+          addedProducts.add(orderModel);
+        });
+      },
+    );
+  }
 
     setState(() {
       _selectedProduct = 'Ürün adı giriniz';
       _selectedPlace = 'Yeri seçiniz';
-      _details = '';
+      detailsController.clear();
       productNameController.clear();
       placeNameController.clear();
+      _quantity = 1;
     });
 
   }
@@ -425,10 +456,14 @@ class NewOrderScreenState extends State<NewOrderScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: quantityController,
                 decoration: const InputDecoration(labelText: 'Miktar'),
               ),
               TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.done,
                 controller: detailsController,
                 decoration: const InputDecoration(labelText: 'Ayrıntılar'),
               ),

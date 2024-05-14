@@ -152,7 +152,7 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const MainScreen()),
+                                  builder: (context) => const MainScreen(isAllowed: true,)),
                                   (route) => false))));
             }
             else {

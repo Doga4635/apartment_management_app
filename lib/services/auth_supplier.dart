@@ -274,7 +274,9 @@ class AuthSupplier extends ChangeNotifier {
           name: snapshot['name'],
           role: snapshot['role'],
           apartmentName: snapshot['apartmentName'],
-          flatNumber: snapshot['flatNumber'], profilePic: '',
+          flatNumber: snapshot['flatNumber'],
+          deviceToken: snapshot['deviceToken'],
+          accessToken: snapshot['accessToken'],
       );
       _uid = userModel.uid;
     });
@@ -299,6 +301,32 @@ class AuthSupplier extends ChangeNotifier {
     DocumentSnapshot snapshot1 = await userDocRef.get();
     String value = snapshot1[data];
     return value;
+  }
+
+  Future<bool> getGarbage(String data) async {
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+      DocumentSnapshot flatDoc = flatSnapshot.docs.first;
+      Map<String, dynamic>? userData = flatDoc.data() as Map<String, dynamic>?;
+
+      if (userData != null && userData.containsKey('garbage')) {
+        bool garbage = userData['garbage'] as bool;
+        bool value = garbage;
+        return value;
+      }
+      else {
+        showSnackBar('Çöp durumu gözükmesinde hata var.');
+        return false;
+      }
+    } else {
+      showSnackBar('Çöp durumu gözükmesinde hata var.');
+      return false;
+    }
   }
 
   Future userSignOut() async {

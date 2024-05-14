@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../models/apartment_model.dart';
 import '../models/flat_model.dart';
 import '../models/user_model.dart';
@@ -22,6 +21,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   late List<UserModel> users;
   List<int> floors = [];
   bool _isLoading = true;
+  String? selectedApartment;
 
   @override
   void initState() {
@@ -33,7 +33,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,7 +64,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
         ],
       ),
       body: SafeArea(
-        child: isLoading == true ? const Center(child: CircularProgressIndicator(
+        child: _isLoading == true ? const Center(child: CircularProgressIndicator(
           color: Colors.teal,
         )) : Center(
           child: Column(
@@ -91,6 +90,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                 .collection('flats')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('garbage', isEqualTo: true)
+                .where('apartmentId', isEqualTo: selectedApartment)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -123,6 +123,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                 .collection('flats')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('garbage', isEqualTo: true)
+                .where('apartmentId', isEqualTo: selectedApartment)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -156,6 +157,8 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     FirebaseFirestore.instance.collection('flats').doc(flatId).update({
       'garbage': false,
     }).then((value) {
+      // Send notification to resident
+      sendNotificationToResident(flatId,'Çöpünüz atıldı.');
       Navigator.pop(context);
       showSnackBar('Çöp atıldı.');
     }).catchError((error) {
@@ -163,11 +166,71 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
     });
   }
 
+
+  // void sendNotificationToResident(String flatId) async {
+  //   String? uid;
+  //   String serverKey = 'AAAA-IJA9G4:APA91bGibOwdCxMOkoJKMcO5kzIZtYpXzYDOggE8qNJ4K-jFTZ2miuCqjoD0tfSU4olwyqOhNukvniWuSNEBCZiYMHmSjxb77qF46t3JsrnviwxKQrjyFV3ygKvD5t5H7mqodPK2VU5z';
+  //
+  //   try {
+  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //         .collection('flats')
+  //         .where('flatId', isEqualTo: flatId)
+  //         .get();
+  //
+  //     if (querySnapshot.docs.isNotEmpty) {
+  //       uid = querySnapshot.docs.first['uid'];
+  //     }
+  //   } catch (error) {
+  //     showSnackBar('Apartman ismi alınamadı.');
+  //   }
+  //
+  //   UserModel? userModel = await getUserById(uid);
+  //
+  //   // Define the endpoint URL of your FCM server
+  //   String url = 'https://fcm.googleapis.com/fcm/send';
+  //
+  //   // Define the headers required for sending a notification
+  //   Map<String, String> headers = {
+  //     'Content-Type': 'application/json',
+  //     'Authorization': 'key=$serverKey',
+  //   };
+  //
+  //   // Define the notification message
+  //   Map<String, dynamic> notification = {
+  //     'notification': {
+  //       'title': '${userModel!.apartmentName} Daire: ${userModel.flatNumber}',
+  //       'body': 'Çöpünüz atıldı'},
+  //     'to': userModel.deviceToken,
+  //   };
+  //
+  //   // Convert the notification message to JSON format
+  //   String jsonBody = json.encode(notification);
+  //
+  //   try {
+  //     // Send the notification using HTTP POST request
+  //     final http.Response response = await http.post(
+  //       Uri.parse(url),
+  //       headers: headers,
+  //       body: jsonBody,
+  //     );
+  //
+  //     // Check the response status
+  //     if (response.statusCode == 200) {
+  //       print('Notification sent successfully.');
+  //     } else {
+  //       print('Failed to send notification. Status code: ${response.statusCode}');
+  //       print('Response body: ${response.body}');
+  //     }
+  //   } catch (e) {
+  //     print('Error sending notification: $e');
+  //   }
+  // }
+
+
   void updateFloorAndFlatLists(String uid) async {
-    // Clear floor and flat lists
       floors.clear();
 
-    String? selectedApartment = await getApartmentIdForUser(uid);
+    selectedApartment = await getApartmentIdForUser(uid);
     QuerySnapshot productSnapshot = await FirebaseFirestore.instance
         .collection('apartments')
         .where('name', isEqualTo: selectedApartment)
@@ -192,7 +255,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
         }
       }
       setState(() {
-        // Set loading state to false after fetching data
         _isLoading = false;
       });
   }

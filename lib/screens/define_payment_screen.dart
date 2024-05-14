@@ -11,10 +11,10 @@ class DefinePaymentScreen extends StatefulWidget {
   const DefinePaymentScreen({Key? key}) : super(key: key);
 
   @override
-  _DefinePaymentScreenState createState() => _DefinePaymentScreenState();
+  DefinePaymentScreenState createState() => DefinePaymentScreenState();
 }
 
-class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
+class DefinePaymentScreenState extends State<DefinePaymentScreen> {
   String randomPaymentId = "";
 
   String selectedPaymentName = '';
@@ -90,7 +90,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 24.0),
+                      padding: EdgeInsets.only(left: 28.0),
                       child: Column(
                         children: [
                           Text(
@@ -227,7 +227,7 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 24.0),
+                      padding: EdgeInsets.only(left: 16.0),
                       child: Column(
                         children: [
                           Text(
@@ -312,14 +312,14 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
                 ),
 
                 Padding(
-                  padding: const EdgeInsets.all(0.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: ElevatedButton(
                     onPressed: () {setState(() {
                       String flatNumber = flatController.text.trim(); // Get the text from the text field and remove leading/trailing spaces
                       if (flatNumber.isNotEmpty) {
                         flatController.clear(); // Clear the text field after adding the flat number
                       }
-                      storeData();
+                      storeData(context);
                     });
                     },
                     style: ElevatedButton.styleFrom(
@@ -352,7 +352,8 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
     );
   }
 
-  void storeData() async {
+
+  void storeData(context) async {
     randomPaymentId = generateRandomId(10);
 
     if (selectedPaymentName == '') {
@@ -397,7 +398,17 @@ class _DefinePaymentScreenState extends State<DefinePaymentScreen> {
           'flatNo': flatNo.trim(), // Save the flat number separately
         });
 
-      }
+
+        showSnackBar("Ödeme başarıyla kaydedildi.");
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
+        );
+      } /*catch (error) {
+        showSnackBar("Ödeme kaydedilirken bir hata oluştu.");
+      }*/
       showSnackBar("Ödeme başarıyla kaydedildi Daire No: $selectedFlat");
 
     } catch (error) {

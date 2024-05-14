@@ -6,10 +6,15 @@ class OrderModel {
   String productId;
   String name;
   int amount;
-  int price;
+  double price;
   String details;
   String place;
   List<String> days;
+  String flatId;
+  String apartmentId;
+  String floorNo;
+  String flatNo;
+
 
   OrderModel({
     required this.listId,
@@ -21,6 +26,10 @@ class OrderModel {
     required this.details,
     required this.place,
     required this.days,
+   required this.flatId,
+    required this.apartmentId,
+    required this.floorNo,
+    required this.flatNo,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -33,7 +42,11 @@ class OrderModel {
       price: map['price'] ?? 0,
       details: map['details'] ?? '',
       place: map['place'] ?? '',
-      days: map['days'] ?? '',
+      days: (map['days'] as List<dynamic>).cast<String>(),
+      flatId: map['flatId'] ?? '',
+      apartmentId: map['apartmentId'] ?? '',
+      floorNo: map['floorNo'] ?? '',
+      flatNo:  map['flatNo'] ?? '',
     );
   }
 
@@ -50,6 +63,11 @@ class OrderModel {
       "details": details,
       "place": place,
       "days": days,
+      "flatId": flatId,
+      "apartmentId": apartmentId,
+      "floorNo": floorNo,
+      "flatNo": flatNo,
+
     };
   }
 
@@ -63,7 +81,15 @@ class OrderModel {
       price: snapshot['price'] ?? 0,
       details: snapshot['details'] ?? '',
       place: snapshot['place'] ?? '',
-      days: snapshot['days'] ?? '',
+      days: (snapshot['days'] as List<dynamic>).cast<String>(),
+      flatId: snapshot['flatId'] ?? '',
+      apartmentId: snapshot['apartmentId'] ?? '',
+      floorNo: snapshot['floorNo'] ?? '',
+      flatNo: snapshot['flatNo'] ?? '',
     );
   }
+
+  static fromJson(Map<String, dynamic>? data) {}
+
+
 }
