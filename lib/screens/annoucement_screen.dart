@@ -33,6 +33,7 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
   void initState() {
     super.initState();
     getApartmentId();
+    deletePastPolls();
   }
 
   void getApartmentId() async {
@@ -41,6 +42,36 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
       _isLoading = false;
     });
   }
+
+  void deletePastPolls() async {
+    apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    QuerySnapshot pollSnapshot = await FirebaseFirestore.instance
+        .collection('polls')
+        .where('apartmentId', isEqualTo: apartmentId)
+        .get();
+
+    // Get the current timestamp
+    Timestamp now = Timestamp.now();
+
+    // Iterate through the messages
+    for (DocumentSnapshot pollDoc in pollSnapshot.docs) {
+      Timestamp? finishedAt = pollDoc['finishedAt'];
+
+      print(finishedAt);
+
+      // Check if finishedAt exists and if it's in the past relative to now
+      if (finishedAt != null && finishedAt.compareTo(now) < 0) {
+        // Delete the message from Firestore
+        await FirebaseFirestore.instance
+            .collection('polls')
+            .doc(pollDoc.id)
+            .delete();
+
+        print('Message deleted: ${pollDoc.id}');
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -226,11 +257,11 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                   if (userModel.role == 'Apartman Yöneticisi') {
                     final messageModel = MessageModel(
                       uid: user.uid,
-                      content: _controller.text,
+                      content: _controller.text.trim(),
                       createdAt: Timestamp.now(),
                       role: userModel.role,
                       messageId: generateRandomId(10),
-                      apartmentName: userModel.apartmentName,
+                      apartmentId: userModel.apartmentName,
                     );
                     await createMessage(messageModel);
                     _controller.clear();
@@ -251,13 +282,15 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
     return ElevatedButton(
       onPressed: () async {
         final user = FirebaseAuth.instance.currentUser;
-        final userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+        final userDoc = FirebaseFirestore.instance.collection('users').doc(
+            user!.uid);
         final userData = await userDoc.get();
         final userModel = UserModel.fromMap(userData.data()!);
 
         if (userModel.role == 'Apartman Yöneticisi') {
           final pollTitleController = TextEditingController();
           final pollOptionsController = TextEditingController();
+          final pollDaysController = TextEditingController();
 
           showDialog(
             context: context,
@@ -269,21 +302,36 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                   children: [
                     TextField(
                       controller: pollTitleController,
-                      decoration: const InputDecoration(labelText: 'Oylama Başlığı'),
+                      decoration: const InputDecoration(
+                          labelText: 'Oylama Başlığı'),
                     ),
                     TextField(
                       controller: pollOptionsController,
                       decoration: const InputDecoration(
-                          labelText: 'Seçenekler ( , ile ayrı yazın)'),
+                          labelText: 'Seçenekler (, ile ayrı yazın)'),
+                    ),
+                    TextField(
+                      controller: pollDaysController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                          labelText: 'Oylama kaç gün aktif kalacak?'),
                     ),
                   ],
                 ),
                 actions: [
                   ElevatedButton(
                     onPressed: () async {
-                      final pollTitle = pollTitleController.text;
-                      final pollOptions = pollOptionsController.text.split(',');
-                      String? apartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+                      final pollTitle = pollTitleController.text.trim();
+                      final pollOptions = pollOptionsController.text.trim().split(',');
+                      String? apartmentId = await getApartmentIdForUser(
+                          FirebaseAuth.instance.currentUser!.uid);
+                      final Timestamp now = Timestamp.now();
+                      final int daysInMilliseconds = int.parse(
+                          pollDaysController.text.trim()) * 24 * 60 * 60 * 1000;
+                      final Timestamp finishedAt = Timestamp
+                          .fromMillisecondsSinceEpoch(
+                          now.millisecondsSinceEpoch + daysInMilliseconds);
+
 
                       Map<String, int> scores = {};
                       for (int i = 0; i < pollOptions.length; i++) {
@@ -298,7 +346,7 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                           options: pollOptions,
                           scores: scores,
                           createdAt: Timestamp.now(),
-                          finishedAt: Timestamp.now(),
+                          finishedAt: finishedAt,
                         );
 
                         await FirebaseFirestore.instance
@@ -306,23 +354,40 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                             .doc(pollModel.id)
                             .set(pollModel.toMap());
 
+                        QuerySnapshot flatSnapshot = await FirebaseFirestore
+                            .instance
+                            .collection('flats')
+                            .where('apartmentId', isEqualTo: apartmentId)
+                            .where('role', isNotEqualTo: 'Apartman Yöneticisi')
+                            .get();
+
+                        if (flatSnapshot.docs.isNotEmpty) {
+                          for (var flat in flatSnapshot.docs) {
+                            sendNotificationToResident(
+                                flat.id, 'Yönetici bir oylama başlattı.');
+                          }
+                        }
+
                         Navigator.pop(context);
                         showSnackBar('Oylama oluşturuldu.');
                       } else {
                         showSnackBar('Lütfen tüm alanları doldurun.');
                       }
                     },
-                    child: const Text('Oylama Oluştur', style: TextStyle(color: Colors.teal),),
+                    child: const Text(
+                      'Oylama Oluştur', style: TextStyle(color: Colors.teal),),
                   ),
                 ],
               );
             },
           );
         } else {
-          showSnackBar('Sadece Apartman Yöneticisi rolünde oylama oluşturma özelliği sağlanmaktadır.');
+          showSnackBar(
+              'Sadece Apartman Yöneticisi rolünde oylama oluşturma özelliği sağlanmaktadır.');
         }
       },
-      child: const Text('Oylama Oluştur', style: TextStyle(color: Colors.teal),),
+      child: const Text(
+        'Oylama Oluştur', style: TextStyle(color: Colors.teal),),
     );
   }
 
@@ -338,5 +403,16 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
         });
       },
     );
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('apartmentId', isEqualTo: apartmentId)
+        .where('role', isNotEqualTo: 'Apartman Yöneticisi')
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+      for (var flat in flatSnapshot.docs) {
+        sendNotificationToResident(flat.id, 'Yönetici bir duyuru paylaştı.');
+      }
+    }
   }
 }

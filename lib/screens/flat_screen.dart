@@ -1,3 +1,5 @@
+import 'package:apartment_management_app/screens/dagitim_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/order_model.dart';
@@ -21,10 +23,12 @@ class FlatScreenState extends State<FlatScreen> {
   List<OrderModel> orders = [];
   late String _currentDay;
   bool _isLoading = true;
+  String? doormanFlatId;
   double totalPrice = 0;
   double givenAmount = 0;
   double? balance = 0;
   double? doormanBalance = 0;
+  double? totalDoormanBalance;
 
   @override
   void initState() {
@@ -41,6 +45,8 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
     String? flatId;
+
+    doormanFlatId = await getFlatIdForUser(FirebaseAuth.instance.currentUser!.uid);
 
     try {
       QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
@@ -59,6 +65,7 @@ class FlatScreenState extends State<FlatScreen> {
 
     balance = await getBalanceWithFlatId(flatId);
     doormanBalance = balance!*(-1);
+    totalDoormanBalance = await getBalanceWithUid(FirebaseAuth.instance.currentUser!.uid);
 
     orders.clear();
     try {
@@ -105,10 +112,9 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchBalance(String flatId) async {
     try {
-
-
       // Perform your calculations
       double newBalance = totalPrice - givenAmount - balance!;
+      totalDoormanBalance = totalDoormanBalance! + totalPrice - givenAmount;
       double flatBalance = newBalance * (-1);
 
       // Update the balance in Firestore
@@ -116,6 +122,13 @@ class FlatScreenState extends State<FlatScreen> {
           .collection('flats')
           .doc(flatId)
           .update({'balance': flatBalance});
+
+      print(doormanFlatId);
+
+      await FirebaseFirestore.instance
+          .collection('flats')
+          .doc(doormanFlatId)
+          .update({'balance': totalDoormanBalance});
 
 setState(() {
   balance = flatBalance;
@@ -143,7 +156,13 @@ setState(() {
             storeBalance();
 
             Navigator.pop(context);
-          },
+            Navigator.pop(context);
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DagitimScreen()),
+            );
+            },
         ),
       ),
       body: _isLoading == true
