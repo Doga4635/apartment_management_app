@@ -1,9 +1,11 @@
 import 'package:apartment_management_app/models/payment_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/auth_supplier.dart';
+import '../utils/utils.dart';
 
 class FlatDetailsScreen extends StatefulWidget {
   const FlatDetailsScreen({Key? key, required this.selectedFlatId}) : super(key: key);
@@ -15,18 +17,47 @@ class FlatDetailsScreen extends StatefulWidget {
 
 class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? currentUserFlatNo;
+  String? currentUserRole;
+  String? currentUserApartmentId;
+  bool isLoading = true;
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getApartmentDetails();
+
+  }
+  void getApartmentDetails() async {
+    currentUserFlatNo = await getFlatNoForUser(FirebaseAuth.instance.currentUser!.uid);
+    currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    currentUserRole = await getRoleForFlat(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    return isLoading ? const Center(
+      child: CircularProgressIndicator(
+        color: Colors.teal,
+      ),
+    )
+        : Scaffold(
       appBar: AppBar(
         title: const Text('Daire Ödemeleri'),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _firestore
             .collection('paymentss')
-            .where('flatNo', isEqualTo: widget.selectedFlatId)
+            .where('flatNo', isEqualTo: currentUserFlatNo)
             .where('paid', isEqualTo: false)
+            .where('apartmentId', isEqualTo: currentUserApartmentId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

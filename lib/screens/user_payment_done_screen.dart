@@ -1,10 +1,12 @@
 import 'package:apartment_management_app/screens/flat_done_details_screen.dart';
 import 'package:apartment_management_app/screens/flat_details_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../models/payment_model.dart';
 import '../services/auth_supplier.dart';
+import '../utils/utils.dart';
 
 class UserPaymentDoneScreen extends StatefulWidget {
   const UserPaymentDoneScreen({Key? key}) : super(key: key);
@@ -16,16 +18,37 @@ class UserPaymentDoneScreen extends StatefulWidget {
 class _UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  String? currentUserFlatNo;
+
+  String? currentUserApartmentId;
+  bool isLoading = true;
+
+
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getApartmentDetails();
+
+  }
+  void getApartmentDetails() async {
+    currentUserFlatNo = await getFlatNoForUser(FirebaseAuth.instance.currentUser!.uid);
+    currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading = false;
+    });
+
+  }
+  @override
   Widget build(BuildContext context) {
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
-    String currentUserFlatNo = ap.userModel.flatNumber;
-    print(currentUserFlatNo);
 
-
-
-    return Scaffold(
+    return isLoading ? const Center(
+      child: CircularProgressIndicator(
+        color: Colors.teal,
+      ),
+    )
+        : Scaffold(
       appBar: AppBar(
         title: const Text('Daire Ödemeleri'),
       ),
@@ -42,7 +65,9 @@ class _UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
 
           List<PaymentModel> payments = snapshot.data!.docs
               .map((doc) => PaymentModel.fromSnapshot(doc))
-              .where((payment) => payment.paid && currentUserFlatNo == payment.flatNo) // Filter out payments where paid is true
+              .where((payment) => payment.paid
+              && payment.flatNo == currentUserFlatNo
+              && payment.apartmentId == currentUserApartmentId) // Filter out payments where paid is true
               .toList();
 
           // Map to store total balance per flat ID

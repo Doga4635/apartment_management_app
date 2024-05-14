@@ -1,5 +1,7 @@
 import 'package:apartment_management_app/screens/flat_details_screen.dart';
+import 'package:apartment_management_app/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
@@ -16,13 +18,30 @@ class UserPaymentScreen extends StatefulWidget {
 
 class _UserPaymentScreenState extends State<UserPaymentScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? currentUserFlatNo;
+  String? currentUserRole;
+  String? currentUserApartmentId;
+  bool isLoading = true;
+
 
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getApartmentDetails();
 
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
-    String currentUserFlatNo = ap.userModel.flatNumber;
+  }
+  void getApartmentDetails() async {
+    currentUserFlatNo = await getFlatNoForUser(FirebaseAuth.instance.currentUser!.uid);
+    currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    currentUserRole = await getRoleForFlat(FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      isLoading = false;
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
 
     ///TO DO
     ///final user = FirebaseAuth.instance.currentUser;
@@ -32,7 +51,12 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
 
 
 
-    return Scaffold(
+    return isLoading ? const Center(
+      child: CircularProgressIndicator(
+        color: Colors.teal,
+      ),
+    )
+        : Scaffold(
       appBar: AppBar(
         title: const Text('Daire Ödemeleri'),
       ),
@@ -50,13 +74,18 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           /*if (userModel.role == 'Apartman Yöneticisi'){
 
           }*/
+          print(currentUserFlatNo);
+          print(currentUserApartmentId);
+          print(currentUserRole);
 
           List<PaymentModel> payments = snapshot.data!.docs
               .map((doc) => PaymentModel.fromSnapshot(doc))
               .where((payment) => !payment.paid
-              //&& currentUserFlatNo == payment.flatNo
+              && payment.flatNo == currentUserFlatNo
+              && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
           ) // Filter out payments where paid is true
               .toList();
+
 
           // Map to store total balance per flat ID
           Map<String, double> flatBalances = {};
