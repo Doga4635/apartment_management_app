@@ -1,5 +1,4 @@
 import 'package:apartment_management_app/screens/dagitim_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/order_model.dart';
@@ -23,12 +22,12 @@ class FlatScreenState extends State<FlatScreen> {
   List<OrderModel> orders = [];
   late String _currentDay;
   bool _isLoading = true;
-  String? doormanFlatId;
   double totalPrice = 0;
   double givenAmount = 0;
   double? balance = 0;
   double? doormanBalance = 0;
-  double? totalDoormanBalance;
+  bool isEditing = false;
+  int _cursorPosition = 0;
 
   @override
   void initState() {
@@ -45,8 +44,6 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
     String? flatId;
-
-    doormanFlatId = await getFlatIdForUser(FirebaseAuth.instance.currentUser!.uid);
 
     try {
       QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
@@ -65,7 +62,6 @@ class FlatScreenState extends State<FlatScreen> {
 
     balance = await getBalanceWithFlatId(flatId);
     doormanBalance = balance!*(-1);
-    totalDoormanBalance = await getBalanceWithUid(FirebaseAuth.instance.currentUser!.uid);
 
     orders.clear();
     try {
@@ -114,7 +110,6 @@ class FlatScreenState extends State<FlatScreen> {
     try {
       // Perform your calculations
       double newBalance = totalPrice - givenAmount - balance!;
-      totalDoormanBalance = totalDoormanBalance! + totalPrice - givenAmount;
       double flatBalance = newBalance * (-1);
 
       // Update the balance in Firestore
@@ -122,13 +117,6 @@ class FlatScreenState extends State<FlatScreen> {
           .collection('flats')
           .doc(flatId)
           .update({'balance': flatBalance});
-
-      print(doormanFlatId);
-
-      await FirebaseFirestore.instance
-          .collection('flats')
-          .doc(doormanFlatId)
-          .update({'balance': totalDoormanBalance});
 
 setState(() {
   balance = flatBalance;
@@ -158,7 +146,7 @@ setState(() {
             Navigator.pop(context);
             Navigator.pop(context);
 
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DagitimScreen()),
             );
@@ -184,6 +172,10 @@ setState(() {
           Expanded(
             child: ListView(
               children: orders.map((order) {
+                // Define a TextEditingController for each TextField
+                TextEditingController controller = TextEditingController(text: order.amount.toString());
+                final selection = controller.selection;
+                _cursorPosition = selection.start;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
@@ -205,13 +197,46 @@ setState(() {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${order.amount} Adet', style: const TextStyle(fontSize: 16)),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 60,
+                                  child: TextField(
+                                    enabled: isEditing, // Enable/disable editing based on the flag
+                                    controller: controller,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Adet',
+                                    ),
+                                    onChanged: (value) {
+                                      // Update the order amount when the TextField value changes
+                                      setState(() {
+                                        order.amount = int.tryParse(value)!;
+                                        totalPrice = calculateTotalPrice();
+                                      });
+
+                                      // Restore cursor position
+                                      controller.selection = TextSelection.collapsed(offset: _cursorPosition);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      // Toggle the editing mode
+                                      isEditing = !isEditing;
+                                    });
+                                  },
+                                  child: const Icon(Icons.edit), // Replace this with your pencil icon
+                                ),
+                              ],
+                            ),
                             Text('${order.price} TL\n${order.details}', style: const TextStyle(fontSize: 16)),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 50,
-                      ),
+                      const SizedBox(width: 50,),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,6 +319,14 @@ setState(() {
         ],
       ),
     );
+  }
+
+  double calculateTotalPrice() {
+    double total = 0;
+    for (var order in orders) {
+      total += order.amount * order.price;
+    }
+    return total;
   }
 
 
