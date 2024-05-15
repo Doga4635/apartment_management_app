@@ -12,7 +12,20 @@
           "package_name": "com.example.apartment_management_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1067337184366-mplmoesa7vfs16if75ihlc57779eanv1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.apartment_management_app",
+            "certificate_hash": "739e0c7ad5e65312153abfe08a35932bc4f09d43"
+          }
+        },
+        {
+          "client_id": "1067337184366-0ic93e7emss0vnkrp51vf47s1v0sqsta.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD58_QFHFqmFg38D_Tj7Ju10tygKj_Cfr0"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1067337184366-0ic93e7emss0vnkrp51vf47s1v0sqsta.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1067337184366-uso89u29ql59th6g6jcq4pajhmg81h7n.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.apartmentManagementApp"
+              }
+            }
+          ]
         }
       }
     }
