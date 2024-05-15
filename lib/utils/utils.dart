@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:apartment_management_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
-
 import '../models/flat_model.dart';
 
 final GlobalKey<ScaffoldMessengerState> snackbarKey = GlobalKey<ScaffoldMessengerState>();
@@ -15,20 +12,6 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void showSnackBar(String content) {
   final SnackBar snackBar = SnackBar(content: Text(content));
   snackbarKey.currentState?.showSnackBar(snackBar);
-}
-
-Future<File?> pickImage(BuildContext context) async {
-  File? image;
-  try{
-    final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if(pickedImage != null) {
-      image = File(pickedImage.path);
-    }
-  } catch(e) {
-    showSnackBar(e.toString());
-  }
-
-  return image;
 }
 
 String generateRandomId(int length) {
@@ -66,7 +49,6 @@ Future<UserModel?> getUserById(String? uid) async {
       UserModel userModel = UserModel(
         uid: doc['uid'],
         role: doc['role'],
-        profilePic: doc['profilePic'],
         name: doc['name'],
         apartmentName: doc['apartmentName'],
         flatNumber: doc['flatNumber'],
@@ -163,8 +145,8 @@ Future<String?> getApartmentIdForUser(String uid) async {
   return apartmentId;
 }
 
-Future<String?> getSelectedFlatIdForUser(String uid) async {
-  String? flatId;
+Future<double?> getBalanceForSelectedFlat(String? uid) async {
+  double? balance;
 
   try {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -174,13 +156,34 @@ Future<String?> getSelectedFlatIdForUser(String uid) async {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      flatId = querySnapshot.docs.first['flatId'];
+      balance = querySnapshot.docs.first['balance'];
     }
   } catch (error) {
-    showSnackBar('Apartman ismi alınamadı.');
+    showSnackBar('Daire bakiyesi alınamadı.');
   }
 
-  return flatId;
+  return balance;
+}
+
+Future<double?> getBalanceWithFlatId(String? flatId) async {
+  double? balance;
+
+  DocumentSnapshot flatSnapshot = await FirebaseFirestore.instance.collection('flats').doc(flatId).get();
+
+  if (flatSnapshot.exists) {
+    // Access the data of the document
+    Map<String, dynamic> data = flatSnapshot.data() as Map<String, dynamic>;
+
+    // Access the 'balance' attribute
+    balance = data['balance'] as double?;
+
+    print(balance);
+  } else {
+    // Handle case when the document doesn't exist
+    print('Document with flatId $flatId does not exist.');
+  }
+
+  return balance;
 }
 
 Future<String?> getProductPrice(String productName) async {
@@ -194,7 +197,7 @@ Future<String?> getProductPrice(String productName) async {
     Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
 
     if (userData != null && userData.containsKey('price')) {
-      int price = userData['price'] as int;
+      double price = userData['price'] as double;
       return price.toString();
     } else {
       return null;
@@ -248,6 +251,7 @@ Future<String?> getFlatIdForUser(String uid) async {
 Future<bool> getAllowedForUser(String uid) async {
   late bool isAllowed;
 
+
   try {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('flats')
@@ -258,13 +262,26 @@ Future<bool> getAllowedForUser(String uid) async {
     if (querySnapshot.docs.isNotEmpty) {
       isAllowed = querySnapshot.docs.first['isAllowed'];
     }
+    // else {
+    //   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+    //       .collection('flats')
+    //       .where('uid', isEqualTo: uid)
+    //       .get();
+    //
+    //   var doc = querySnapshot.docs.first;
+    //   var docId = doc.id;
+    //   isAllowed = doc['isAllowed'];
+    //   FirebaseFirestore.instance.collection('flats').doc(docId).update({
+    //     'selectedFlat': true,
+    //   });
+    // }
   } catch (error) {
     showSnackBar('Daire ismi alınamadı.');
   }
   return isAllowed;
 }
 
-Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day, String apartmentId) async {
+Future<List<Map<String, dynamic>>> getOrdersForFlat(String flatNo, String floorNo,String day, apartmentId) async {
   final QuerySnapshot result = await FirebaseFirestore.instance
       .collection('orders')
       .where('flatNo', isEqualTo: flatNo)

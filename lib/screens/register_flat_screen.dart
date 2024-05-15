@@ -453,7 +453,7 @@ void getApartments() async {
       name: nameController.text.trim(),
       role: selectedRoleValue,
       apartmentName: selectedApartmentName,
-      flatNumber: selectedFlatNumber.toString(), profilePic: '',
+      flatNumber: selectedFlatNumber.toString(),
       deviceToken: "",
       accessToken: "",
     );
@@ -468,6 +468,7 @@ void getApartments() async {
       garbage: false,
       selectedFlat: true,
       isAllowed: selectedRoleValue == 'Apartman Yöneticisi' ? true : false,
+      balance: 0,
     );
 
     if (nameController.text.trim() == "") {

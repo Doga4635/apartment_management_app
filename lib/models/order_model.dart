@@ -6,7 +6,7 @@ class OrderModel {
   String productId;
   String name;
   int amount;
-  int price;
+  double price;
   String details;
   String place;
   List<String> days;
