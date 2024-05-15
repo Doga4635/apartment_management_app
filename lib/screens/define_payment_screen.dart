@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -18,13 +19,13 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
   String randomPaymentId = "";
 
   String selectedPaymentName = '';
-  String selectedApartmentName = '';
   String selectedPrice = '';
   String selectedDescription = '';
-  Map<String, bool> selectedFlats = {};
+  String selectedFlat = '';
+  String? currentUserApartmentId;
+
 
   final paymentNameController = TextEditingController();
-  final apartmentNameController = TextEditingController();
   final priceController = TextEditingController();
   final descriptionController = TextEditingController();
   final flatController = TextEditingController();
@@ -38,7 +39,6 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
   void dispose() {
     super.dispose();
     paymentNameController.dispose();
-    apartmentNameController.dispose();
     priceController.dispose();
     descriptionController.dispose();
     flatController.dispose();
@@ -122,51 +122,6 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                   onChanged: (value) {
                     setState(() {
                       selectedPaymentName = value;
-                    });
-                  },
-                ),const Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        Icons.apartment,
-                        size: 60.0,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Apartman İsmini Giriniz",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Apartman için isim nedir?',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                TextField(
-                  controller: apartmentNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Apartman Adı',
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedApartmentName = value;
                     });
                   },
                 ),
@@ -272,7 +227,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 24.0),
+                      padding: EdgeInsets.only(left: 24.0,top:10.0),
                       child: Column(
                         children: [
                           Text(
@@ -283,9 +238,9 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: EdgeInsets.all(6.0),
                             child: Text(
-                              'Daire numarasını giriniz',
+                              'Birden fazla daire girilirken\ndaireleri virgül ile ayırınız',
                               style: TextStyle(
                                 fontSize: 16.0,
                                 color: Colors.grey,
@@ -297,12 +252,17 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 15.0),
+                const SizedBox(height: 10.0),
                 TextField(
                   controller: flatController,
                   decoration: const InputDecoration(
                     labelText: 'Daire Numarası',
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedFlat = value.trim();
+                    });
+                  },
                 ),
 
                 Padding(
@@ -311,7 +271,6 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
                     onPressed: () {setState(() {
                       String flatNumber = flatController.text.trim(); // Get the text from the text field and remove leading/trailing spaces
                       if (flatNumber.isNotEmpty) {
-                        selectedFlats[flatNumber] = false; // Add the flat number to the map
                         flatController.clear(); // Clear the text field after adding the flat number
                       }
                       storeData(context);
@@ -347,51 +306,62 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
     );
   }
 
+
   void storeData(context) async {
     randomPaymentId = generateRandomId(10);
-
-    PaymentModel paymentModel = PaymentModel(
-      id: randomPaymentId,
-      name: selectedPaymentName,
-      apartmentId: selectedApartmentName,
-      description: selectedDescription,
-      price: selectedPrice,
-      flatId: selectedFlats,
-    );
+    currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
 
     if (selectedPaymentName == '') {
       showSnackBar("Lütfen ödeme adınızı giriniz.");
+      return;
     } else if (selectedPrice == '') {
       showSnackBar("Lütfen ödeme miktarını giriniz.");
+      return;
     } else if (selectedDescription == '') {
       showSnackBar("Lütfen ödeme açıklamasını giriniz.");
-    } else if (selectedFlats.isEmpty) {
+      return;
+    } else if (selectedFlat.isEmpty) {
       showSnackBar("Lütfen daire numarası giriniz.");
+      return;
     }
-    else if (selectedApartmentName == '') {
-      showSnackBar("Lütfen apartman adınızı giriniz.");
-    } else {
-      final firestore = FirebaseFirestore.instance;
-      try {
-        await firestore.collection('payments').doc(randomPaymentId).set({
+
+    final firestore = FirebaseFirestore.instance;
+
+    try {
+      List<String> flatNumbers = selectedFlat.split(',');
+
+      for (String flatNo in flatNumbers) {
+        PaymentModel paymentModel = PaymentModel(
+          id: randomPaymentId,
+          name: selectedPaymentName,
+          apartmentId: currentUserApartmentId!,
+          description: selectedDescription,
+          price: selectedPrice,
+          flatNo: flatNo.trim(), // Trim to remove any leading or trailing whitespace
+          paid: false,
+        );
+
+        await firestore.collection('paymentss').doc().set({
           'name': paymentModel.name,
           'apartmentId': paymentModel.apartmentId,
           'description': paymentModel.description,
           'price': paymentModel.price,
-          'flatId': selectedFlats,
+          'paid': paymentModel.paid,
+          'flatNo': flatNo.trim(), // Save the flat number separately
         });
-
-        showSnackBar("Ödeme başarıyla kaydedildi.");
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
-        );
-      } catch (error) {
-        showSnackBar("Ödeme kaydedilirken bir hata oluştu.");
       }
+      showSnackBar("Ödeme başarıyla kaydedildi");
+    } catch (error) {
+      print(error);
+      showSnackBar("Ödeme kaydedilirken bir hata oluştu.");
     }
+
+    Navigator.pop(context);
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ApartmentPaymentScreen()),
+    );
   }
 
   void showSnackBar(String message) {

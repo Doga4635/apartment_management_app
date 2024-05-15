@@ -1,19 +1,20 @@
-import 'package:apartment_management_app/screens/flat_details_screen.dart';
-import 'package:apartment_management_app/utils/utils.dart';
+import 'package:apartment_management_app/screens/flat_done_details_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment_model.dart';
+import '../utils/utils.dart';
 
-class UserPaymentScreen extends StatefulWidget {
-  const UserPaymentScreen({Key? key}) : super(key: key);
+class UserPaymentDoneScreen extends StatefulWidget {
+  const UserPaymentDoneScreen({Key? key}) : super(key: key);
 
   @override
-  _UserPaymentScreenState createState() => _UserPaymentScreenState();
+  UserPaymentDoneScreenState createState() => UserPaymentDoneScreenState();
 }
 
-class _UserPaymentScreenState extends State<UserPaymentScreen> {
+class UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   String? currentUserFlatNo;
   String? currentUserRole;
   String? currentUserApartmentId;
@@ -35,17 +36,10 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
     setState(() {
       isLoading = false;
     });
+
   }
   @override
   Widget build(BuildContext context) {
-
-    ///TO DO
-    ///final user = FirebaseAuth.instance.currentUser;
-    ///final userDoc = FirebaseFirestore.instance.collection('users').doc(user!.uid);
-    ///final userData = userDoc.get();
-    ///final userModel = UserModel.fromMap(userData.data()!);
-
-
 
     return isLoading ? const Center(
       child: CircularProgressIndicator(
@@ -57,7 +51,6 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
         title: const Text('Daire Ödemeleri'),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-
         stream: _firestore.collection('paymentss').snapshots(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
@@ -69,11 +62,10 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           }
 
           List<PaymentModel> payments = snapshot.data!.docs
-                .map((doc) => PaymentModel.fromSnapshot(doc))
-                .where((payment) => !payment.paid
-                && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
-            ) // Filter out payments where paid is true
-                .toList();
+              .map((doc) => PaymentModel.fromSnapshot(doc))
+              .where((payment) => payment.paid
+              && payment.apartmentId == currentUserApartmentId) // Filter out payments where paid is true
+              .toList();
 
           // Map to store total balance per flat ID
           Map<String, double> flatBalances = {};
@@ -96,8 +88,8 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           return Column(
             children: [
               Text(
-                'Toplam Apartman Borcu: ${totalBalance.toStringAsFixed(2)}',
-                style: const TextStyle(color: Colors.red, fontSize: 18),
+                'Toplam Apartman Ödenen: ${totalBalance.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.green, fontSize: 18),
               ),
               const Divider(),
               Expanded(
@@ -109,13 +101,13 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
 
                     return ListTile(
                       title: Text('Daire Numarası: $flatNo'),
-                      subtitle: Text('Toplam Borç: ${balance.toStringAsFixed(2)}'),
+                      subtitle: Text('Toplam Ödenen: ${balance.toStringAsFixed(2)}'),
                       onTap: () {
                         // Navigate to a separate screen to show the details of payments for the selected flat ID
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FlatDetailsScreen(selectedFlatNo: flatNo),
+                            builder: (context) => FlatDoneDetailsScreen(selectedFlatNo: flatNo),
                           ),
                         );
                       },
@@ -145,12 +137,12 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           }
 
           List<PaymentModel> payments = snapshot.data!.docs
-                .map((doc) => PaymentModel.fromSnapshot(doc))
-                .where((payment) => !payment.paid
-                && payment.flatNo == currentUserFlatNo
-                && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
-            ) // Filter out payments where paid is true
-                .toList();
+              .map((doc) => PaymentModel.fromSnapshot(doc))
+              .where((payment) => payment.paid
+              && payment.flatNo == currentUserFlatNo
+              && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
+          ) // Filter out payments where paid is true
+              .toList();
 
           // Map to store total balance per flat ID
           Map<String, double> flatBalances = {};
@@ -173,8 +165,8 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           return Column(
             children: [
               Text(
-                'Toplam Apartman Borcu: ${totalBalance.toStringAsFixed(2)}',
-                style: const TextStyle(color: Colors.red, fontSize: 18),
+                'Toplam Ödenen Tutar: ${totalBalance.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.green, fontSize: 18),
               ),
               const Divider(),
               Expanded(
@@ -186,13 +178,13 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
 
                     return ListTile(
                       title: Text('Daire Numarası: $flatNo'),
-                      subtitle: Text('Toplam Borç: ${balance.toStringAsFixed(2)}'),
+                      subtitle: Text('Toplam Ödenen: ${balance.toStringAsFixed(2)}'),
                       onTap: () {
                         // Navigate to a separate screen to show the details of payments for the selected flat ID
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FlatDetailsScreen(selectedFlatNo: flatNo),
+                            builder: (context) => FlatDoneDetailsScreen(selectedFlatNo: flatNo),
                           ),
                         );
                       },

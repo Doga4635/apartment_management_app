@@ -148,6 +148,25 @@ Future<String?> getApartmentIdForUser(String uid) async {
 
   return apartmentId;
 }
+Future<String?> getFlatNoForUser(String uid) async {
+  String? flatNo;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      flatNo = querySnapshot.docs.first['flatNo'];
+    }
+  } catch (error) {
+    showSnackBar('Apartman ismi alınamadı.');
+  }
+
+  return flatNo;
+}
 
 Future<double?> getBalanceForSelectedFlat(String? uid) async {
   double? balance;

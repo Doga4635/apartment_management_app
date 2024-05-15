@@ -1,6 +1,8 @@
 import 'package:apartment_management_app/screens/define_payment_screen.dart';
-import 'package:apartment_management_app/screens/done_payment_screen.dart';
+
+
 import 'package:apartment_management_app/screens/permission_screen.dart';
+import 'package:apartment_management_app/screens/user_payment_done_screen.dart';
 import 'package:apartment_management_app/screens/user_payment_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -34,6 +36,7 @@ class ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+
             Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
           },
         ),
@@ -191,9 +194,8 @@ class ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
               InkWell(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const DonePaymentScreen()));
+                      MaterialPageRoute(builder: (context) => const UserPaymentDoneScreen()));
                   // Add your functionality here
-
                 },
                 child: Container(
                   width: 300,

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:apartment_management_app/screens/apartment_payment_screen.dart';
 import 'package:apartment_management_app/screens/first_module_screen.dart';
 import 'package:apartment_management_app/screens/permission_screen.dart';
@@ -38,7 +37,7 @@ class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    return Scaffold(
+    return widget.isAllowed ? Scaffold(
       appBar: AppBar(
         title: const Text('Ana Menü', style: TextStyle(fontSize: 28)),
         backgroundColor: Colors.teal,
@@ -125,7 +124,7 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       body: Center(
-            child: widget.isAllowed ? Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
@@ -177,37 +176,8 @@ class MainScreenState extends State<MainScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    minimumSize: const Size(290, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  child: const Text(
-                    "Apartman Muhasebe İşlemleri",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-                const SizedBox(height: 30),
               ],
-            ) : Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Container(
-                padding: const EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
-                decoration: BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(6.0),
-                ),
-                child: const Text('Daire girişiniz için yönetici izni beklenmektedir.',
-                  style: TextStyle(color: Colors.white,fontSize: 36),
-                ),),
-            ),
+            )
           ),
 
       floatingActionButton: Row(
@@ -245,6 +215,68 @@ class MainScreenState extends State<MainScreen> {
         ],
 
       ),
+    ) :
+    Scaffold(
+        appBar: AppBar(
+          title: const Text('Ana Menü', style: TextStyle(fontSize: 28)),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
+            },
+          ),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                String currentUserUid = ap.userModel.uid;
+
+                //Checking if the user has more than 1 role
+                QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    .collection('flats')
+                    .where('uid', isEqualTo: currentUserUid)
+                    .get();
+
+                if (querySnapshot.docs.length > 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+
+                  );
+                }
+              },
+              icon: const Icon(Icons.person),
+            ),
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                ));
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Container(
+              padding: const EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
+              decoration: BoxDecoration(
+                color: Colors.teal,
+                borderRadius: BorderRadius.circular(6.0),
+              ),
+              child: const Text('Daire girişiniz için yönetici izni beklenmektedir.',
+                style: TextStyle(color: Colors.white,fontSize: 36),
+              ),),
+          ),
+        ),
     );
   }
 
