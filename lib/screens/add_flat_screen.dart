@@ -422,62 +422,62 @@ class AddFlatScreenState extends State<AddFlatScreen> {
       balance: 0,
     );
 
-    if (selectedRoleValue == "Rol") {
-      showSnackBar("Lütfen rolünüzü seçiniz.");
-    } else if (selectedApartmentName == 'Apartman Adı') {
-      showSnackBar("Lütfen apartman adınızı seçiniz.");
-    } else if (selectedApartmentName == 'Flat Number') {
-      showSnackBar("Lütfen daire numaranızı seçiniz.");
-    } else {
-      DocumentSnapshot apartmentDoc = await FirebaseFirestore.instance
-          .collection('apartments')
-          .where('name', isEqualTo: selectedApartmentName)
-          .get()
-          .then((apartmentDoc) => apartmentDoc.docs.first);
+      if (selectedRoleValue == "Rol") {
+        showSnackBar("Lütfen rolünüzü seçiniz.");
+      } else if (selectedApartmentName == 'Apartman Adı') {
+        showSnackBar("Lütfen apartman adınızı seçiniz.");
+      } else if (selectedApartmentName == 'Flat Number') {
+        showSnackBar("Lütfen daire numaranızı seçiniz.");
+      } else {
+        DocumentSnapshot apartmentDoc = await FirebaseFirestore.instance
+            .collection('apartments')
+            .where('name', isEqualTo: selectedApartmentName)
+            .get()
+            .then((apartmentDoc) => apartmentDoc.docs.first);
 
-      int managerCount = apartmentDoc['managerCount'];
-      int doormanCount = apartmentDoc['doormanCount'];
+        int managerCount = apartmentDoc['managerCount'];
+        int doormanCount = apartmentDoc['doormanCount'];
 
-      QuerySnapshot managerSnapshot = await FirebaseFirestore.instance
-          .collection('flats')
-          .where('apartmentId', isEqualTo: selectedApartmentName)
-          .where('role', isEqualTo: 'Apartman Yöneticisi')
-          .get();
+        QuerySnapshot managerSnapshot = await FirebaseFirestore.instance
+            .collection('flats')
+            .where('apartmentId', isEqualTo: selectedApartmentName)
+            .where('role', isEqualTo: 'Apartman Yöneticisi')
+            .get();
 
-      int existingManagerCount = managerSnapshot.docs.length;
+        int existingManagerCount = managerSnapshot.docs.length;
 
-      QuerySnapshot doormanSnapshot = await FirebaseFirestore.instance
-          .collection('flats')
-          .where('apartmentId', isEqualTo: selectedApartmentName)
-          .where('role', isEqualTo: 'Kapıcı')
-          .get();
+        QuerySnapshot doormanSnapshot = await FirebaseFirestore.instance
+            .collection('flats')
+            .where('apartmentId', isEqualTo: selectedApartmentName)
+            .where('role', isEqualTo: 'Kapıcı')
+            .get();
 
-      int existingDoormanCount = doormanSnapshot.docs.length;
+        int existingDoormanCount = doormanSnapshot.docs.length;
 
-      if (selectedRoleValue == 'Apartman Yöneticisi' && existingManagerCount >= managerCount) {
-        showSnackBar('Seçili apartmanda olması gereken yönetici sayısına erişildiği için kayıt gerçekleşmedi.');
-        return; // Prevent saving data
-      } else if (selectedRoleValue == 'Kapıcı' && existingDoormanCount >= doormanCount) {
-        showSnackBar('Seçili apartmanda olması gereken kapıcı sayısına erişildiği için kayıt gerçekleşmedi.');
-        return; // Prevent saving data
+        if (selectedRoleValue == 'Apartman Yöneticisi' && existingManagerCount >= managerCount) {
+          showSnackBar('Seçili apartmanda olması gereken yönetici sayısına erişildiği için kayıt gerçekleşmedi.');
+          return; // Prevent saving data
+        } else if (selectedRoleValue == 'Kapıcı' && existingDoormanCount >= doormanCount) {
+          showSnackBar('Seçili apartmanda olması gereken kapıcı sayısına erişildiği için kayıt gerçekleşmedi.');
+          return; // Prevent saving data
+        }
+
+        // Save data if the count has not been exceeded
+        ap.saveFlatDataToFirebase(
+          context: context,
+          flatModel: flatModel,
+          onSuccess: () {
+            Navigator.pop(context);
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const MultipleFlatUserProfileScreen()),
+            );
+          },
+        );
       }
-
-      // Save data if the count has not been exceeded
-      ap.saveFlatDataToFirebase(
-        context: context,
-        flatModel: flatModel,
-        onSuccess: () {
-          Navigator.pop(context);
-          Navigator.pop(context);
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const MultipleFlatUserProfileScreen()),
-          );
-        },
-      );
     }
-  }
 
 
 }
