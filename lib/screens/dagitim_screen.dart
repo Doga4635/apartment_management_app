@@ -165,24 +165,35 @@ class DagitimScreenState extends State<DagitimScreen> {
       children: floors.map((floor) {
         return ListTile(
           title: Text('$floor. Kat'),
-          trailing: StreamBuilder(
+          trailing: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('orders')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('apartmentId', isEqualTo: selectedApartment!)
                 .where('days', arrayContains: _currentDay)
                 .snapshots(),
-            builder: (context, snapshot) {
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return const Icon(Icons.error);
               } else {
-                bool hasGrocery = snapshot.data!.docs.isNotEmpty;
-                return Icon(
-                  hasGrocery ? Icons.check_circle : Icons.close,
-                  color: hasGrocery ? Colors.green : Colors.red,
-                );
+                bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                if (hasGrocery) {
+                  bool allOrdersDelivered = true;
+                  for (var doc in snapshot.data!.docs) {
+                    if (!doc['isDelivered']) {
+                      allOrdersDelivered = false;
+                      break;
+                    }
+                  }
+                  return Icon(
+                    allOrdersDelivered ? Icons.close : Icons.check_circle,
+                    color: allOrdersDelivered ? Colors.red : Colors.green,
+                  );
+                } else {
+                  return const Icon(Icons.close, color: Colors.red);
+                }
               }
             },
           ),
@@ -250,7 +261,7 @@ class DagitimScreenState extends State<DagitimScreen> {
                       trailing: SizedBox(
                         width: 24.0,
                         height: 24.0,
-                        child: StreamBuilder(
+                        child: StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('orders')
                               .where('floorNo', isEqualTo: floor.toString())
@@ -258,17 +269,28 @@ class DagitimScreenState extends State<DagitimScreen> {
                               .where('apartmentId', isEqualTo: selectedApartment!)
                               .where('days', arrayContains: _currentDay)
                               .snapshots(),
-                          builder: (context, grocerySnapshot) {
+                          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (snapshot.hasError) {
                               return const Icon(Icons.error);
                             } else {
-                              bool hasGrocery = grocerySnapshot.data?.docs.isNotEmpty ?? false;
-                              return Icon(
-                                hasGrocery ? Icons.check_circle : Icons.close,
-                                color: hasGrocery ? Colors.green : Colors.red,
-                              );
+                              bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                              if (hasGrocery) {
+                                bool allOrdersDelivered = true;
+                                for (var doc in snapshot.data!.docs) {
+                                  if (!doc['isDelivered']) {
+                                    allOrdersDelivered = false;
+                                    break;
+                                  }
+                                }
+                                return Icon(
+                                  allOrdersDelivered ? Icons.close : Icons.check_circle,
+                                  color: allOrdersDelivered ? Colors.red : Colors.green,
+                                );
+                              } else {
+                                return const Icon(Icons.close, color: Colors.red);
+                              }
                             }
                           },
                         ),

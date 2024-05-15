@@ -326,6 +326,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           apartmentId: widget.apartmentId,
           floorNo: widget.floorNo,
           flatNo: widget.flatNo,
+          isDelivered: false,
 
         );
 
@@ -356,6 +357,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           apartmentId: widget.apartmentId,
           floorNo: widget.floorNo,
           flatNo: widget.flatNo,
+          isDelivered: false,
+
         );
 
 
@@ -384,6 +387,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
           apartmentId: widget.apartmentId,
           floorNo: widget.floorNo,
           flatNo: widget.flatNo,
+          isDelivered: false,
         );
 
 
@@ -414,6 +418,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
         apartmentId: widget.apartmentId,
         floorNo: widget.floorNo,
         flatNo: widget.flatNo,
+        isDelivered: false,
       );
 
 

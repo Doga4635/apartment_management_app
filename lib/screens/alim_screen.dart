@@ -199,6 +199,7 @@ class AlimScreenState extends State<AlimScreen> {
 
   void showOtherQuantity(List<String> places) {
     Map<String, List<Map<String, dynamic>>> ordersByPlace = {};
+    Map<String, TextEditingController> priceControllersMap = {};
 
     // Group orders by place
     for (var place in places) {
@@ -243,6 +244,9 @@ class AlimScreenState extends State<AlimScreen> {
                         'details': details,
                         'amount': productAmount,
                       });
+
+                      // Initialize price controllers map
+                      priceControllersMap[productName + details] = TextEditingController(text: doc['price'].toString());
                     }
                   }
 
@@ -251,8 +255,6 @@ class AlimScreenState extends State<AlimScreen> {
                   ordersByPlace.forEach((place, orders) {
                     List<Widget> orderWidgets = [];
                     orders.forEach((order) {
-                      TextEditingController priceController = TextEditingController();
-
                       orderWidgets.add(
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,24 +272,12 @@ class AlimScreenState extends State<AlimScreen> {
                                   width: 40,
                                   height: 15,
                                   child: TextField(
-                                    controller: priceController,
+                                    controller: priceControllersMap[order['productName'] + order['details']],
                                     keyboardType: TextInputType.number,
                                     style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
                                 const Text(' TL '),
-                                TextButton(
-                                  onPressed: () async {
-                                    String newPrice = priceController.text;
-                                    List<String> orderId = await getOrderIds(order['productName'], order['details']);
-                                    for (String id in orderId) {
-                                      FirebaseFirestore.instance.collection('orders').doc(id).update({
-                                        'price': double.parse(newPrice),
-                                      });
-                                    }
-                                  },
-                                  child: const Icon(Icons.check, color: Colors.teal),
-                                )
                               ],
                             ),
                           ],
@@ -311,25 +301,54 @@ class AlimScreenState extends State<AlimScreen> {
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: placeWidgets,
+                    children: [
+                      ...placeWidgets,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton(
+                            onPressed: () async {
+                              // Save the prices to orders
+                              for (var placeOrders in ordersByPlace.entries) {
+                                String place = placeOrders.key;
+                                List<Map<String, dynamic>> orders = placeOrders.value;
+
+                                for (var order in orders) {
+                                  String productName = order['productName'];
+                                  String details = order['details'];
+                                  int productAmount = order['amount'];
+                                  TextEditingController priceController = priceControllersMap[productName + details]!;
+                                  String newPrice = priceController.text;
+
+                                  List<String> orderId = await getOrderIds(productName, details);
+                                  for (String id in orderId) {
+                                    FirebaseFirestore.instance.collection('orders').doc(id).update({
+                                      'price': double.parse(newPrice),
+                                    });
+                                  }
+                                }
+                              }
+                            },
+                            child: const Text('Fiyatları Kaydet', style: TextStyle(color: Colors.teal)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Kapat', style: TextStyle(color: Colors.teal)),
+                          ),
+                        ],
+                      ),
+                    ],
                   );
                 }
               },
             ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Close', style: TextStyle(color: Colors.teal)),
-              ),
-            ],
           ),
         );
       },
     );
   }
-
 
 
 

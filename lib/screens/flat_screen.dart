@@ -25,6 +25,7 @@ class FlatScreenState extends State<FlatScreen> {
   double givenAmount = 0;
   double? balance = 0;
   double? doormanBalance = 0;
+  bool _isDelivered = false;
 
   @override
   void initState() {
@@ -37,6 +38,9 @@ class FlatScreenState extends State<FlatScreen> {
   void _updateCurrentDay() {
     final now = DateTime.now();
     _currentDay = getDayOfWeek(now.weekday);
+    setState(() {
+      _isDelivered = false; // Reset delivery status when updating the current day
+    });
   }
 
   Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
@@ -68,6 +72,7 @@ class FlatScreenState extends State<FlatScreen> {
           .where('floorNo', isEqualTo: floorNo)
           .where('flatNo', isEqualTo: flatNo)
           .where('days', arrayContains: _currentDay)
+          .where('isDelivered', isEqualTo: false)
           .get();
 
       if (orderSnapshot.docs.isNotEmpty) {
@@ -83,9 +88,11 @@ class FlatScreenState extends State<FlatScreen> {
               place: doc['place'] ?? '',
               days: List<String>.from(doc['days']),
               flatId: doc['flatId'] ?? '',
+              isDelivered: doc['isDelivered'] ?? false,
               apartmentId: apartmentId,
               floorNo: floorNo,
               flatNo: flatNo);
+
         }).toList();
       } else {
         print('No documents found for the current user.');
@@ -128,6 +135,14 @@ setState(() {
     }
   }
 
+  void markOrdersAsDelivered() async {
+    for (var order in orders) {
+         await FirebaseFirestore.instance
+            .collection('orders')
+             .doc(order.orderId)
+          .update({'isDelivered': true});
+        }
+    }
 
 
   @override
@@ -252,12 +267,28 @@ setState(() {
       ),
 
 
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: FloatingActionButton(
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(bottom: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {
+                markOrdersAsDelivered();
+                setState(() {
+                  _isDelivered = true;
+                });
+                fetchOrders(widget.apartmentId, widget.floorNo, widget.flatNo);
+              },
+              tooltip: 'Teslim Edildi',
+              backgroundColor: Colors.teal,
+              label: Text(_isDelivered ? "Teslim Edildi" : "Teslim Et", style: TextStyle(color: Colors.white),),
+              icon: Icon(
+                _isDelivered ? Icons.check : Icons.close,
+                color: Colors.white,
+              ),
+            ),
+            FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -271,11 +302,12 @@ setState(() {
                 color: Colors.white,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
+      );
+    }
+
 
 
   Future<void> storeBalance() async {
@@ -291,3 +323,4 @@ setState(() {
     }
   }
 }
+
