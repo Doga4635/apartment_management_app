@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../services/auth_supplier.dart';
 import 'ana_menü_yardım_screen.dart';
 
 class OrderViewScreen extends StatefulWidget {
@@ -40,8 +37,6 @@ class OrderViewScreenState extends State<OrderViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sipariş Özeti'),
@@ -110,7 +105,7 @@ class OrderViewScreenState extends State<OrderViewScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => YardimScreen()),
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
                 );
               },
               tooltip: 'Yardım',
@@ -214,10 +209,10 @@ class OrderItem extends StatefulWidget {
       : super(key: key);
 
   @override
-  _OrderItemState createState() => _OrderItemState();
+  OrderItemState createState() => OrderItemState();
 }
 
-class _OrderItemState extends State<OrderItem> {
+class OrderItemState extends State<OrderItem> {
   bool isEditing = false;
   late TextEditingController productNameController;
   late TextEditingController productAmountController;
@@ -256,27 +251,27 @@ class _OrderItemState extends State<OrderItem> {
                     TextField(
                       enabled: isEditing,
                       controller: productNameController,
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                      decoration: InputDecoration(labelText: 'Ürün'),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                      decoration: const InputDecoration(labelText: 'Ürün'),
                     ),
                     TextField(
                       enabled: isEditing,
                       controller: productAmountController,
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                      decoration: InputDecoration(labelText: 'Adet'),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                      decoration: const InputDecoration(labelText: 'Adet'),
                     ),
                     TextField(
                       enabled: isEditing,
                       controller: productPlaceController,
-                      style: TextStyle(fontSize: 20, color: Colors.black),
-                      decoration: InputDecoration(labelText: 'Yer'),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                      decoration: const InputDecoration(labelText: 'Yer'),
                     ),
                     if (widget.orderDetails.isNotEmpty)
                       TextField(
                         enabled: isEditing,
                         controller: productDetailsController,
-                        style: TextStyle(fontSize: 20, color: Colors.black),
-                        decoration: InputDecoration(labelText: 'Detaylar'),
+                        style: const TextStyle(fontSize: 20, color: Colors.black),
+                        decoration: const InputDecoration(labelText: 'Detaylar'),
                         maxLines: null, // Allow unlimited lines for details
                       ),
                   ],
@@ -288,7 +283,7 @@ class _OrderItemState extends State<OrderItem> {
               children: [
                 if (!isEditing)
                   IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: const Icon(Icons.edit),
                     onPressed: () {
                       setState(() {
                         isEditing = true;
@@ -297,7 +292,7 @@ class _OrderItemState extends State<OrderItem> {
                   ),
                 if (isEditing)
                   IconButton(
-                    icon: Icon(Icons.check),
+                    icon: const Icon(Icons.check),
                     onPressed: () {
                       widget.onUpdate(
                         productNameController.text,
@@ -319,21 +314,21 @@ class _OrderItemState extends State<OrderItem> {
                     },
                   ),
                 IconButton(
-                  icon: Icon(Icons.delete),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
                     // Show delete confirmation dialog
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Emin Misiniz?'),
-                          content: Text('Bu ürünü listenizden çıkarmak istediğinize emin misiniz?'),
+                          title: const Text('Emin Misiniz?'),
+                          content: const Text('Bu ürünü listenizden çıkarmak istediğinize emin misiniz?'),
                           actions: [
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text('İptal'),
+                              child: const Text('İptal'),
                             ),
                             TextButton(
                               onPressed: () {
@@ -346,7 +341,7 @@ class _OrderItemState extends State<OrderItem> {
                                   ),
                                 );
                               },
-                              child: Text('Sil'),
+                              child: const Text('Sil'),
                             ),
                           ],
                         );

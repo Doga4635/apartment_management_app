@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/screens/dagitim_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/order_model.dart';
@@ -25,6 +26,8 @@ class FlatScreenState extends State<FlatScreen> {
   double givenAmount = 0;
   double? balance = 0;
   double? doormanBalance = 0;
+  bool isEditing = false;
+  int _cursorPosition = 0;
 
   @override
   void initState() {
@@ -105,8 +108,6 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchBalance(String flatId) async {
     try {
-
-
       // Perform your calculations
       double newBalance = totalPrice - givenAmount - balance!;
       double flatBalance = newBalance * (-1);
@@ -143,7 +144,13 @@ setState(() {
             storeBalance();
 
             Navigator.pop(context);
-          },
+            Navigator.pop(context);
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DagitimScreen()),
+            );
+            },
         ),
       ),
       body: _isLoading == true
@@ -165,6 +172,10 @@ setState(() {
           Expanded(
             child: ListView(
               children: orders.map((order) {
+                // Define a TextEditingController for each TextField
+                TextEditingController controller = TextEditingController(text: order.amount.toString());
+                final selection = controller.selection;
+                _cursorPosition = selection.start;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
@@ -186,13 +197,46 @@ setState(() {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${order.amount} Adet', style: const TextStyle(fontSize: 16)),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 60,
+                                  child: TextField(
+                                    enabled: isEditing, // Enable/disable editing based on the flag
+                                    controller: controller,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Adet',
+                                    ),
+                                    onChanged: (value) {
+                                      // Update the order amount when the TextField value changes
+                                      setState(() {
+                                        order.amount = int.tryParse(value)!;
+                                        totalPrice = calculateTotalPrice();
+                                      });
+
+                                      // Restore cursor position
+                                      controller.selection = TextSelection.collapsed(offset: _cursorPosition);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      // Toggle the editing mode
+                                      isEditing = !isEditing;
+                                    });
+                                  },
+                                  child: const Icon(Icons.edit), // Replace this with your pencil icon
+                                ),
+                              ],
+                            ),
                             Text('${order.price} TL\n${order.details}', style: const TextStyle(fontSize: 16)),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 50,
-                      ),
+                      const SizedBox(width: 50,),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,6 +319,14 @@ setState(() {
         ],
       ),
     );
+  }
+
+  double calculateTotalPrice() {
+    double total = 0;
+    for (var order in orders) {
+      total += order.amount * order.price;
+    }
+    return total;
   }
 
 

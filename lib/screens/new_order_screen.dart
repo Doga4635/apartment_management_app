@@ -73,192 +73,198 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Yeni Liste'),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            _showExitConfirmationDialog();
-          },
+    return GestureDetector(
+        onTap: () {
+          // Dismiss the keyboard when user taps anywhere on the screen
+          FocusScope.of(context).unfocus();
+        },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Yeni Liste'),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              _showExitConfirmationDialog();
+            },
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 20),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : CustomDropdown<String>.search(
-              hintText: _selectedProduct,
-              items: productList,
-              excludeSelected: false,
-              onChanged: (value) {
-                setState(() {
-                  _isLoading = true;
-                  _selectedProduct = value;
-                  _isLoading = false;
-                });
-              },
-            ),
-            const SizedBox(height: 6),
-            _selectedProduct == 'Diğer' ?
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
-              child: TextField(
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.done,
-                controller: productNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Yeni ürünün adını yazın',
-                ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : CustomDropdown<String>.search(
+                hintText: _selectedProduct,
+                items: productList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  setState(() {
+                    _isLoading = true;
+                    _selectedProduct = value;
+                    _isLoading = false;
+                  });
+                },
               ),
-            ) :
-            const SizedBox(height: 10),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      if (_quantity > 1) _quantity--;
-                    });
-                  },
-                  icon: const Icon(Icons.remove),
+              const SizedBox(height: 6),
+              _selectedProduct == 'Diğer' ?
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+                child: TextField(
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  controller: productNameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Yeni ürünün adını yazın',
+                  ),
                 ),
-                const SizedBox(
-                  width: 50,
-                ),
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    '$_quantity',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+              ) :
+              const SizedBox(height: 10),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_quantity > 1) _quantity--;
+                      });
+                    },
+                    icon: const Icon(Icons.remove),
+                  ),
+                  const SizedBox(
+                    width: 50,
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      '$_quantity',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _quantity++;
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: detailsController,
-              maxLength: 18,
-              decoration: const InputDecoration(
-                labelText: 'Not',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            CustomDropdown<String>.search(
-              hintText: _selectedPlace,
-              items: placeList,
-              excludeSelected: false,
-              onChanged: (value) {
-                setState(() {
-                  _isLoading = true;
-                  _selectedPlace = value;
-                  _isLoading = false;
-                });
-              },
-            ),
-            const SizedBox(height: 6),
-            _selectedPlace == 'Diğer' ?
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0,right: 8.0),
-              child: TextField(
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.done,
-                controller: placeNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Yeni yerin adını yazın',
-                ),
-              ),
-            ) :
-            const SizedBox(height: 10),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: createOrder,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-              ),
-              child: const Text(
-                'Listeye Ekle',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Divider(),
-            const SizedBox(height: 20),
-            const Text(
-              '  Liste',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: addedProducts.length,
-              itemBuilder: (context, index) {
-                OrderModel product = addedProducts[index];
-                return ListTile(
-                  title: Text('${product.name} - Miktar: ${product.amount}'),
-                  subtitle: Text(
-                      'Not: ${product.details} - Yer: ${product.place}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () {
-                          _showEditDialog(context, product);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          _showConfirmationDialog(context, product);
-                        },
-                      ),
-                    ],
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _quantity++;
+                      });
+                    },
+                    icon: const Icon(Icons.add),
                   ),
-                );
-              },
-            ),
-            const SizedBox(height: 30),
-
-            ElevatedButton(
-              onPressed: () {
-                createList(saveList: true);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AlimScreen()),
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-              child: const Text(
-                'Listeyi Oluştur',
-                style: TextStyle(color: Colors.white),
+                ],
               ),
-            ),
+              const SizedBox(height: 20),
+              TextFormField(
+                controller: detailsController,
+                maxLength: 18,
+                decoration: const InputDecoration(
+                  labelText: 'Not',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              CustomDropdown<String>.search(
+                hintText: _selectedPlace,
+                items: placeList,
+                excludeSelected: false,
+                onChanged: (value) {
+                  setState(() {
+                    _isLoading = true;
+                    _selectedPlace = value;
+                    _isLoading = false;
+                  });
+                },
+              ),
+              const SizedBox(height: 6),
+              _selectedPlace == 'Diğer' ?
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0,right: 8.0),
+                child: TextField(
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.done,
+                  controller: placeNameController,
+                  decoration: const InputDecoration(
+                    hintText: 'Yeni yerin adını yazın',
+                  ),
+                ),
+              ) :
+              const SizedBox(height: 10),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: createOrder,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                ),
+                child: const Text(
+                  'Listeye Ekle',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Divider(),
+              const SizedBox(height: 20),
+              const Text(
+                '  Liste',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: addedProducts.length,
+                itemBuilder: (context, index) {
+                  OrderModel product = addedProducts[index];
+                  return ListTile(
+                    title: Text('${product.name} - Miktar: ${product.amount}'),
+                    subtitle: Text(
+                        'Not: ${product.details} - Yer: ${product.place}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            _showEditDialog(context, product);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            _showConfirmationDialog(context, product);
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 30),
 
-            const SizedBox(height: 20),
-          ],
+              ElevatedButton(
+                onPressed: () {
+                  createList(saveList: true);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AlimScreen()),
+                  );
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                child: const Text(
+                  'Listeyi Oluştur',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -474,8 +480,8 @@ class NewOrderScreenState extends State<NewOrderScreen> {
               onPressed: () {
                 // Get the updated values from the text fields
                 int updatedQuantity =
-                    int.tryParse(quantityController.text) ?? product.amount;
-                String updatedDetails = detailsController.text;
+                    int.tryParse(quantityController.text.trim()) ?? product.amount;
+                String updatedDetails = detailsController.text.trim();
 
 
                 // Update the order with the new values

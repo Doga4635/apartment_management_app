@@ -27,6 +27,7 @@ class DagitimScreenState extends State<DagitimScreen> {
   bool _isLoading = true;
   String? selectedApartment;
   double? totalApartmentBalance = 0;
+  String? doormanFlatId;
 
 
   @override
@@ -45,6 +46,7 @@ class DagitimScreenState extends State<DagitimScreen> {
 
   Future<void> fetchTotalApartmentBalance() async {
     selectedApartment = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    doormanFlatId = await getFlatIdForUser(FirebaseAuth.instance.currentUser!.uid);
     try {
       double totalBalance = 0;
 
@@ -52,6 +54,7 @@ class DagitimScreenState extends State<DagitimScreen> {
       QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
           .collection('flats')
           .where('apartmentId', isEqualTo: selectedApartment)
+          .where('role', isNotEqualTo: 'Kapıcı')
           .get();
 
       // Calculate the total balance by summing up balances from all flats
@@ -65,8 +68,12 @@ class DagitimScreenState extends State<DagitimScreen> {
     } catch (error) {
       print('Error fetching total apartment balance: $error');
     }
-  }
 
+    await FirebaseFirestore.instance
+        .collection('flats')
+        .doc(doormanFlatId)
+        .update({'balance': totalApartmentBalance});
+  }
 
 
   @override
