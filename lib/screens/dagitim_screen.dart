@@ -27,6 +27,7 @@ class DagitimScreenState extends State<DagitimScreen> {
   bool _isLoading = true;
   String? selectedApartment;
   double? totalApartmentBalance = 0;
+  String? doormanFlatId;
 
 
   @override
@@ -45,6 +46,7 @@ class DagitimScreenState extends State<DagitimScreen> {
 
   Future<void> fetchTotalApartmentBalance() async {
     selectedApartment = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
+    doormanFlatId = await getFlatIdForUser(FirebaseAuth.instance.currentUser!.uid);
     try {
       double totalBalance = 0;
 
@@ -52,6 +54,7 @@ class DagitimScreenState extends State<DagitimScreen> {
       QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
           .collection('flats')
           .where('apartmentId', isEqualTo: selectedApartment)
+          .where('role', isNotEqualTo: 'Kapıcı')
           .get();
 
       // Calculate the total balance by summing up balances from all flats
@@ -65,8 +68,12 @@ class DagitimScreenState extends State<DagitimScreen> {
     } catch (error) {
       print('Error fetching total apartment balance: $error');
     }
-  }
 
+    await FirebaseFirestore.instance
+        .collection('flats')
+        .doc(doormanFlatId)
+        .update({'balance': totalApartmentBalance});
+  }
 
 
   @override
@@ -165,24 +172,35 @@ class DagitimScreenState extends State<DagitimScreen> {
       children: floors.map((floor) {
         return ListTile(
           title: Text('$floor. Kat'),
-          trailing: StreamBuilder(
+          trailing: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('orders')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('apartmentId', isEqualTo: selectedApartment!)
                 .where('days', arrayContains: _currentDay)
                 .snapshots(),
-            builder: (context, snapshot) {
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
                 return const Icon(Icons.error);
               } else {
-                bool hasGrocery = snapshot.data!.docs.isNotEmpty;
-                return Icon(
-                  hasGrocery ? Icons.check_circle : Icons.close,
-                  color: hasGrocery ? Colors.green : Colors.red,
-                );
+                bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                if (hasGrocery) {
+                  bool allOrdersDelivered = true;
+                  for (var doc in snapshot.data!.docs) {
+                    if (!doc['isDelivered']) {
+                      allOrdersDelivered = false;
+                      break;
+                    }
+                  }
+                  return Icon(
+                    allOrdersDelivered ? Icons.close : Icons.check_circle,
+                    color: allOrdersDelivered ? Colors.red : Colors.green,
+                  );
+                } else {
+                  return const Icon(Icons.close, color: Colors.red);
+                }
               }
             },
           ),
@@ -250,7 +268,7 @@ class DagitimScreenState extends State<DagitimScreen> {
                       trailing: SizedBox(
                         width: 24.0,
                         height: 24.0,
-                        child: StreamBuilder(
+                        child: StreamBuilder<QuerySnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('orders')
                               .where('floorNo', isEqualTo: floor.toString())
@@ -258,17 +276,28 @@ class DagitimScreenState extends State<DagitimScreen> {
                               .where('apartmentId', isEqualTo: selectedApartment!)
                               .where('days', arrayContains: _currentDay)
                               .snapshots(),
-                          builder: (context, grocerySnapshot) {
+                          builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
                             } else if (snapshot.hasError) {
                               return const Icon(Icons.error);
                             } else {
-                              bool hasGrocery = grocerySnapshot.data?.docs.isNotEmpty ?? false;
-                              return Icon(
-                                hasGrocery ? Icons.check_circle : Icons.close,
-                                color: hasGrocery ? Colors.green : Colors.red,
-                              );
+                              bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                              if (hasGrocery) {
+                                bool allOrdersDelivered = true;
+                                for (var doc in snapshot.data!.docs) {
+                                  if (!doc['isDelivered']) {
+                                    allOrdersDelivered = false;
+                                    break;
+                                  }
+                                }
+                                return Icon(
+                                  allOrdersDelivered ? Icons.close : Icons.check_circle,
+                                  color: allOrdersDelivered ? Colors.red : Colors.green,
+                                );
+                              } else {
+                                return const Icon(Icons.close, color: Colors.red);
+                              }
                             }
                           },
                         ),

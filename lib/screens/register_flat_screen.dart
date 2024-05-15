@@ -443,8 +443,6 @@ void getApartments() async {
 
 
   void storeData() async {
-    int i = 0;
-    int j = 0;
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     randomFlatId = generateRandomId(10);
 
@@ -497,9 +495,7 @@ void getApartments() async {
           .where('role', isEqualTo: 'Apartman Yöneticisi')
           .get();
 
-      for (var doc in managerSnapshot.docs) {
-        i++;
-      }
+      int existingManagerCount = managerSnapshot.docs.length;
 
       QuerySnapshot doormanSnapshot = await FirebaseFirestore.instance
           .collection('flats')
@@ -507,15 +503,14 @@ void getApartments() async {
           .where('role', isEqualTo: 'Kapıcı')
           .get();
 
-      for (var doc in doormanSnapshot.docs) {
-        j++;
-      }
+      int existingDoormanCount = doormanSnapshot.docs.length;
 
-      if(managerCount < i && selectedRoleValue == 'Apartman Yöneticisi') {
+      if (selectedRoleValue == 'Apartman Yöneticisi' && existingManagerCount >= managerCount) {
         showSnackBar('Seçili apartmanda olması gereken yönetici sayısına erişildiği için kayıt gerçekleşmedi.');
-      }
-      else if(doormanCount < j && selectedRoleValue == 'Kapıcı') {
+        return; // Prevent saving data
+      } else if (selectedRoleValue == 'Kapıcı' && existingDoormanCount >= doormanCount) {
         showSnackBar('Seçili apartmanda olması gereken kapıcı sayısına erişildiği için kayıt gerçekleşmedi.');
+        return; // Prevent saving data
       }
       else {
         ap.saveFlatDataToFirebase(

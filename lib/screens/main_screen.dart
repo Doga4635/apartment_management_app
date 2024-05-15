@@ -184,6 +184,7 @@ class MainScreenState extends State<MainScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            heroTag: "btn1",
             onPressed: () {
               Navigator.push(
                 context,
@@ -200,6 +201,7 @@ class MainScreenState extends State<MainScreen> {
             width: 10.0,
           ),
           FloatingActionButton(
+            heroTag: "btn2",
             onPressed: () {Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const YardimScreen()),

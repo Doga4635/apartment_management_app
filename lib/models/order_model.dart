@@ -14,6 +14,7 @@ class OrderModel {
   String apartmentId;
   String floorNo;
   String flatNo;
+  bool isDelivered;
 
 
   OrderModel({
@@ -30,6 +31,7 @@ class OrderModel {
     required this.apartmentId,
     required this.floorNo,
     required this.flatNo,
+    required this.isDelivered,
   });
 
   factory OrderModel.fromMap(Map<String, dynamic> map) {
@@ -47,6 +49,7 @@ class OrderModel {
       apartmentId: map['apartmentId'] ?? '',
       floorNo: map['floorNo'] ?? '',
       flatNo:  map['flatNo'] ?? '',
+      isDelivered: map['isDelivered'] ?? false,
     );
   }
 
@@ -67,6 +70,7 @@ class OrderModel {
       "apartmentId": apartmentId,
       "floorNo": floorNo,
       "flatNo": flatNo,
+      "isDelivered": isDelivered,
 
     };
   }
@@ -86,6 +90,7 @@ class OrderModel {
       apartmentId: snapshot['apartmentId'] ?? '',
       floorNo: snapshot['floorNo'] ?? '',
       flatNo: snapshot['flatNo'] ?? '',
+      isDelivered: snapshot['isDelivered'] ?? false,
     );
   }
 

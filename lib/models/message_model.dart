@@ -6,7 +6,7 @@ class MessageModel {
   final Timestamp createdAt;
   final String role;
   final String messageId;
-  final String apartmentName;
+  final String apartmentId;
 
   MessageModel({
     required this.uid,
@@ -14,7 +14,7 @@ class MessageModel {
     required this.createdAt,
     required this.role,
     required this.messageId,
-    required this.apartmentName,
+    required this.apartmentId,
   });
 
   factory MessageModel.fromMap(Map<String,dynamic> map) {
@@ -24,7 +24,7 @@ class MessageModel {
       createdAt: map['createdAt'] ?? Timestamp.now(),
       role: map['role'] ?? '',
       messageId: map['messageId'] ?? '',
-      apartmentName: map['apartmentName'] ?? '',
+      apartmentId: map['apartmentId'] ?? '',
     );
   }
 
@@ -35,7 +35,7 @@ class MessageModel {
       "createdAt": createdAt,
       "role": role,
       "messageId": messageId,
-      "apartmentName": apartmentName,
+      "apartmentId": apartmentId,
     };
   }
 
@@ -46,7 +46,7 @@ class MessageModel {
       createdAt: snapshot['createdAt'] ?? '0',
       role: snapshot['role'] ?? '',
       messageId: snapshot['messageId'] ?? '',
-      apartmentName: snapshot['apartmentName'] ?? '',
+      apartmentId: snapshot['apartmentId'] ?? '',
     );
   }
 

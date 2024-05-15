@@ -67,6 +67,8 @@ Future<UserModel?> getUserById(String? uid) async {
 
 void sendNotificationToResident(String flatId, String body) async {
   String? uid;
+  String? apartmentName;
+  String? flatNo;
   String serverKey = 'AAAA-IJA9G4:APA91bGibOwdCxMOkoJKMcO5kzIZtYpXzYDOggE8qNJ4K-jFTZ2miuCqjoD0tfSU4olwyqOhNukvniWuSNEBCZiYMHmSjxb77qF46t3JsrnviwxKQrjyFV3ygKvD5t5H7mqodPK2VU5z';
 
   try {
@@ -83,6 +85,8 @@ void sendNotificationToResident(String flatId, String body) async {
   }
 
   UserModel? userModel = await getUserById(uid);
+  apartmentName = await getApartmentIdOfFlat(flatId);
+  flatNo = await getFlatNoOfFlat(flatId);
 
   // Define the endpoint URL of your FCM server
   String url = 'https://fcm.googleapis.com/fcm/send';
@@ -96,9 +100,9 @@ void sendNotificationToResident(String flatId, String body) async {
   // Define the notification message
   Map<String, dynamic> notification = {
     'notification': {
-      'title': '${userModel!.apartmentName} Daire: ${userModel.flatNumber}',
+      'title': '$apartmentName Daire: $flatNo',
       'body': body},
-    'to': userModel.deviceToken,
+    'to': userModel!.deviceToken,
   };
 
   // Convert the notification message to JSON format
@@ -184,6 +188,44 @@ Future<double?> getBalanceForSelectedFlat(String? uid) async {
   return balance;
 }
 
+Future<String?> getApartmentIdOfFlat(String? flatId) async {
+  String? apartmentId;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      apartmentId = querySnapshot.docs.first['apartmentId'];
+    }
+  } catch (error) {
+    showSnackBar('Daire bakiyesi alınamadı.');
+  }
+
+  return apartmentId;
+}
+
+Future<String?> getFlatNoOfFlat(String? flatId) async {
+  String? flatNo;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      flatNo = querySnapshot.docs.first['flatNo'];
+    }
+  } catch (error) {
+    showSnackBar('Daire bakiyesi alınamadı.');
+  }
+
+  return flatNo;
+}
+
 Future<double?> getBalanceWithFlatId(String? flatId) async {
   double? balance;
 
@@ -200,6 +242,26 @@ Future<double?> getBalanceWithFlatId(String? flatId) async {
   } else {
     // Handle case when the document doesn't exist
     print('Document with flatId $flatId does not exist.');
+  }
+
+  return balance;
+}
+
+Future<double?> getBalanceWithUid(String? uid) async {
+  double? balance;
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('uid', isEqualTo: uid)
+        .where('selectedFlat', isEqualTo: true)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      balance = querySnapshot.docs.first['balance'];
+    }
+  } catch (error) {
+    showSnackBar('Daire bakiyesi alınamadı.');
   }
 
   return balance;

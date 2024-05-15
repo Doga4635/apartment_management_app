@@ -9,6 +9,7 @@ import '../models/flat_model.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
 import '../services/auth_supplier.dart';
+import 'multiple_flat_user_profile_screen.dart';
 
 class TrashTrackingScreen extends StatefulWidget {
   const TrashTrackingScreen({Key? key}) : super(key: key);
@@ -42,24 +43,50 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
             fontSize: 26,
           ),
         ),
+        backgroundColor: Colors.teal,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-              );
+            onPressed: () async {
+
+              String currentUserUid = ap.userModel.uid;
+
+              //Checking if the user has more than 1 role
+              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                  .collection('flats')
+                  .where('uid', isEqualTo: currentUserUid)
+                  .get();
+
+              if (querySnapshot.docs.length > 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                );
+              }
+              else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                );
+              }
             },
             icon: const Icon(Icons.person),
           ),
           IconButton(
-            onPressed: () {
-              ap.userSignOut().then((value) => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-              ));
-            },
-            icon: const Icon(Icons.exit_to_app),
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen(),
+                  ),
+                ),
+                );
+              },
+              icon: const Icon(Icons.exit_to_app)
           ),
         ],
       ),

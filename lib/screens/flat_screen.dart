@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/screens/dagitim_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/order_model.dart';
@@ -25,6 +26,9 @@ class FlatScreenState extends State<FlatScreen> {
   double givenAmount = 0;
   double? balance = 0;
   double? doormanBalance = 0;
+  bool isEditing = false;
+  int _cursorPosition = 0;
+  bool _isDelivered = false;
 
   @override
   void initState() {
@@ -37,6 +41,9 @@ class FlatScreenState extends State<FlatScreen> {
   void _updateCurrentDay() {
     final now = DateTime.now();
     _currentDay = getDayOfWeek(now.weekday);
+    setState(() {
+      _isDelivered = false; // Reset delivery status when updating the current day
+    });
   }
 
   Future<void> fetchOrders(String apartmentId, String floorNo, String flatNo) async {
@@ -68,6 +75,7 @@ class FlatScreenState extends State<FlatScreen> {
           .where('floorNo', isEqualTo: floorNo)
           .where('flatNo', isEqualTo: flatNo)
           .where('days', arrayContains: _currentDay)
+          .where('isDelivered', isEqualTo: false)
           .get();
 
       if (orderSnapshot.docs.isNotEmpty) {
@@ -83,9 +91,11 @@ class FlatScreenState extends State<FlatScreen> {
               place: doc['place'] ?? '',
               days: List<String>.from(doc['days']),
               flatId: doc['flatId'] ?? '',
+              isDelivered: doc['isDelivered'] ?? false,
               apartmentId: apartmentId,
               floorNo: floorNo,
               flatNo: flatNo);
+
         }).toList();
       } else {
         print('No documents found for the current user.');
@@ -105,8 +115,6 @@ class FlatScreenState extends State<FlatScreen> {
 
   Future<void> fetchBalance(String flatId) async {
     try {
-
-
       // Perform your calculations
       double newBalance = totalPrice - givenAmount - balance!;
       double flatBalance = newBalance * (-1);
@@ -128,6 +136,14 @@ setState(() {
     }
   }
 
+  void markOrdersAsDelivered() async {
+    for (var order in orders) {
+         await FirebaseFirestore.instance
+            .collection('orders')
+             .doc(order.orderId)
+          .update({'isDelivered': true});
+        }
+    }
 
 
   @override
@@ -143,7 +159,13 @@ setState(() {
             storeBalance();
 
             Navigator.pop(context);
-          },
+            Navigator.pop(context);
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DagitimScreen()),
+            );
+            },
         ),
       ),
       body: _isLoading == true
@@ -165,6 +187,10 @@ setState(() {
           Expanded(
             child: ListView(
               children: orders.map((order) {
+                // Define a TextEditingController for each TextField
+                TextEditingController controller = TextEditingController(text: order.amount.toString());
+                final selection = controller.selection;
+                _cursorPosition = selection.start;
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Row(
@@ -186,13 +212,46 @@ setState(() {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${order.amount} Adet', style: const TextStyle(fontSize: 16)),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 60,
+                                  child: TextField(
+                                    enabled: isEditing, // Enable/disable editing based on the flag
+                                    controller: controller,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Adet',
+                                    ),
+                                    onChanged: (value) {
+                                      // Update the order amount when the TextField value changes
+                                      setState(() {
+                                        order.amount = int.tryParse(value)!;
+                                        totalPrice = calculateTotalPrice();
+                                      });
+
+                                      // Restore cursor position
+                                      controller.selection = TextSelection.collapsed(offset: _cursorPosition);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      // Toggle the editing mode
+                                      isEditing = !isEditing;
+                                    });
+                                  },
+                                  child: const Icon(Icons.edit), // Replace this with your pencil icon
+                                ),
+                              ],
+                            ),
                             Text('${order.price} TL\n${order.details}', style: const TextStyle(fontSize: 16)),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 50,
-                      ),
+                      const SizedBox(width: 50,),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,12 +311,28 @@ setState(() {
       ),
 
 
-      bottomNavigationBar: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: FloatingActionButton(
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(bottom: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {
+                markOrdersAsDelivered();
+                setState(() {
+                  _isDelivered = true;
+                });
+                fetchOrders(widget.apartmentId, widget.floorNo, widget.flatNo);
+              },
+              tooltip: 'Teslim Edildi',
+              backgroundColor: Colors.teal,
+              label: Text(_isDelivered ? "Teslim Edildi" : "Teslim Et", style: TextStyle(color: Colors.white),),
+              icon: Icon(
+                _isDelivered ? Icons.check : Icons.close,
+                color: Colors.white,
+              ),
+            ),
+            FloatingActionButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -271,10 +346,19 @@ setState(() {
                 color: Colors.white,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
+      );
+    }
+
+
+  double calculateTotalPrice() {
+    double total = 0;
+    for (var order in orders) {
+      total += order.amount * order.price;
+    }
+    return total;
   }
 
 
@@ -291,3 +375,4 @@ setState(() {
     }
   }
 }
+
