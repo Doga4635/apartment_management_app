@@ -84,6 +84,7 @@ class FlatDoneDetailsScreenState extends State<FlatDoneDetailsScreen> {
                 const Divider(),
                 ListView.builder(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: documents.length,
                   itemBuilder: (context, index) {
                     final PaymentModel payment = PaymentModel.fromSnapshot(documents[index]);
