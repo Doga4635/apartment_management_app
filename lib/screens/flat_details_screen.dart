@@ -2,26 +2,22 @@ import 'package:apartment_management_app/models/payment_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 
 class FlatDetailsScreen extends StatefulWidget {
-  const FlatDetailsScreen({Key? key, required this.selectedFlatId}) : super(key: key);
+  const FlatDetailsScreen({Key? key, required this.selectedFlatNo}) : super(key: key);
 
-  final String selectedFlatId;
+  final String selectedFlatNo;
   @override
-  _FlatDetailsScreenState createState() => _FlatDetailsScreenState();
+  FlatDetailsScreenState createState() => FlatDetailsScreenState();
 }
 
-class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
+class FlatDetailsScreenState extends State<FlatDetailsScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? currentUserFlatNo;
   String? currentUserRole;
   String? currentUserApartmentId;
   bool isLoading = true;
-
 
 
   @override
@@ -32,7 +28,6 @@ class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
 
   }
   void getApartmentDetails() async {
-    currentUserFlatNo = await getFlatNoForUser(FirebaseAuth.instance.currentUser!.uid);
     currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
     currentUserRole = await getRoleForFlat(FirebaseAuth.instance.currentUser!.uid);
     setState(() {
@@ -55,7 +50,7 @@ class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _firestore
             .collection('paymentss')
-            .where('flatNo', isEqualTo: currentUserFlatNo)
+            .where('flatNo', isEqualTo: widget.selectedFlatNo)
             .where('paid', isEqualTo: false)
             .where('apartmentId', isEqualTo: currentUserApartmentId)
             .snapshots(),
@@ -99,7 +94,7 @@ class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
                       apartmentName: apartmentName,
                       description: description,
                       price: price,
-                      flatId: widget.selectedFlatId, onPressed: () { // Add onPressed callback
+                      flatId: widget.selectedFlatNo, onPressed: () { // Add onPressed callback
                       // Update the payment document to set paid to true
                       _firestore.collection('paymentss').doc(payment.id).update(
                         {'paid': true},
@@ -146,10 +141,10 @@ class _FlatDetailsScreenState extends State<FlatDetailsScreen> {
         ),
         ListTile(
           title: Text('Daire No: $flatId'), // Display flatId
-          subtitle: IconButton( // Add IconButton for setting paid to true
+          subtitle: currentUserRole == 'Apartman Yöneticisi' ? IconButton( // Add IconButton for setting paid to true
             icon: const Icon(Icons.check, color: Colors.green),
             onPressed: onPressed, // Call the onPressed callback
-          ),
+          ) : null,
         ),
         const Divider(),
       ],

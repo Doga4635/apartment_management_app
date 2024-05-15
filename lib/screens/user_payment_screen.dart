@@ -1,13 +1,9 @@
 import 'package:apartment_management_app/screens/flat_details_screen.dart';
 import 'package:apartment_management_app/utils/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 import '../models/payment_model.dart';
-import '../models/user_model.dart';
-import '../services/auth_supplier.dart';
 
 class UserPaymentScreen extends StatefulWidget {
   const UserPaymentScreen({Key? key}) : super(key: key);
@@ -56,7 +52,7 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
         color: Colors.teal,
       ),
     )
-        : Scaffold(
+        : currentUserRole == 'Apartman Yöneticisi' ? Scaffold(
       appBar: AppBar(
         title: const Text('Daire Ödemeleri'),
       ),
@@ -71,21 +67,13 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           if (snapshot.hasError) {
             return const Center(child: Text('Error fetching data'));
           }
-          /*if (userModel.role == 'Apartman Yöneticisi'){
-
-          }*/
-          print(currentUserFlatNo);
-          print(currentUserApartmentId);
-          print(currentUserRole);
 
           List<PaymentModel> payments = snapshot.data!.docs
-              .map((doc) => PaymentModel.fromSnapshot(doc))
-              .where((payment) => !payment.paid
-              && payment.flatNo == currentUserFlatNo
-              && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
-          ) // Filter out payments where paid is true
-              .toList();
-
+                .map((doc) => PaymentModel.fromSnapshot(doc))
+                .where((payment) => !payment.paid
+                && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
+            ) // Filter out payments where paid is true
+                .toList();
 
           // Map to store total balance per flat ID
           Map<String, double> flatBalances = {};
@@ -93,9 +81,9 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           // Iterate through payments and accumulate total balance for each flat ID
           double totalBalance = 0.0;
           for (var payment in payments) {
-            payment.flatNo.split(',').forEach((flatId) {
-              flatBalances[flatId.trim()] =
-                  (flatBalances[flatId.trim()] ?? 0.0) + double.parse(payment.price);
+            payment.flatNo.split(',').forEach((flatNo) {
+              flatBalances[flatNo.trim()] =
+                  (flatBalances[flatNo.trim()] ?? 0.0) + double.parse(payment.price);
               totalBalance += double.parse(payment.price);
             });
           }
@@ -116,18 +104,95 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
                 child: ListView.builder(
                   itemCount: sortedKeys.length,
                   itemBuilder: (BuildContext context, int index) {
-                    String flatId = sortedKeys[index];
-                    double balance = flatBalances[flatId] ?? 0.0;
+                    String flatNo = sortedKeys[index];
+                    double balance = flatBalances[flatNo] ?? 0.0;
 
                     return ListTile(
-                      title: Text('Daire Numarası: $flatId'),
+                      title: Text('Daire Numarası: $flatNo'),
                       subtitle: Text('Toplam Borç: ${balance.toStringAsFixed(2)}'),
                       onTap: () {
                         // Navigate to a separate screen to show the details of payments for the selected flat ID
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FlatDetailsScreen(selectedFlatId: flatId),
+                            builder: (context) => FlatDetailsScreen(selectedFlatNo: flatNo),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    ) :
+    Scaffold(
+      appBar: AppBar(
+        title: const Text('Daire Ödemeleri'),
+      ),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+
+        stream: _firestore.collection('paymentss').snapshots(),
+        builder: (BuildContext context,
+            AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
+
+          List<PaymentModel> payments = snapshot.data!.docs
+                .map((doc) => PaymentModel.fromSnapshot(doc))
+                .where((payment) => !payment.paid
+                && payment.flatNo == currentUserFlatNo
+                && payment.apartmentId == currentUserApartmentId // Filter out payments where paid is true
+            ) // Filter out payments where paid is true
+                .toList();
+
+          // Map to store total balance per flat ID
+          Map<String, double> flatBalances = {};
+
+          // Iterate through payments and accumulate total balance for each flat ID
+          double totalBalance = 0.0;
+          for (var payment in payments) {
+            payment.flatNo.split(',').forEach((flatNo) {
+              flatBalances[flatNo.trim()] =
+                  (flatBalances[flatNo.trim()] ?? 0.0) + double.parse(payment.price);
+              totalBalance += double.parse(payment.price);
+            });
+          }
+
+          // Sort the flatBalances map by keys (apartment numbers) in ascending order
+          List<String> sortedKeys = flatBalances.keys.toList()
+            ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+
+          // Build the ListView with sorted keys
+          return Column(
+            children: [
+              Text(
+                'Toplam Apartman Borcu: ${totalBalance.toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.red, fontSize: 18),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: sortedKeys.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    String flatNo = sortedKeys[index];
+                    double balance = flatBalances[flatNo] ?? 0.0;
+
+                    return ListTile(
+                      title: Text('Daire Numarası: $flatNo'),
+                      subtitle: Text('Toplam Borç: ${balance.toStringAsFixed(2)}'),
+                      onTap: () {
+                        // Navigate to a separate screen to show the details of payments for the selected flat ID
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FlatDetailsScreen(selectedFlatNo: flatNo),
                           ),
                         );
                       },
