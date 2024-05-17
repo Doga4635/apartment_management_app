@@ -317,7 +317,7 @@ setState(() {
 
 
         bottomNavigationBar: Container(
-          padding: EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.all( 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

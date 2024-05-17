@@ -8,6 +8,7 @@ import '../models/apartment_model.dart';
 import '../models/flat_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 import 'flat_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
@@ -142,25 +143,46 @@ class DagitimScreenState extends State<DagitimScreen> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Adjust alignment to space between
           children: [
-            const Text(
-              'Toplam Bakiye:  ',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min for the text widgets
+              children: [
+                const Text(
+                  'Toplam Bakiye:  ',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${totalApartmentBalance!.abs()} TL',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: totalApartmentBalance!.isNegative ? Colors.red : Colors.teal,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '${totalApartmentBalance!.abs()} TL',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: totalApartmentBalance!.isNegative ? Colors.red : Colors.teal,
+            FloatingActionButton(
+              heroTag: "btn2",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const YardimScreen()),
+                );
+              },
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(
+                Icons.question_mark,
+                color: Colors.white,
               ),
             ),
           ],
         ),
       ),
+
+
     );
   }
 

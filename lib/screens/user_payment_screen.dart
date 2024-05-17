@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment_model.dart';
+import 'ana_menü_yardım_screen.dart';
 
 class UserPaymentScreen extends StatefulWidget {
   const UserPaymentScreen({Key? key}) : super(key: key);
@@ -203,6 +204,25 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
             ],
           );
         },
+      ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
       ),
     );
   }

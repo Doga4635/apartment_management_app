@@ -7,6 +7,8 @@ import 'package:apartment_management_app/constants.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
+import 'ana_menü_yardım_screen.dart';
+
 class CodeEnterScreen extends StatefulWidget {
   final String verificationId;
   const CodeEnterScreen({super.key, required this.verificationId});
@@ -128,7 +130,12 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const YardimScreen()),
+          );
+        },
         tooltip: 'Help',
         backgroundColor: Colors.teal,
         child: const Icon(Icons.question_mark,

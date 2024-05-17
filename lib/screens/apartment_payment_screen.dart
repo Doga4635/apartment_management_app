@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 import 'main_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
@@ -219,6 +220,27 @@ class ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
           ),
         ),
       ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
+      ),
+
+
     );
   }
 }

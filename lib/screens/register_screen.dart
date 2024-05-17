@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:apartment_management_app/constants.dart';
 import 'package:provider/provider.dart';
 
+import 'ana_menü_yardım_screen.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -148,7 +150,12 @@ class RegisterScreenState extends State<RegisterScreen> {
             ),
         ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const YardimScreen()),
+          );
+        },
         tooltip: 'Help',
         backgroundColor: Colors.teal,
         child: const Icon(Icons.question_mark,
