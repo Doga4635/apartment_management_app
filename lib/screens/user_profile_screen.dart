@@ -30,173 +30,179 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     Future<String?> role = getUserRole(currentUserUid);
     Future<String?> flatNumber = getUserFlatNumber(currentUserUid);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profil',
-          style: TextStyle(
-            fontSize: 28,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Profil',
+            style: TextStyle(
+              fontSize: 28,
+            ),
           ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(FontAwesomeIcons.angleLeft),
-        ),
-        actions: [
-          IconButton(
+          leading: IconButton(
             onPressed: () {
-              ap.userSignOut().then(
-                    (value) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WelcomeScreen(),
+              Navigator.pop(context);
+            },
+            icon: const Icon(FontAwesomeIcons.angleLeft),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then(
+                      (value) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen(),
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          ap.userModel.name,
+                          style: const TextStyle(fontSize: 32),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+
+                      const SizedBox(height: 8.0),
+
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: role,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: apartmentName,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: flatNumber,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              const  String defaultText = 'Daire: '; // Prefix text
+                              final String flatNumberText = snapshot.data ?? '';
+
+                              return Text(
+                                '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                                style: const TextStyle(fontSize: 22),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+
+
+                    ],
+
                   ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.exit_to_app),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        ap.userModel.name,
-                        style: const TextStyle(fontSize: 32),
-                        textAlign: TextAlign.start,
-                      ),
+
+                const SizedBox(height: 50),
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddFlatScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(210, 40),
+                  ),
+                  child: const Text(
+                    "Daire Ekle",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
                     ),
-                    const SizedBox(height: 8.0),
-
-                    const SizedBox(height: 8.0),
-
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: role,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            return Text(
-                              snapshot.data ?? '',
-                              style: const TextStyle(fontSize: 22),
-                              textAlign: TextAlign.left,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: apartmentName,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            return Text(
-                              snapshot.data ?? '',
-                              style: const TextStyle(fontSize: 22),
-                              textAlign: TextAlign.left,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: flatNumber,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            const  String defaultText = 'Daire: '; // Prefix text
-                            final String flatNumberText = snapshot.data ?? '';
-
-                            return Text(
-                              '$defaultText$flatNumberText', // Concatenate the prefix with flat number
-                              style: const TextStyle(fontSize: 22),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-
-
-                  ],
-
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 50),
-
-              ElevatedButton(
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AddFlatScreen()),
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(210, 40),
-                ),
-                child: const Text(
-                  "Daire Ekle",
-                  style: TextStyle(
-                    fontSize: 25,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
-                  ),
+                tooltip: 'Yardım',
+                backgroundColor: Colors.teal,
+                child: const Icon(
+                  Icons.question_mark,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const YardimScreen()),
-                );
-              },
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );

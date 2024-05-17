@@ -64,279 +64,285 @@ class AddFlatScreenState extends State<AddFlatScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daire Ekle',style: TextStyle(
-          fontSize: 28,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Daire Ekle',style: TextStyle(
+            fontSize: 28,
+          ),
+          ),
+          leading: IconButton(onPressed: () {
+            Navigator.pop(context);
+          },
+            icon: const Icon(FontAwesomeIcons.angleLeft),
+          ),
         ),
-        ),
-        leading: IconButton(onPressed: () {
-          Navigator.pop(context);
-        },
-          icon: const Icon(FontAwesomeIcons.angleLeft),
-        ),
-      ),
-      body: SafeArea(
-        child: isLoading == true ? const Center(child: CircularProgressIndicator(
-          color: Colors.teal,
-        )) : SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(
-              top: 3.0,
-              left: 20.0,
-              right: 20.0,
-              bottom: 20.0,
-            ),
-            child: Column(
-              children: [
-                const Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        Icons.person_search,
-                        size: 60.0,),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Rolünüzü Seçin",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: Text(
-                              'Dairedeki rolünüz nedir?',
+        body: SafeArea(
+          child: isLoading == true ? const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          )) : SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 3.0,
+                left: 20.0,
+                right: 20.0,
+                bottom: 20.0,
+              ),
+              child: Column(
+                children: [
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.person_search,
+                          size: 60.0,),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Rolünüzü Seçin",
                               style: TextStyle(
-                                fontSize: 16.0,
-                                color: Colors.grey,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Text(
+                                'Dairedeki rolünüz nedir?',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                CustomDropdown<String>.search(
-                  hintText: selectedRoleValue,
-                  items: _roleList,
-                  excludeSelected: false,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedRoleValue = value;
-                    });
-                  },
-                ),
-                const Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        Icons.apartment,
-                        size: 60.0,),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Apartmanınızı Seçiniz",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Hangisi sizin apartmanınız?',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    selectedRoleValue =='Apartman Yöneticisi' ?
-                    Expanded(
-                      flex: 1,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CreateApartmentScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                        child: const Icon(Icons.add,color: Colors.white,),
-                      ),
-                    ):
-                    Expanded(
-                      flex: 1,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                        child: const Icon(Icons.add,color: Colors.white,),
-                      ),
-                    ),
-                    _isLoading
-                        ? const CircularProgressIndicator()
-                        : Expanded(
-                      flex: 4,
-                      child: CustomDropdown<String>.search(
-                        hintText: selectedApartmentName,
-                        items: _apartmentList,
-                        excludeSelected: false,
-                        onChanged: (value) {
-                          setState(() {
-                            _isLoading = true;
-                            selectedApartmentName = value;
-                            updateFloorAndFlatLists(selectedApartmentName);
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        Icons.home_work,
-                        size: 60.0,),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Kat Numaranızı Seçiniz",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Hangisi sizin kat numaranız?',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                selectedApartmentName != 'Apartman Adı' && _isLoading == false ?
-                CustomDropdown<int>.search(
-                  hintText: 'Kat Numarası',
-                  items: _floorList,
-                  excludeSelected: false,
-                  onChanged: (value) {
-                    selectedFloorNumber = value;
-                  },
-                ) :
-                Container(
-                  padding: const  EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(6.0),
+                    ],
                   ),
-                  child: const Text('Öncelikle apartmanı seçmelisiniz',
-                    style: TextStyle(color: Colors.white),
-                  ),),
-                const Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Icon(
-                        Icons.home_filled,
-                        size: 60.0,),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 24.0),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Daire Numaranızı Seçiniz",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Text(
-                              'Hangisi sizin daire numaranız?',
+                  CustomDropdown<String>.search(
+                    hintText: selectedRoleValue,
+                    items: _roleList,
+                    excludeSelected: false,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRoleValue = value;
+                      });
+                    },
+                  ),
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.apartment,
+                          size: 60.0,),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Apartmanınızı Seçiniz",
                               style: TextStyle(
-                                fontSize: 16.0,
-                                color: Colors.grey,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                'Hangisi sizin apartmanınız?',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                selectedApartmentName != 'Apartman Adı' && _isLoading == false ?
-                CustomDropdown<int>.search(
-                  hintText: 'Daire Numarası',
-                  items: _flatList,
-                  excludeSelected: false,
-                  onChanged: (value) {
-                    selectedFlatNumber = value;
-                  },
-                ) :
-                Container(
-                  padding: const  EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
-                  decoration: BoxDecoration(
-                    color: Colors.teal,
-                    borderRadius: BorderRadius.circular(6.0),
+                    ],
                   ),
-                  child: const Text('Öncelikle apartmanı seçmelisiniz',
-                    style: TextStyle(color: Colors.white),
-                  ),),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0,top: 18.0,right: 8.0,bottom: 8.0),
-                  child: ElevatedButton(
-                    onPressed:  () => storeData(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
+                  Row(
+                    children: [
+                      selectedRoleValue =='Apartman Yöneticisi' ?
+                      Expanded(
+                        flex: 1,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const CreateApartmentScreen()),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
+                          child: const Icon(Icons.add,color: Colors.white,),
+                        ),
+                      ):
+                      Expanded(
+                        flex: 1,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                          child: const Icon(Icons.add,color: Colors.white,),
+                        ),
+                      ),
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : Expanded(
+                        flex: 4,
+                        child: CustomDropdown<String>.search(
+                          hintText: selectedApartmentName,
+                          items: _apartmentList,
+                          excludeSelected: false,
+                          onChanged: (value) {
+                            setState(() {
+                              _isLoading = true;
+                              selectedApartmentName = value;
+                              updateFloorAndFlatLists(selectedApartmentName);
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.home_work,
+                          size: 60.0,),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Kat Numaranızı Seçiniz",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                'Hangisi sizin kat numaranız?',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  selectedApartmentName != 'Apartman Adı' && _isLoading == false ?
+                  CustomDropdown<int>.search(
+                    hintText: 'Kat Numarası',
+                    items: _floorList,
+                    excludeSelected: false,
+                    onChanged: (value) {
+                      selectedFloorNumber = value;
+                    },
+                  ) :
+                  Container(
+                    padding: const  EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(6.0),
                     ),
-                    child: const Text(
-                      'Kaydet',
-                      style: TextStyle(
-                        color: Colors.white,
+                    child: const Text('Öncelikle apartmanı seçmelisiniz',
+                      style: TextStyle(color: Colors.white),
+                    ),),
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(10.0),
+                        child: Icon(
+                          Icons.home_filled,
+                          size: 60.0,),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 24.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Daire Numaranızı Seçiniz",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                'Hangisi sizin daire numaranız?',
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  selectedApartmentName != 'Apartman Adı' && _isLoading == false ?
+                  CustomDropdown<int>.search(
+                    hintText: 'Daire Numarası',
+                    items: _flatList,
+                    excludeSelected: false,
+                    onChanged: (value) {
+                      selectedFlatNumber = value;
+                    },
+                  ) :
+                  Container(
+                    padding: const  EdgeInsets.only(left: 24.0,top: 5.0,right: 24.0,bottom: 5.0),
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    child: const Text('Öncelikle apartmanı seçmelisiniz',
+                      style: TextStyle(color: Colors.white),
+                    ),),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0,top: 18.0,right: 8.0,bottom: 8.0),
+                    child: ElevatedButton(
+                      onPressed:  () => storeData(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: const EdgeInsets.symmetric(horizontal: 70.0,vertical: 15.0),
+                      ),
+                      child: const Text(
+                        'Kaydet',
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Yardım',
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.question_mark,
-          color: Colors.white,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          tooltip: 'Yardım',
+          backgroundColor: Colors.teal,
+          child: const Icon(Icons.question_mark,
+            color: Colors.white,
+          ),
         ),
       ),
     );

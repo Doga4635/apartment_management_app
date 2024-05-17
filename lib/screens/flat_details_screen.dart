@@ -43,74 +43,80 @@ class FlatDetailsScreenState extends State<FlatDetailsScreen> {
         color: Colors.teal,
       ),
     )
-        : Scaffold(
-      appBar: AppBar(
-        title: const Text('Daire Ödemeleri'),
-      ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _firestore
-            .collection('paymentss')
-            .where('flatNo', isEqualTo: widget.selectedFlatNo)
-            .where('paid', isEqualTo: false)
-            .where('apartmentId', isEqualTo: currentUserApartmentId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error fetching data'));
-          }
-
-          List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
-              snapshot.data!.docs;
-
-          int totalBalance = 0;
-          for (var document in documents) {
-            final PaymentModel payment = PaymentModel.fromSnapshot(document);
-            totalBalance += int.parse(payment.price);
-          }
-
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                Text(
-                  'Toplam Apartman Borcu: $totalBalance',
-                  style: const TextStyle(color: Colors.red, fontSize: 18),
+        : GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+          child: Scaffold(
+                appBar: AppBar(
+          title: const Text('Daire Ödemeleri'),
                 ),
-                const Divider(),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: documents.length,
-                  itemBuilder: (context, index) {
-                    final PaymentModel payment = PaymentModel.fromSnapshot(documents[index]);
-                    final String apartmentName = payment.apartmentId;
-                    final String name = payment.name;
-                    final String description = payment.description;
-                    final String price = payment.price;
+                body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: _firestore
+              .collection('paymentss')
+              .where('flatNo', isEqualTo: widget.selectedFlatNo)
+              .where('paid', isEqualTo: false)
+              .where('apartmentId', isEqualTo: currentUserApartmentId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error fetching data'));
+            }
 
-                    return _buildPaymentCard(
-                      name: name,
-                      apartmentName: apartmentName,
-                      description: description,
-                      price: price,
-                      flatId: widget.selectedFlatNo, onPressed: () { // Add onPressed callback
-                      // Update the payment document to set paid to true
-                      _firestore.collection('paymentss').doc(payment.id).update(
-                        {'paid': true},
-                        // and back to the previous screen
+            List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
+                snapshot.data!.docs;
+
+            int totalBalance = 0;
+            for (var document in documents) {
+              final PaymentModel payment = PaymentModel.fromSnapshot(document);
+              totalBalance += int.parse(payment.price);
+            }
+
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(
+                    'Toplam Apartman Borcu: $totalBalance',
+                    style: const TextStyle(color: Colors.red, fontSize: 18),
+                  ),
+                  const Divider(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: documents.length,
+                    itemBuilder: (context, index) {
+                      final PaymentModel payment = PaymentModel.fromSnapshot(documents[index]);
+                      final String apartmentName = payment.apartmentId;
+                      final String name = payment.name;
+                      final String description = payment.description;
+                      final String price = payment.price;
+
+                      return _buildPaymentCard(
+                        name: name,
+                        apartmentName: apartmentName,
+                        description: description,
+                        price: price,
+                        flatId: widget.selectedFlatNo, onPressed: () { // Add onPressed callback
+                        // Update the payment document to set paid to true
+                        _firestore.collection('paymentss').doc(payment.id).update(
+                          {'paid': true},
+                          // and back to the previous screen
+                        );
+                      },
                       );
                     },
-                    );
-                  },
+                  ),
+                ],
+              ),
+            );
+          },
                 ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
+              ),
+        );
   }
 
   Widget _buildPaymentCard({

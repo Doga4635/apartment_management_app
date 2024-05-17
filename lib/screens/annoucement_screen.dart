@@ -64,8 +64,6 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
     for (DocumentSnapshot pollDoc in pollSnapshot.docs) {
       Timestamp? finishedAt = pollDoc['finishedAt'];
 
-      print(finishedAt);
-
       // Check if finishedAt exists and if it's in the past relative to now
       if (finishedAt != null && finishedAt.compareTo(now) < 0) {
         // Delete the message from Firestore
@@ -95,27 +93,33 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
           return Text('Error: ${snapshot.error}');
         } else {
           String userRole = snapshot.data ?? '';
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Duyurular / Oylamalar'),
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: _buildPollsSection(ap, userRole),
-                ),
-                userRole == 'Apartman Yöneticisi'
-                    ? _buildPollCreationButton(ap)
-                    : Container(),
-                Expanded(
-                  flex: 1,
-                  child: _buildMessagesSection(userRole),
-                ),
-                userRole == 'Apartman Yöneticisi'
-                    ? _buildMessageInputSection(ap)
-                    : Container(),
-              ],
+          return GestureDetector(
+            onTap: () {
+              // Dismiss the keyboard when user taps anywhere on the screen
+              FocusScope.of(context).unfocus();
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('Duyurular / Oylamalar'),
+              ),
+              body: Column(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: _buildPollsSection(ap, userRole),
+                  ),
+                  userRole == 'Apartman Yöneticisi'
+                      ? _buildPollCreationButton(ap)
+                      : Container(),
+                  Expanded(
+                    flex: 1,
+                    child: _buildMessagesSection(userRole),
+                  ),
+                  userRole == 'Apartman Yöneticisi'
+                      ? _buildMessageInputSection(ap)
+                      : Container(),
+                ],
+              ),
             ),
           );
         }
@@ -370,61 +374,72 @@ class AnnouncementScreenState extends State<AnnouncementScreen> {
                 actions: [
                   ElevatedButton(
                     onPressed: () async {
-                      final pollTitle = pollTitleController.text.trim();
-                      final pollOptions =
-                      pollOptionsController.text.trim().split(',');
-                      String? apartmentId = await getApartmentIdForUser(
-                          FirebaseAuth.instance.currentUser!.uid);
-                      final Timestamp now = Timestamp.now();
-                      final int daysInMilliseconds =
-                          int.parse(pollDaysController.text.trim()) *
-                              24 *
-                              60 *
-                              60 *
-                              1000;
-                      final Timestamp finishedAt =
-                      Timestamp.fromMillisecondsSinceEpoch(
-                          now.millisecondsSinceEpoch + daysInMilliseconds);
-
-                      Map<String, int> scores = {};
-                      for (int i = 0; i < pollOptions.length; i++) {
-                        scores[pollOptions[i]] = 0;
+                      if(pollTitleController.text.isEmpty) {
+                        showSnackBar('Oylama başlığını giriniz.');
                       }
+                      else if(pollOptionsController.text.isEmpty) {
+                        showSnackBar('Lütfen oylamanın seçeneklerini giriniz.');
+                      }
+                      else if(pollDaysController.text.isEmpty) {
+                        showSnackBar('Lütfen oylamanın kaç gün aktif kalacağını giriniz.');
+                      }
+                      else {
+                        final pollTitle = pollTitleController.text.trim();
+                        final pollOptions =
+                        pollOptionsController.text.trim().split(',');
+                        String? apartmentId = await getApartmentIdForUser(
+                            FirebaseAuth.instance.currentUser!.uid);
+                        final Timestamp now = Timestamp.now();
+                        final int daysInMilliseconds =
+                            int.parse(pollDaysController.text.trim()) *
+                                24 *
+                                60 *
+                                60 *
+                                1000;
+                        final Timestamp finishedAt =
+                        Timestamp.fromMillisecondsSinceEpoch(
+                            now.millisecondsSinceEpoch + daysInMilliseconds);
 
-                      if (pollTitle.isNotEmpty && pollOptions.isNotEmpty) {
-                        final pollModel = PollModel(
-                          id: generateRandomId(10),
-                          apartmentId: apartmentId!,
-                          title: pollTitle,
-                          options: pollOptions,
-                          scores: scores,
-                          createdAt: Timestamp.now(),
-                          finishedAt: finishedAt,
-                        );
-
-                        await FirebaseFirestore.instance
-                            .collection('polls')
-                            .doc(pollModel.id)
-                            .set(pollModel.toMap());
-
-                        QuerySnapshot flatSnapshot = await FirebaseFirestore
-                            .instance
-                            .collection('flats')
-                            .where('apartmentId', isEqualTo: apartmentId)
-                            .where('role', isNotEqualTo: 'Apartman Yöneticisi')
-                            .get();
-
-                        if (flatSnapshot.docs.isNotEmpty) {
-                          for (var flat in flatSnapshot.docs) {
-                            sendNotificationToResident(
-                                flat.id, 'Yönetici bir oylama başlattı.');
-                          }
+                        Map<String, int> scores = {};
+                        for (int i = 0; i < pollOptions.length; i++) {
+                          scores[pollOptions[i]] = 0;
                         }
 
-                        Navigator.pop(context);
-                        showSnackBar('Oylama oluşturuldu.');
-                      } else {
-                        showSnackBar('Lütfen tüm alanları doldurun.');
+                        if (pollTitle.isNotEmpty && pollOptions.isNotEmpty) {
+                          final pollModel = PollModel(
+                            id: generateRandomId(10),
+                            apartmentId: apartmentId!,
+                            title: pollTitle,
+                            options: pollOptions,
+                            scores: scores,
+                            createdAt: Timestamp.now(),
+                            finishedAt: finishedAt,
+                          );
+
+                          await FirebaseFirestore.instance
+                              .collection('polls')
+                              .doc(pollModel.id)
+                              .set(pollModel.toMap());
+
+                          QuerySnapshot flatSnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('flats')
+                              .where('apartmentId', isEqualTo: apartmentId)
+                              .where('role', isNotEqualTo: 'Apartman Yöneticisi')
+                              .get();
+
+                          if (flatSnapshot.docs.isNotEmpty) {
+                            for (var flat in flatSnapshot.docs) {
+                              sendNotificationToResident(
+                                  flat.id, 'Yönetici bir oylama başlattı.');
+                            }
+                          }
+
+                          Navigator.pop(context);
+                          showSnackBar('Oylama oluşturuldu.');
+                        } else {
+                          showSnackBar('Lütfen tüm alanları doldurun.');
+                        }
                       }
                     },
                     child: const Text(

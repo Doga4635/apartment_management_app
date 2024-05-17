@@ -34,72 +34,78 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Çöp Takibi',
-          style: TextStyle(
-            fontSize: 26,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text(
+            'Çöp Takibi',
+            style: TextStyle(
+              fontSize: 26,
+            ),
           ),
-        ),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-
-              String currentUserUid = ap.userModel.uid;
-
-              //Checking if the user has more than 1 role
-              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                  .collection('flats')
-                  .where('uid', isEqualTo: currentUserUid)
-                  .get();
-
-              if (querySnapshot.docs.length > 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
-                );
-              }
-              else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                );
-              }
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
             },
-            icon: const Icon(Icons.person),
           ),
-          IconButton(
-              onPressed: () {
-                ap.userSignOut().then((value) => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WelcomeScreen(),
-                  ),
-                ),
-                );
+          actions: [
+            IconButton(
+              onPressed: () async {
+
+                String currentUserUid = ap.userModel.uid;
+
+                //Checking if the user has more than 1 role
+                QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    .collection('flats')
+                    .where('uid', isEqualTo: currentUserUid)
+                    .get();
+
+                if (querySnapshot.docs.length > 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  );
+                }
+                else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                  );
+                }
               },
-              icon: const Icon(Icons.exit_to_app)
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: _isLoading == true ? const Center(child: CircularProgressIndicator(
-          color: Colors.teal,
-        )) : Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Build floor list with garbage status icons
-              buildFloorList(),
-            ],
+              icon: const Icon(Icons.person),
+            ),
+            IconButton(
+                onPressed: () {
+                  ap.userSignOut().then((value) => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WelcomeScreen(),
+                    ),
+                  ),
+                  );
+                },
+                icon: const Icon(Icons.exit_to_app)
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: _isLoading == true ? const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          )) : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // Build floor list with garbage status icons
+                buildFloorList(),
+              ],
+            ),
           ),
         ),
       ),
@@ -161,6 +167,7 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
                 List<FlatModel> flats = snapshot.data!.docs
                     .map((doc) => FlatModel.fromSnapshot(doc))
                     .toList();
+                flats.sort((a, b) => int.parse(a.flatNo).compareTo(int.parse(b.flatNo)));
                 return Column(
                   children: flats.map((flat) {
                     return ListTile(
@@ -192,66 +199,6 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
       showSnackBar('Çöp atımında hata oldu.');
     });
   }
-
-
-  // void sendNotificationToResident(String flatId) async {
-  //   String? uid;
-  //   String serverKey = 'AAAA-IJA9G4:APA91bGibOwdCxMOkoJKMcO5kzIZtYpXzYDOggE8qNJ4K-jFTZ2miuCqjoD0tfSU4olwyqOhNukvniWuSNEBCZiYMHmSjxb77qF46t3JsrnviwxKQrjyFV3ygKvD5t5H7mqodPK2VU5z';
-  //
-  //   try {
-  //     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //         .collection('flats')
-  //         .where('flatId', isEqualTo: flatId)
-  //         .get();
-  //
-  //     if (querySnapshot.docs.isNotEmpty) {
-  //       uid = querySnapshot.docs.first['uid'];
-  //     }
-  //   } catch (error) {
-  //     showSnackBar('Apartman ismi alınamadı.');
-  //   }
-  //
-  //   UserModel? userModel = await getUserById(uid);
-  //
-  //   // Define the endpoint URL of your FCM server
-  //   String url = 'https://fcm.googleapis.com/fcm/send';
-  //
-  //   // Define the headers required for sending a notification
-  //   Map<String, String> headers = {
-  //     'Content-Type': 'application/json',
-  //     'Authorization': 'key=$serverKey',
-  //   };
-  //
-  //   // Define the notification message
-  //   Map<String, dynamic> notification = {
-  //     'notification': {
-  //       'title': '${userModel!.apartmentName} Daire: ${userModel.flatNumber}',
-  //       'body': 'Çöpünüz atıldı'},
-  //     'to': userModel.deviceToken,
-  //   };
-  //
-  //   // Convert the notification message to JSON format
-  //   String jsonBody = json.encode(notification);
-  //
-  //   try {
-  //     // Send the notification using HTTP POST request
-  //     final http.Response response = await http.post(
-  //       Uri.parse(url),
-  //       headers: headers,
-  //       body: jsonBody,
-  //     );
-  //
-  //     // Check the response status
-  //     if (response.statusCode == 200) {
-  //       print('Notification sent successfully.');
-  //     } else {
-  //       print('Failed to send notification. Status code: ${response.statusCode}');
-  //       print('Response body: ${response.body}');
-  //     }
-  //   } catch (e) {
-  //     print('Error sending notification: $e');
-  //   }
-  // }
 
 
   void updateFloorAndFlatLists(String uid) async {

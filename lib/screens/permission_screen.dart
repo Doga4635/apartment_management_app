@@ -29,125 +29,131 @@ class PermissionScreenState extends State<PermissionScreen> {
   @override
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Bekleyen İzinler', style: TextStyle(fontSize: 24)),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true)));
-          },
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text('Bekleyen İzinler', style: TextStyle(fontSize: 24)),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true)));
+            },
+          ),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                String currentUserUid = ap.userModel.uid;
+
+                //Checking if the user has more than 1 role
+                QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    .collection('flats')
+                    .where('uid', isEqualTo: currentUserUid)
+                    .get();
+
+                if (querySnapshot.docs.length > 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+
+                  );
+                }
+              },
+              icon: const Icon(Icons.person),
+            ),
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                ));
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              String currentUserUid = ap.userModel.uid;
-
-              //Checking if the user has more than 1 role
-              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                  .collection('flats')
-                  .where('uid', isEqualTo: currentUserUid)
-                  .get();
-
-              if (querySnapshot.docs.length > 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
-                );
+        body: SafeArea(
+          child: FutureBuilder<String?>(
+            future: getApartmentIdForUser(ap.userModel.uid),
+            builder: (context, apartmentIdSnapshot) {
+              if (apartmentIdSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (apartmentIdSnapshot.hasError) {
+                return const Text('Apartman adı alınırken sorun oluştu.');
               } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                return StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('flats')
+                      .where('isAllowed', isEqualTo: false)
+                      .where('apartmentId', isEqualTo: apartmentIdSnapshot.data)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return const Text('Veriler alınırken hata oluştu.');
+                    } else {
+                      List<FlatModel> flats = snapshot.data!.docs
+                          .map((doc) => FlatModel.fromSnapshot(doc))
+                          .toList();
+                      return ListView.builder(
+                        itemCount: flats.length,
+                        itemBuilder: (context, index) {
+                          return FutureBuilder<UserModel?>(
+                            future: getUserById(flats[index].uid),
+                            builder: (context, userSnapshot) {
+                              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (userSnapshot.hasError) {
+                                return const Text('Error fetching user data');
+                              } else {
+                                UserModel? user = userSnapshot.data;
+                                if (user != null) {
+                                  return ListTile(
+                                    title: Text(user.name),
+                                    leading: Text('No: ${flats[index].flatNo}',style: const TextStyle(fontSize: 14),),
+                                    subtitle: Text(flats[index].role),
+                                    trailing: SizedBox(
+                                      width: 100,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            icon: const Icon(Icons.check, color: Colors.teal),
+                                            onPressed: () => _removeFlat(flats[index].flatId, true),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.close, color: Colors.red),
+                                            onPressed: () => _removeFlat(flats[index].flatId, false),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  return const Text('User not found');
+                                }
+                              }
+                            },
+                          );
+                        },
+                      );
 
+                    }
+                  },
                 );
               }
             },
-            icon: const Icon(Icons.person),
           ),
-          IconButton(
-            onPressed: () {
-              ap.userSignOut().then((value) => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-              ));
-            },
-            icon: const Icon(Icons.exit_to_app),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: FutureBuilder<String?>(
-          future: getApartmentIdForUser(ap.userModel.uid),
-          builder: (context, apartmentIdSnapshot) {
-            if (apartmentIdSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (apartmentIdSnapshot.hasError) {
-              return const Text('Apartman adı alınırken sorun oluştu.');
-            } else {
-              return StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('flats')
-                    .where('isAllowed', isEqualTo: false)
-                    .where('apartmentId', isEqualTo: apartmentIdSnapshot.data)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return const Text('Veriler alınırken hata oluştu.');
-                  } else {
-                    List<FlatModel> flats = snapshot.data!.docs
-                        .map((doc) => FlatModel.fromSnapshot(doc))
-                        .toList();
-                    return ListView.builder(
-                      itemCount: flats.length,
-                      itemBuilder: (context, index) {
-                        return FutureBuilder<UserModel?>(
-                          future: getUserById(flats[index].uid),
-                          builder: (context, userSnapshot) {
-                            if (userSnapshot.connectionState == ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            } else if (userSnapshot.hasError) {
-                              return const Text('Error fetching user data');
-                            } else {
-                              UserModel? user = userSnapshot.data;
-                              if (user != null) {
-                                return ListTile(
-                                  title: Text(user.name),
-                                  leading: Text('No: ${flats[index].flatNo}',style: const TextStyle(fontSize: 14),),
-                                  subtitle: Text(flats[index].role),
-                                  trailing: SizedBox(
-                                    width: 100,
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.check, color: Colors.teal),
-                                          onPressed: () => _removeFlat(flats[index].flatId, true),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.close, color: Colors.red),
-                                          onPressed: () => _removeFlat(flats[index].flatId, false),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return const Text('User not found');
-                              }
-                            }
-                          },
-                        );
-                      },
-                    );
-
-                  }
-                },
-              );
-            }
-          },
         ),
       ),
     );

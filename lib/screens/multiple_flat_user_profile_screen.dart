@@ -46,6 +46,40 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
       // Delete the flat document from Firestore
       await FirebaseFirestore.instance.collection('flats').doc(flatIdToDelete).delete();
 
+      QuerySnapshot listSnapshot = await FirebaseFirestore.instance
+          .collection('lists')
+          .where('flatId', isEqualTo: flatIdToDelete)
+          .get();
+
+      List<DocumentSnapshot> listDocuments = listSnapshot.docs;
+
+      for (DocumentSnapshot document in listDocuments) {
+        String listId = document.id;
+
+        // Delete the document
+        await FirebaseFirestore.instance
+            .collection('lists')
+            .doc(listId)
+            .delete();
+      }
+
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('orders')
+          .where('flatId', isEqualTo: flatIdToDelete)
+          .get();
+
+      List<DocumentSnapshot> orderDocuments = querySnapshot.docs;
+
+      for (DocumentSnapshot document in orderDocuments) {
+        String orderId = document.id;
+
+        // Delete the document
+        await FirebaseFirestore.instance
+            .collection('orders')
+            .doc(orderId)
+            .delete();
+      }
+
       // Remove the flat from the lists
       setState(() {
         flatList.removeAt(index);
@@ -56,303 +90,305 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
       showSnackBar('Daire başarılı bir şekilde silindi.');
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profil',
-          style: TextStyle(
-            fontSize: 28,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Profil',
+            style: TextStyle(
+              fontSize: 28,
+            ),
           ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(FontAwesomeIcons.angleLeft),
-        ),
-        actions: [
-          IconButton(
+          leading: IconButton(
             onPressed: () {
-              ap.userSignOut().then(
-                    (value) => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WelcomeScreen(),
-                  ),
-                ),
-              );
+              Navigator.pop(context);
             },
-            icon: const Icon(Icons.exit_to_app),
+            icon: const Icon(FontAwesomeIcons.angleLeft),
           ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        ap.userModel.name,
-                        style: const TextStyle(fontSize: 32),
-                        textAlign: TextAlign.start,
-                      ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then(
+                      (value) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WelcomeScreen(),
                     ),
-                    const SizedBox(height: 8.0),
-
-                    const SizedBox(height: 8.0),
-
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: role,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            return Text(
-                              snapshot.data ?? '',
-                              style: const TextStyle(fontSize: 22),
-                              textAlign: TextAlign.left,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: apartmentName,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            return Text(
-                              snapshot.data ?? '',
-                              style: const TextStyle(fontSize: 22),
-                              textAlign: TextAlign.left,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Container(
-                      alignment: Alignment.centerLeft,
-                      child: FutureBuilder<String?>(
-                        future: flatNumber,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            const String defaultText = 'Daire: '; // Prefix text
-                            final String flatNumberText = snapshot.data ?? '';
-
-                            return Text(
-                              '$defaultText$flatNumberText', // Concatenate the prefix with flat number
-                              style: const TextStyle(fontSize: 22),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-
-
-                  ],
-
-                ),
-              ),
-
-              const SizedBox(height: 28.0),
-
-              Expanded(
-                child:Container(
-                  width: 350.0,
-                  height: 330.0,
-
-
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey, width: 1.0),
                   ),
+                );
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          ap.userModel.name,
+                          style: const TextStyle(fontSize: 32),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
 
-                  child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    itemCount: flatList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal[50],
-                                  minimumSize: const Size(250, 85),
-                                ),
-                                onPressed: () async {
-                                  String selectedFlatId = flatIDList[index];
-                                  await updateSelectedFlatIdentityFalse(currentUserUid);
-                                  await updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
-                                  updateUserIdentity(currentUserUid, selectedFlatId);
-                                  getAllowedForUser(currentUserUid).then((value) {
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
+                      const SizedBox(height: 8.0),
 
-                                    /*
-                                  setState(() {
-                                    apartmentName = getUserApartmentName(currentUserUid);
-                                    role = getUserRole(currentUserUid);
-                                    flatNumber = getUserFlatNumber(currentUserUid);
-                                  });
-                                  */
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: role,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: apartmentName,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              return Text(
+                                snapshot.data ?? '',
+                                style: const TextStyle(fontSize: 22),
+                                textAlign: TextAlign.left,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8.0),
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: FutureBuilder<String?>(
+                          future: flatNumber,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              const String defaultText = 'Daire: '; // Prefix text
+                              final String flatNumberText = snapshot.data ?? '';
 
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => MainScreen(isAllowed: value)),
-                                    );
-
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                                      content: Text('Daire başarıyla değiştirildi.'),
-                                    ));
-                                  });
-
+                              return Text(
+                                '$defaultText$flatNumberText', // Concatenate the prefix with flat number
+                                style: const TextStyle(fontSize: 22),
+                              );
+                            }
+                          },
+                        ),
+                      ),
 
 
-                                },
-                                child: Text(
-                                  '${apartmentList[index]}\n Daire: ${flatList[index]}',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20,
+                    ],
+
+                  ),
+                ),
+
+                const SizedBox(height: 28.0),
+
+                Expanded(
+                  child:Container(
+                    width: 350.0,
+                    height: 330.0,
+
+
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey, width: 1.0),
+                    ),
+
+                    child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: flatList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.teal[50],
+                                    minimumSize: const Size(250, 85),
+                                  ),
+                                  onPressed: () async {
+                                    String selectedFlatId = flatIDList[index];
+                                    await updateSelectedFlatIdentityFalse(currentUserUid);
+                                    await updateSelectedFlatIdentityTrue(currentUserUid, selectedFlatId);
+                                    updateUserIdentity(currentUserUid, selectedFlatId);
+                                    getAllowedForUser(currentUserUid).then((isAllowed) {
+                                      navigateToMainScreen(context, isAllowed);
+                                    });
+
+                                  },
+                                  child: Text(
+                                    '${apartmentList[index]}\n Daire: ${flatList[index]}',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 20,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 10),
-                            IconButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Daireyi Sil"),
-                                      content: const Text("Bu daireyi silmek istediğinizden emin misiniz?"),
-                                      actions: [
-                                        ElevatedButton(
-                                          child: const Text("İptal"),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                        ElevatedButton(
-                                          child: const Text("Sil"),
-                                          onPressed: () {
-                                            deleteFlat(index);
-                                            Navigator.of(context).pop();
-                                            if (flatList.isEmpty){
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                                              );
-                                            }
+                              const SizedBox(width: 10),
+                              IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Daireyi Sil"),
+                                        content: const Text("Bu daireyi silmek istediğinizden emin misiniz?"),
+                                        actions: [
+                                          ElevatedButton(
+                                            child: const Text("İptal"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                          ElevatedButton(
+                                            child: const Text("Sil"),
+                                            onPressed: () {
+                                              deleteFlat(index);
+                                              Navigator.of(context).pop();
+                                              if (flatList.isEmpty){
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                                                );
+                                              }
 
-                                          },
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              icon: const Icon(Icons.delete),
-                              color: Colors.red,
-                              iconSize: 30,
-                            ),
-
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Icons.delete),
+                                color: Colors.red,
+                                iconSize: 30,
+                              ),
 
 
-                          ],
-                        ),
-                      );
-                    },
+
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+
+
+
                   ),
-
-
-
                 ),
-              ),
 
-              const SizedBox(height: 30.0),
-
+                const SizedBox(height: 30.0),
 
 
-              ElevatedButton(
+
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddFlatScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(210, 50),
+                  ),
+                  child: const Text(
+                    "Daire Ekle",
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AddFlatScreen()),
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(210, 50),
-                ),
-                child: const Text(
-                  "Daire Ekle",
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
-                  ),
+                tooltip: 'Yardım',
+                backgroundColor: Colors.teal,
+                child: const Icon(
+                  Icons.question_mark,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const YardimScreen()),
-                );
-              },
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   editProfileButton({required Null Function() onPressed}) {}
+}
+
+void navigateToMainScreen(BuildContext context, bool isAllowed) {
+  Navigator.of(context).pop();
+  Navigator.of(context).pop();
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => MainScreen(isAllowed: isAllowed),
+    ),
+  );
+
+  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+    content: Text('Daire başarıyla değiştirildi.'),
+  ));
 }
 
 Future<void> updateSelectedFlatIdentityFalse(String currentUserUid) async {
