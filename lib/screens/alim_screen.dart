@@ -73,6 +73,7 @@ class AlimScreenState extends State<AlimScreen> {
     Map<String, List<Map<String, dynamic>>> productsDetailsMap = {};
     Map<String, TextEditingController> priceControllersMap = {};
     Map<String, int> productAmounts = {};
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -91,82 +92,68 @@ class AlimScreenState extends State<AlimScreen> {
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else {
-                  // Map to hold price controllers for each product
                   List<OrderModel> orders = snapshot.data!.docs
                       .map((doc) => OrderModel.fromSnapshot(doc))
-                      .where((order) => order.days.contains(_currentDay)
-                      || order.days.contains('Bir kez') // Filter out payments where paid is true
-                  ) // Filter out payments where paid is true
+                      .where((order) => order.days.contains(_currentDay) || order.days.contains('Bir kez'))
                       .toList();
 
-                  for(var order in orders) {
+                  for (var order in orders) {
                     String productName = order.name;
                     String details = order.details;
                     int productAmount = order.amount;
 
-                    // For showing non-detailed orders
-                    if (details == "") {
+                    if (details.isEmpty) {
                       details = "Normal";
                     }
 
-                    addOrUpdateOrder(productsDetailsMap,productAmounts,productName,details,productAmount);
+                    addOrUpdateOrder(productsDetailsMap, productAmounts, productName, details, productAmount);
 
-
-                    // Initialize price controllers map
-                    priceControllersMap[details] = TextEditingController(text: order.price.toString());
+                    if (!priceControllersMap.containsKey(details)) {
+                      priceControllersMap[details] = TextEditingController(text: order.price.toString());
+                    }
                   }
 
-                  List<Widget> productWidgets = [];
+                  List<Widget> productWidgets = productsDetailsMap.entries.map((entry) {
+                    String productName = entry.key;
+                    List<Map<String, dynamic>> orders = entry.value;
 
-                  productsDetailsMap.forEach((productName, orders) {
-
-                    List<Widget> orderWidgets = [];
-                    for (var order in orders) {
-                      orderWidgets.add(
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0,
-                                  top: 8.0,
-                                  right: 16.0,
-                                  bottom: 8.0),
-                              child: Text('${order['details']}: ${order['amount']}',
-                                  style: const TextStyle(fontSize: 14)),
-                            ),
-                            SizedBox(
-                              width: 40,
-                              // Adjust width according to your preference
-                              height: 15,
-                              child: TextField(
-                                controller: priceControllersMap[order['details']],
-                                keyboardType: TextInputType.number,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            const Text(' TL '),
-                          ],
-                        ),
-                      );
-                    }
-                    productWidgets.add(
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    List<Widget> orderWidgets = orders.map((order) {
+                      String details = order['details'];
+                      return Row(
                         children: [
-                          Text('> $productName - ${productAmounts[productName]}', style: const TextStyle(fontSize: 16)),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: orderWidgets,
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 8.0, right: 16.0, bottom: 8.0),
+                            child: Text('$details: ${order['amount']}', style: const TextStyle(fontSize: 14)),
                           ),
+                          SizedBox(
+                            width: 40,
+                            height: 15,
+                            child: TextField(
+                              controller: priceControllersMap[details],
+                              keyboardType: TextInputType.number,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          const Text(' TL '),
                         ],
-                      ),
+                      );
+                    }).toList();
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('> $productName - ${productAmounts[productName]}', style: const TextStyle(fontSize: 16)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: orderWidgets,
+                        ),
+                      ],
                     );
-                  });
+                  }).toList();
 
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ...productWidgets,
-                    ],
+                    children: productWidgets,
                   );
                 }
               },
@@ -177,21 +164,23 @@ class AlimScreenState extends State<AlimScreen> {
                 children: [
                   TextButton(
                     onPressed: () async {
-                      // Save the prices to orders
                       for (var productOrders in productsDetailsMap.entries) {
+                        String productName = productOrders.key;
                         List<Map<String, dynamic>> orders = productOrders.value;
 
                         for (var order in orders) {
-                          String productName = order['productName'];
-                          String details = order['details'];
-                          TextEditingController priceController = priceControllersMap[details]!;
-                          String newPrice = priceController.text;
-
-                          List<String> orderId = await getOrderIds(productName, details);
-                          for (String id in orderId) {
-                            FirebaseFirestore.instance.collection('orders').doc(id).update({
-                              'price': double.parse(newPrice),
-                            });
+                          String? details = order['details'];
+                          if (details != null) {
+                            TextEditingController? priceController = priceControllersMap[details];
+                            if (priceController != null) {
+                              String newPrice = priceController.text;
+                              List<String> orderId = await getOrderIds(productName, details);
+                              for (String id in orderId) {
+                                await FirebaseFirestore.instance.collection('orders').doc(id).update({
+                                  'price': double.parse(newPrice),
+                                });
+                              }
+                            }
                           }
                         }
                       }
