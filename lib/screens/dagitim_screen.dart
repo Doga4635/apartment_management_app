@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/apartment_model.dart';
 import '../models/flat_model.dart';
+import '../models/order_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
-import 'ana_menü_yardım_screen.dart';
 import 'flat_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
@@ -81,108 +81,93 @@ class DagitimScreenState extends State<DagitimScreen> {
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Dağıtım',
-          style: TextStyle(
-            fontSize: 26,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          title: const Text(
+            'Dağıtım',
+            style: TextStyle(
+              fontSize: 26,
+            ),
+          ),
+          backgroundColor: Colors.teal,
+          actions: [
+            IconButton(
+              onPressed: () async {
+                String currentUserUid = ap.userModel.uid;
+                //Checking if the user has more than 1 role
+                QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    .collection('flats')
+                    .where('uid', isEqualTo: currentUserUid)
+                    .get();
+
+
+                if (querySnapshot.docs.length > 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  );
+                }
+                else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                  );
+                }
+              },
+              icon: const Icon(Icons.person),
+            ),
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                ));
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: _isLoading == true ? const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          )) : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // Build floor list with garbage status icons
+                buildFloorList(),
+              ],
+            ),
           ),
         ),
-        backgroundColor: Colors.teal,
-        actions: [
-          IconButton(
-            onPressed: () async {
-              String currentUserUid = ap.userModel.uid;
-              //Checking if the user has more than 1 role
-              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                  .collection('flats')
-                  .where('uid', isEqualTo: currentUserUid)
-                  .get();
-
-
-              if (querySnapshot.docs.length > 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
-                );
-              }
-              else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                );
-              }
-            },
-            icon: const Icon(Icons.person),
-          ),
-          IconButton(
-            onPressed: () {
-              ap.userSignOut().then((value) => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-              ));
-            },
-            icon: const Icon(Icons.exit_to_app),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: _isLoading == true ? const Center(child: CircularProgressIndicator(
-          color: Colors.teal,
-        )) : Center(
-          child: Column(
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Build floor list with garbage status icons
-              buildFloorList(),
+            mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min
+            children: [
+              const Text(
+                'Toplam Bakiye:  ',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '${totalApartmentBalance!.abs()} TL',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: totalApartmentBalance!.isNegative ? Colors.red : Colors.teal,
+                ),
+              ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Adjust alignment to space between
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min, // Set mainAxisSize to min for the text widgets
-              children: [
-                const Text(
-                  'Toplam Bakiye:  ',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  '${totalApartmentBalance!.abs()} TL',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: totalApartmentBalance!.isNegative ? Colors.red : Colors.teal,
-                  ),
-                ),
-              ],
-            ),
-            FloatingActionButton(
-              heroTag: "btn2",
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const YardimScreen()),
-                );
-              },
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-
-
     );
   }
 
@@ -199,7 +184,6 @@ class DagitimScreenState extends State<DagitimScreen> {
                 .collection('orders')
                 .where('floorNo', isEqualTo: floor.toString())
                 .where('apartmentId', isEqualTo: selectedApartment!)
-                .where('days', arrayContains: _currentDay)
                 .snapshots(),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -207,7 +191,13 @@ class DagitimScreenState extends State<DagitimScreen> {
               } else if (snapshot.hasError) {
                 return const Icon(Icons.error);
               } else {
-                bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                List<OrderModel> orders = snapshot.data!.docs
+                    .map((doc) => OrderModel.fromSnapshot(doc))
+                    .where((order) => order.days.contains(_currentDay)
+                    || order.days.contains('Bir kez') // Filter out payments where paid is true
+                ) // Filter out payments where paid is true
+                    .toList();
+                bool hasGrocery = orders.isNotEmpty;
                 if (hasGrocery) {
                   bool allOrdersDelivered = true;
                   for (var doc in snapshot.data!.docs) {
@@ -296,7 +286,6 @@ class DagitimScreenState extends State<DagitimScreen> {
                               .where('floorNo', isEqualTo: floor.toString())
                               .where('flatNo', isEqualTo: flat.flatNo)
                               .where('apartmentId', isEqualTo: selectedApartment!)
-                              .where('days', arrayContains: _currentDay)
                               .snapshots(),
                           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -304,7 +293,13 @@ class DagitimScreenState extends State<DagitimScreen> {
                             } else if (snapshot.hasError) {
                               return const Icon(Icons.error);
                             } else {
-                              bool hasGrocery = snapshot.data?.docs.isNotEmpty ?? false;
+                              List<OrderModel> orders = snapshot.data!.docs
+                                  .map((doc) => OrderModel.fromSnapshot(doc))
+                                  .where((order) => order.days.contains(_currentDay)
+                                  || order.days.contains('Bir kez') // Filter out payments where paid is true
+                              ) // Filter out payments where paid is true
+                                  .toList();
+                              bool hasGrocery = orders.isNotEmpty;
                               if (hasGrocery) {
                                 bool allOrdersDelivered = true;
                                 for (var doc in snapshot.data!.docs) {

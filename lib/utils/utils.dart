@@ -343,19 +343,6 @@ Future<bool> getAllowedForUser(String uid) async {
     if (querySnapshot.docs.isNotEmpty) {
       isAllowed = querySnapshot.docs.first['isAllowed'];
     }
-    // else {
-    //   QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-    //       .collection('flats')
-    //       .where('uid', isEqualTo: uid)
-    //       .get();
-    //
-    //   var doc = querySnapshot.docs.first;
-    //   var docId = doc.id;
-    //   isAllowed = doc['isAllowed'];
-    //   FirebaseFirestore.instance.collection('flats').doc(docId).update({
-    //     'selectedFlat': true,
-    //   });
-    // }
   } catch (error) {
     showSnackBar('Daire ismi alınamadı.');
   }

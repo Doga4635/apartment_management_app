@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:apartment_management_app/utils/utils.dart';
-
 import '../services/auth_supplier.dart';
 import 'alisveris_listesi_screen.dart';
 import 'ana_menü_yardım_screen.dart';
@@ -50,230 +49,236 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
           return Text('Error: ${snapshot.error}');
         } else {
           String userRole = snapshot.data ?? ''; // Get the user's role from the snapshot
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                'Kapıcı İşlemleri',
-                style: TextStyle(
-                  fontSize: 26,
+          return GestureDetector(
+            onTap: () {
+              // Dismiss the keyboard when user taps anywhere on the screen
+              FocusScope.of(context).unfocus();
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text(
+                  'Kapıcı İşlemleri',
+                  style: TextStyle(
+                    fontSize: 26,
+                  ),
                 ),
-              ),
-              backgroundColor: Colors.teal,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
-                },
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () async {
-
-                    String currentUserUid = ap.userModel.uid;
-
-                    //Checking if the user has more than 1 role
-                    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                        .collection('flats')
-                        .where('uid', isEqualTo: currentUserUid)
-                        .get();
-
-                    if (querySnapshot.docs.length > 1) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
-                      );
-                    }
-                    else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-                      );
-                    }
+                backgroundColor: Colors.teal,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
                   },
-                  icon: const Icon(Icons.person),
                 ),
-                IconButton(
-                    onPressed: () {
-                      ap.userSignOut().then((value) => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const WelcomeScreen(),
-                        ),
-                      ),
-                      );
-                    },
-                    icon: const Icon(Icons.exit_to_app)
-                ),
-              ],
-            ),
-            body: SafeArea(
-              child: _isLoading ? const Center(child: CircularProgressIndicator(
-                color: Colors.teal,
-              )) : Center(
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 80.0,
-                    ),
-                    Container(
-                      height: 180,
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      child: Image.asset(
-                        "images/kapıcı.jpg",
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-                    const SizedBox(height: 80),
-                    ElevatedButton(
-                      onPressed: () {
-                        if(userRole == "Kapıcı") {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
-                          );
-                        }
-                        else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const GroceryListScreen()),
-                          );                      }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                      ),
-                      child: const Text(
-                        'Kapıcıya Alışveriş Listesi',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20.0,
-                    ),
-                    userRole == 'Kapıcı' // Show button for 'Doorman'
-                        ? ElevatedButton(
-                      onPressed: () {
-                        // Handle button tap for Doorman
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
+                actions: [
+                  IconButton(
+                    onPressed: () async {
 
+                      String currentUserUid = ap.userModel.uid;
+
+                      //Checking if the user has more than 1 role
+                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                          .collection('flats')
+                          .where('uid', isEqualTo: currentUserUid)
+                          .get();
+
+                      if (querySnapshot.docs.length > 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                        );
+                      }
+                      else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.person),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        ap.userSignOut().then((value) => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WelcomeScreen(),
+                          ),
+                        ),
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                      icon: const Icon(Icons.exit_to_app)
+                  ),
+                ],
+              ),
+              body: SafeArea(
+                child: _isLoading ? const Center(child: CircularProgressIndicator(
+                  color: Colors.teal,
+                )) : Center(
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 80.0,
                       ),
-                      child: const Text(
-                        'Çöp Takibi',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w400,
+                      Container(
+                        height: 180,
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        child: Image.asset(
+                          "images/kapıcı.jpg",
+                          fit: BoxFit.contain,
                         ),
                       ),
-                    )
-                        : Container(
-                      height: 45.0,
-                      width: 300.0,
-                      decoration: const BoxDecoration(
-                        color: Colors.teal,
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      child: FutureBuilder<bool>(
-                        future: ap.getGarbage('garbage'),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.teal,
-                                ));
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else {
-                            bool isThereGarbage = snapshot.data ?? false;
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 20.0),
-                                  child: Text(
-                                    "Çöpüm var",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                ),
-                                ToggleSwitch(
-                                  minWidth: 60.0,
-                                  minHeight: 35.0,
-                                  cornerRadius: 20.0,
-                                  activeBgColors: [
-                                    [Colors.green[800]!],
-                                    [Colors.red[800]!]
-                                  ],
-                                  activeFgColor: Colors.white,
-                                  inactiveBgColor: Colors.grey,
-                                  inactiveFgColor: Colors.white,
-                                  initialLabelIndex: isThereGarbage ? 0 : 1,
-                                  totalSwitches: 2,
-                                  labels: const ['Evet', 'Hayır'],
-                                  radiusStyle: true,
-                                  onToggle: (index) async {
-                                    toggleSwitchProvider.setCurrentIndex(
-                                        index!);
-                                    if (index == 0) {
-                                      _applyGarbage();
-                                    }
-                                    else {
-                                      _removeGarbage();
-                                    }
-                                  },
-                                ),
-                              ],
+                      const SizedBox(height: 80),
+                      ElevatedButton(
+                        onPressed: () {
+                          if(userRole == "Kapıcı") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AlisverisListesiScreen()),
                             );
                           }
-                        }
-                      ),),
-                  ],
+                          else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const GroceryListScreen()),
+                            );                      }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                        ),
+                        child: const Text(
+                          'Kapıcıya Alışveriş Listesi',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      userRole == 'Kapıcı' // Show button for 'Doorman'
+                          ? ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap for Doorman
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const TrashTrackingScreen()));
+
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                        ),
+                        child: const Text(
+                          'Çöp Takibi',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      )
+                          : Container(
+                        height: 45.0,
+                        width: 300.0,
+                        decoration: const BoxDecoration(
+                          color: Colors.teal,
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        child: FutureBuilder<bool>(
+                          future: ap.getGarbage('garbage'),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.teal,
+                                  ));
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              bool isThereGarbage = snapshot.data ?? false;
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 20.0),
+                                    child: Text(
+                                      "Çöpüm var",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                  ToggleSwitch(
+                                    minWidth: 60.0,
+                                    minHeight: 35.0,
+                                    cornerRadius: 20.0,
+                                    activeBgColors: [
+                                      [Colors.green[800]!],
+                                      [Colors.red[800]!]
+                                    ],
+                                    activeFgColor: Colors.white,
+                                    inactiveBgColor: Colors.grey,
+                                    inactiveFgColor: Colors.white,
+                                    initialLabelIndex: isThereGarbage ? 0 : 1,
+                                    totalSwitches: 2,
+                                    labels: const ['Evet', 'Hayır'],
+                                    radiusStyle: true,
+                                    onToggle: (index) async {
+                                      toggleSwitchProvider.setCurrentIndex(
+                                          index!);
+                                      if (index == 0) {
+                                        _applyGarbage();
+                                      }
+                                      else {
+                                        _removeGarbage();
+                                      }
+                                    },
+                                  ),
+                                ],
+                              );
+                            }
+                          }
+                        ),),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            floatingActionButton: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  heroTag: "btn1",
-                  onPressed: () {
-                    Navigator.push(
+              floatingActionButton: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    heroTag: "btn1",
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
+                      );
+                    },
+                    tooltip: 'Duyuru',
+                    backgroundColor: Colors.teal,
+                    child: const Icon(Icons.announcement,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 10.0,
+                  ),
+                  FloatingActionButton(
+                    heroTag: "btn2",
+                    onPressed: () {Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
-                    );
-                  },
-                  tooltip: 'Duyuru',
-                  backgroundColor: Colors.teal,
-                  child: const Icon(Icons.announcement,
-                    color: Colors.white,
+                      MaterialPageRoute(builder: (context) => const YardimScreen()),
+                    );},
+                    tooltip: 'Yardım',
+                    backgroundColor: Colors.teal,
+                    child: const Icon(Icons.question_mark,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  width: 10.0,
-                ),
-                FloatingActionButton(
-                  heroTag: "btn2",
-                  onPressed: () {Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const YardimScreen()),
-                  );},
-                  tooltip: 'Yardım',
-                  backgroundColor: Colors.teal,
-                  child: const Icon(Icons.question_mark,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+                ],
 
+              ),
             ),
           );
         }

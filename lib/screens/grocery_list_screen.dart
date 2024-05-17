@@ -96,192 +96,198 @@ class GroceryListScreenState extends State<GroceryListScreen> {
   Widget build(BuildContext context) {
     final ap = Provider.of<AuthSupplier>(context, listen: false);
     String currentUserUid = FirebaseAuth.instance.currentUser!.uid;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Listeler'),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const FirstModuleScreen()));
-          },
-        ),
-        actions: [
-          FutureBuilder(
-              future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(
-                    color: Colors.teal,
-                  ));
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  String userRole = snapshot.data ?? '';
-                  return userRole == 'Apartman Yöneticisi' ? IconButton(
-                    onPressed: () async {
-                      String? apartmentName = await getApartmentIdForUser(ap.userModel.uid);
-
-                      //Checking if the user has more than 1 role
-                      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                          .collection('flats')
-                          .where('apartmentId', isEqualTo: apartmentName)
-                          .where('isAllowed', isEqualTo: false)
-                          .get();
-
-                      if (querySnapshot.docs.isNotEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (
-                              context) => const PermissionScreen()),
-                        );
-                      } else {
-                        showSnackBar(
-                            'Kayıt olmak için izin isteyen kullanıcı bulunmamaktadır.');
-                      }
-                    },
-                    icon: const Icon(Icons.verified_user),
-                  ) : const SizedBox(width: 2,height: 2);
-                }
-              }
-          ),
-          IconButton(
-            onPressed: () async {
-              String currentUserUid = ap.userModel.uid;
-
-              //Checking if the user has more than 1 role
-              QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-                  .collection('flats')
-                  .where('uid', isEqualTo: currentUserUid)
-                  .get();
-
-              if (querySnapshot.docs.length > 1) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const UserProfileScreen()),
-
-                );
-              }
-            },
-            icon: const Icon(Icons.person),
-          ),
-          IconButton(
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Listeler'),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              ap.userSignOut().then((value) => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-              ));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const FirstModuleScreen()));
             },
-            icon: const Icon(Icons.exit_to_app),
           ),
-        ],
-      ),
+          actions: [
+            FutureBuilder(
+                future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator(
+                      color: Colors.teal,
+                    ));
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    String userRole = snapshot.data ?? '';
+                    return userRole == 'Apartman Yöneticisi' ? IconButton(
+                      onPressed: () async {
+                        String? apartmentName = await getApartmentIdForUser(ap.userModel.uid);
 
-      body: _isLoading ? const Center(child: CircularProgressIndicator(
-        color: Colors.teal,
-      )) : Center(
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Container(
-                  width: 350.0,
-                  height: 330.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    color: Colors.white,
-                    border: Border.all(color: Colors.teal, width: 1.0),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        if (listDays.contains('Bir kez'))
-                          ...buildDayColumnOneTime('Bir kez', listDayOneTime,currentUserUid ),
-                        if (listDays.contains('Pazartesi'))
-                          ...buildDayColumnMonday('Pazartesi', listDayMonday,currentUserUid ),
-                        if (listDays.contains('Salı'))
-                          ...buildDayColumnTuesday('Salı', listDayTuesday,currentUserUid),
-                        if (listDays.contains('Çarşamba'))
-                          ...buildDayColumnWednesday('Çarşamba', listDayWednesday,currentUserUid),
-                        if (listDays.contains('Perşembe'))
-                          ...buildDayColumnThursday('Perşembe', listDayThursday,currentUserUid),
-                        if (listDays.contains('Cuma'))
-                          ...buildDayColumnFriday('Cuma', listDayFriday,currentUserUid),
-                        if (listDays.contains('Cumartesi'))
-                          ...buildDayColumnSaturday('Cumartesi', listDaySaturday,currentUserUid),
-                        if (listDays.contains('Pazar'))
-                          ...buildDayColumnSunday('Pazar', listDaySunday,currentUserUid),
-                      ],
+                        //Checking if the user has more than 1 role
+                        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                            .collection('flats')
+                            .where('apartmentId', isEqualTo: apartmentName)
+                            .where('isAllowed', isEqualTo: false)
+                            .get();
+
+                        if (querySnapshot.docs.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (
+                                context) => const PermissionScreen()),
+                          );
+                        } else {
+                          showSnackBar(
+                              'Kayıt olmak için izin isteyen kullanıcı bulunmamaktadır.');
+                        }
+                      },
+                      icon: const Icon(Icons.verified_user),
+                    ) : const SizedBox(width: 2,height: 2);
+                  }
+                }
+            ),
+            IconButton(
+              onPressed: () async {
+                String currentUserUid = ap.userModel.uid;
+
+                //Checking if the user has more than 1 role
+                QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+                    .collection('flats')
+                    .where('uid', isEqualTo: currentUserUid)
+                    .get();
+
+                if (querySnapshot.docs.length > 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MultipleFlatUserProfileScreen()),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserProfileScreen()),
+
+                  );
+                }
+              },
+              icon: const Icon(Icons.person),
+            ),
+            IconButton(
+              onPressed: () {
+                ap.userSignOut().then((value) => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                ));
+              },
+              icon: const Icon(Icons.exit_to_app),
+            ),
+          ],
+        ),
+
+        body: _isLoading ? const Center(child: CircularProgressIndicator(
+          color: Colors.teal,
+        )) : Center(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 350.0,
+                    height: 330.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.teal, width: 1.0),
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (listDays.contains('Bir kez'))
+                            ...buildDayColumnOneTime('Bir kez', listDayOneTime,currentUserUid ),
+                          if (listDays.contains('Pazartesi'))
+                            ...buildDayColumnMonday('Pazartesi', listDayMonday,currentUserUid ),
+                          if (listDays.contains('Salı'))
+                            ...buildDayColumnTuesday('Salı', listDayTuesday,currentUserUid),
+                          if (listDays.contains('Çarşamba'))
+                            ...buildDayColumnWednesday('Çarşamba', listDayWednesday,currentUserUid),
+                          if (listDays.contains('Perşembe'))
+                            ...buildDayColumnThursday('Perşembe', listDayThursday,currentUserUid),
+                          if (listDays.contains('Cuma'))
+                            ...buildDayColumnFriday('Cuma', listDayFriday,currentUserUid),
+                          if (listDays.contains('Cumartesi'))
+                            ...buildDayColumnSaturday('Cumartesi', listDaySaturday,currentUserUid),
+                          if (listDays.contains('Pazar'))
+                            ...buildDayColumnSunday('Pazar', listDaySunday,currentUserUid),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 30.0),
-              ElevatedButton(
-                onPressed: () {
-                  _showListDialog(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(75, 50),
-                ),
-                child: const Text(
-                  "Liste Oluştur",
-                  style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
+                const SizedBox(height: 30.0),
+                ElevatedButton(
+                  onPressed: () {
+                    _showListDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    minimumSize: const Size(75, 50),
                   ),
+                  child: const Text(
+                    "Liste Oluştur",
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+
+
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const Text('Bütçeniz: ',style: TextStyle(fontSize: 20.0),),
+              Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: Text('${balance?.abs()}',
+                  style: TextStyle(
+                    color: balance!.isNegative ? Colors.red: Colors.teal,
+                    fontSize: 20.0,
+                  ),
+                ),
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
+                  );
+                },
+                tooltip: 'Yardım',
+                backgroundColor: Colors.teal,
+                child: const Icon(
+                  Icons.question_mark,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
         ),
+
       ),
-
-
-
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            const Text('Bütçeniz: ',style: TextStyle(fontSize: 20.0),),
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Text('${balance?.abs()}',
-                style: TextStyle(
-                  color: balance!.isNegative ? Colors.red: Colors.teal,
-                  fontSize: 20.0,
-                ),
-              ),
-            ),
-            FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const YardimScreen()),
-                );
-              },
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-
     );
   }
 
@@ -344,54 +350,60 @@ class GroceryListScreenState extends State<GroceryListScreen> {
 
   void createList(String name, List<String> days) async {
 
+    if(name.isEmpty) {
+      showSnackBar('Lütfen liste ismi giriniz.');
+    }
+    else if(days.isEmpty) {
+      showSnackBar('Lütfen zamanı seçiniz.');
+    }
+    else {
+      final ap = Provider.of<AuthSupplier>(context, listen: false);
+      String? flatId = await getFlatIdForUser(ap.userModel.uid);
 
+      String apartmentId = '';
+      String floorNo = '';
+      String flatNo = '';
 
-    final ap = Provider.of<AuthSupplier>(context, listen: false);
-    String? flatId = await getFlatIdForUser(ap.userModel.uid);
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('flats')
+          .where('flatId', isEqualTo: flatId)
+          .get();
 
-    String apartmentId = '';
-    String floorNo = '';
-    String flatNo = '';
+      if (querySnapshot.docs.isNotEmpty) {
+        for (var doc in querySnapshot.docs) {
+          Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+          if (data != null) {
+            apartmentId = data['apartmentId'];
+            floorNo = data['floorNo'];
+            flatNo = data['flatNo'];
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('flats')
-        .where('flatId', isEqualTo: flatId)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      for (var doc in querySnapshot.docs) {
-        Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
-        if (data != null) {
-          apartmentId = data['apartmentId'];
-          floorNo = data['floorNo'];
-          flatNo = data['flatNo'];
-
+          }
         }
       }
+
+      ListModel listModel = ListModel(
+        listId: randomListId,
+        flatId: flatId!,
+        name: name,
+        uid: ap.userModel.uid,
+        days: days, orders: [],
+      );
+      ap.saveListDataToFirebase(
+        context: context,
+        listModel: listModel,
+        onSuccess: () {
+          setState(() {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: flatId, apartmentId: apartmentId, floorNo: floorNo, flatNo: flatNo,)),
+                  (route) => false,
+            );
+          });
+
+
+        },
+      );
     }
-
-    ListModel listModel = ListModel(
-      listId: randomListId,
-      flatId: flatId!,
-      name: name,
-      uid: ap.userModel.uid,
-      days: days, orders: [],
-    );
-    ap.saveListDataToFirebase(
-      context: context,
-      listModel: listModel,
-      onSuccess: () {
-        setState(() {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => NewOrderScreen(listId:randomListId, days: days, flatId: flatId, apartmentId: apartmentId, floorNo: floorNo, flatNo: flatNo,)),
-                (route) => false,
-          );
-        });
-
-
-      },
-    );
   }
 
   void _showMultiSelect(BuildContext context) async {
@@ -399,6 +411,9 @@ class GroceryListScreenState extends State<GroceryListScreen> {
       context: context,
       builder: (BuildContext context) {
         return MultiSelectDialog(
+          title: Text('Zamanı Seçiniz'),
+          cancelText: Text('Kapat',style: TextStyle(color: Colors.teal),),
+          confirmText: Text('Kaydet',style: TextStyle(color: Colors.teal),),
           items: _days.map((day) {
             return MultiSelectItem<String>(day, day);
           }).toList(),

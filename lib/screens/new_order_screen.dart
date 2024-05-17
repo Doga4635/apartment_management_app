@@ -440,11 +440,7 @@ class NewOrderScreenState extends State<NewOrderScreen> {
   }
 
     setState(() {
-      _selectedProduct = 'Ürün adı giriniz';
-      _selectedPlace = 'Yeri seçiniz';
       detailsController.clear();
-      productNameController.clear();
-      placeNameController.clear();
       _quantity = 1;
     });
 

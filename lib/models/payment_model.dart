@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class PaymentModel {
   String id;
@@ -8,6 +9,7 @@ class PaymentModel {
   String price;
   String flatNo;
   bool paid = false;
+  Timestamp dueDate;
 
   PaymentModel({
     required this.id,
@@ -17,6 +19,7 @@ class PaymentModel {
     required this.price,
     required this.flatNo,
     required this.paid,
+    required this.dueDate,
   });
 
   factory PaymentModel.fromMap(String id, Map<String, dynamic> map) {
@@ -28,18 +31,21 @@ class PaymentModel {
       price: map['price'] ?? '',
       flatNo: map['flatNo'] ?? '',
       paid: map['paid'] ?? false,
+      dueDate: map['dueDate'] ?? '',
 
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "name": name,
       "apartmentId": apartmentId,
       "description": description,
       "price": price,
       "flatNo": flatNo,
       "paid": paid,
+      "dueDate": dueDate,
     };
   }
 
@@ -52,17 +58,13 @@ class PaymentModel {
       price: snapshot['price'] ?? '',
       flatNo: snapshot['flatNo'] ?? '',
       paid: snapshot['paid'] ?? false,
-
+      dueDate: snapshot['dueDate'] ?? '',
     );
   }
 
-  /*// Added a new property to store the flatIdPayments as a comma separated string
-  String get flatIdsString => flatNo.keys.join(',');
+  String getFormattedDueDate() {
+    DateTime dateTime = dueDate.toDate();
+    return DateFormat('dd-MM-yyyy').format(dateTime);
+  }
 
-  // Added a new method to set the flatIdPayments from a comma separated string
-  set flatIdsString(String value) {
-    flatNo = {};
-    List<String> ids = value.split(',').map((e) => e.trim()).toList();
-    ids.forEach((id) => flatNo[id] = false);
-    }*/
 }

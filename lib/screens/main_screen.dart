@@ -9,8 +9,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../models/payment_model.dart';
 import 'ana_menü_yardım_screen.dart';
 import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
@@ -31,6 +33,7 @@ class MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     getToken();
+    //checkPaymentsAndNotifyResidents();
   }
 
 
@@ -41,14 +44,7 @@ class MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Ana Menü', style: TextStyle(fontSize: 28)),
         backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen()));
-          },
-        ),
         actions: [
-
           FutureBuilder(
     future: getRoleForFlat(ap.userModel.uid), // Assuming 'role' is the field that contains the user's role
     builder: (context, snapshot) {
@@ -123,62 +119,72 @@ class MainScreenState extends State<MainScreen> {
           ),
         ],
       ),
-      body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (
-                          context) => const FirstModuleScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    minimumSize: const Size(290, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  child: const Text(
-                    "Kapıcı İşlemleri",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (
-                          context) => const ApartmentPaymentScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    minimumSize: const Size(290, 50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  child: const Text(
-                    "Bireysel Ödeme İşlemleri",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
-            )
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('images/background.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.5,
           ),
+        ),
+        child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (
+                            context) => const FirstModuleScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      minimumSize: const Size(320, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: const Text(
+                      "Kapıcı İşlemleri",
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (
+                            context) => const ApartmentPaymentScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      minimumSize: const Size(300, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    child: const Text(
+                      "Bireysel Ödeme İşlemleri",
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                ],
+              )
+            ),
+      ),
 
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -294,4 +300,52 @@ class MainScreenState extends State<MainScreen> {
       print(value);
     });
   }
+
+  Future<void> checkPaymentsAndNotifyResidents() async {
+    DateTime now = DateTime.now();
+    DateTime thresholdDate = now.add(const Duration(days: 2));
+
+    try {
+      // Fetch payments from Firestore
+      QuerySnapshot paymentSnapshot = await FirebaseFirestore.instance.collection('paymentss').get();
+
+      for (var paymentDoc in paymentSnapshot.docs) {
+        PaymentModel payment = PaymentModel(
+          id: paymentDoc['id'],
+          name: paymentDoc['name'],
+          apartmentId: paymentDoc['apartmentId'],
+          description: paymentDoc['description'],
+          price: paymentDoc['price'],
+          flatNo: paymentDoc['flatNo'],
+          paid: paymentDoc['paid'],
+          dueDate: paymentDoc['dueDate'].toDate(),
+        );
+
+        Timestamp now = Timestamp.now();
+        final int daysInMilliseconds = 2 * 24 * 60 * 60 * 1000;
+        Timestamp twoDaysBeforeDueDate = Timestamp.fromMillisecondsSinceEpoch(
+            payment.dueDate.millisecondsSinceEpoch - daysInMilliseconds);
+        // Check if the payment is not paid and the due date is within 2 days
+        if (!payment.paid && twoDaysBeforeDueDate.compareTo(now) < 0) {
+    // Fetch the flat information
+    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatNo', isEqualTo: payment.flatNo)
+        .where('apartmentId', isEqualTo: payment.apartmentId)
+        .where('uid',isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    if (flatSnapshot.docs.isNotEmpty) {
+    String flatId = flatSnapshot.docs.first['flatId'];
+    // Send notification to the flat
+    String formattedDueDate = DateFormat('dd-MM-yyyy').format(payment.dueDate as DateTime);
+    sendNotificationToResident(flatId, '${payment.name} ödemesinin tarihi yaklaşıyor: $formattedDueDate');
+    }
+    }
+    }
+    } catch (e) {
+    print('Error checking payments and sending notifications: $e');
+    }
+  }
+
 }

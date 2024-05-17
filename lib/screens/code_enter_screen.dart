@@ -7,8 +7,6 @@ import 'package:apartment_management_app/constants.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
-import 'ana_menü_yardım_screen.dart';
-
 class CodeEnterScreen extends StatefulWidget {
   final String verificationId;
   const CodeEnterScreen({super.key, required this.verificationId});
@@ -29,117 +27,118 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = Provider.of<AuthSupplier>(context,listen: true).isLoading;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: isLoading == true ? const Center(child: CircularProgressIndicator(
-          color: Colors.teal,
-        )) :
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 30.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.arrow_back),
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: isLoading == true ? const Center(child: CircularProgressIndicator(
+            color: Colors.teal,
+          )) :
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(left: 30.0),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: const Icon(Icons.arrow_back),
+                  ),
                 ),
               ),
-            ),
-            const Icon(
-              Icons.sms,
-              size: 120,
-              color: Colors.teal,
-            ),
-            const Text(
-              'SMS Kodunu Giriniz',
-              style: TextStyle(
-                color: customTealShade900,
-                fontSize: 28.0,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 10,bottom: 15),
-              child: Text(
-                'Telefonunuza SMS ile gönderilen kodu giriniz.',
-                style: greyTextStyle,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: Pinput(
-                length: 6,
-                showCursor: true,
-                defaultPinTheme: PinTheme(
-                    width: 50,
-                    height: 60,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.teal.shade200,
-                        )
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w600,
-                    )
-                ),
-                onCompleted: (value) {
-                  setState(() {
-                    otpCode = value;
-                  });
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  if(otpCode != null) {
-                    verifyOTP(context, otpCode!);
-                  }
-                  else {
-                    showSnackBar("6 haneli kodu girin.");
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  padding: const EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
-                ),
-                child: const Text('Gönder' , style: TextStyle(color: Colors.white),),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Koda ulaşamadınız mı?",
-                style: greyTextStyle,
-              ),
-            ),
-            const Text(
-              "Kodu Yeniden Gönder",
-              style: TextStyle(
+              const Icon(
+                Icons.sms,
+                size: 120,
                 color: Colors.teal,
-                fontSize: 16.0,
               ),
-            ),
-          ],
+              const Text(
+                'SMS Kodunu Giriniz',
+                style: TextStyle(
+                  color: customTealShade900,
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(top: 10,bottom: 15),
+                child: Text(
+                  'Telefonunuza SMS ile gönderilen kodu giriniz.',
+                  style: greyTextStyle,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Pinput(
+                  length: 6,
+                  showCursor: true,
+                  defaultPinTheme: PinTheme(
+                      width: 50,
+                      height: 60,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.teal.shade200,
+                          )
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600,
+                      )
+                  ),
+                  onCompleted: (value) {
+                    setState(() {
+                      otpCode = value;
+                    });
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if(otpCode != null) {
+                      verifyOTP(context, otpCode!);
+                    }
+                    else {
+                      showSnackBar("6 haneli kodu girin.");
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    padding: const EdgeInsets.symmetric(horizontal: 70.0, vertical: 15.0),
+                  ),
+                  child: const Text('Gönder' , style: TextStyle(color: Colors.white),),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Koda ulaşamadınız mı?",
+                  style: greyTextStyle,
+                ),
+              ),
+              const Text(
+                "Kodu Yeniden Gönder",
+                style: TextStyle(
+                  color: Colors.teal,
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const YardimScreen()),
-          );
-        },
-        tooltip: 'Help',
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.question_mark,
-          color: Colors.white,),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          tooltip: 'Help',
+          backgroundColor: Colors.teal,
+          child: const Icon(Icons.question_mark,
+            color: Colors.white,),
+        ),
       ),
     );
   }

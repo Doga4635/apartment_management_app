@@ -37,85 +37,91 @@ class OrderViewScreenState extends State<OrderViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sipariş Özeti'),
-        backgroundColor: Colors.teal,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+    return GestureDetector(
+      onTap: () {
+        // Dismiss the keyboard when user taps anywhere on the screen
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Sipariş Özeti'),
+          backgroundColor: Colors.teal,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
         ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    width: 350.0,
+                    height: 330.0,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.white, width: 1.0),
+                    ),
+                    child: ListView.builder(
+                      scrollDirection: Axis.vertical,
+                      itemCount: orderName.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return OrderItem(
+                          listId: listId,
+                          orderName: orderName[index],
+                          orderAmount: orderAmount[index],
+                          orderPlace: orderPlace[index],
+                          orderDetails: orderDetails[index],
+                          orderIdList: orderIdList,
+                          onUpdate: (newName, newAmount, newPlace, newDetails) {
+                            updateFirestore(
+                              index,
+                              newName,
+                              newAmount,
+                              newPlace,
+                              newDetails,
+                              orderIdList,
+                            );
+                          },
+                          onDelete: () {
+                            deleteItemFromFirestore(orderIdList[index]);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Expanded(
-                child: Container(
-                  width: 350.0,
-                  height: 330.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    color: Colors.white,
-                    border: Border.all(color: Colors.white, width: 1.0),
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    itemCount: orderName.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return OrderItem(
-                        listId: listId,
-                        orderName: orderName[index],
-                        orderAmount: orderAmount[index],
-                        orderPlace: orderPlace[index],
-                        orderDetails: orderDetails[index],
-                        orderIdList: orderIdList,
-                        onUpdate: (newName, newAmount, newPlace, newDetails) {
-                          updateFirestore(
-                            index,
-                            newName,
-                            newAmount,
-                            newPlace,
-                            newDetails,
-                            orderIdList,
-                          );
-                        },
-                        onDelete: () {
-                          deleteItemFromFirestore(orderIdList[index]);
-                        },
-                      );
-                    },
-                  ),
+              FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const YardimScreen()),
+                  );
+                },
+                tooltip: 'Yardım',
+                backgroundColor: Colors.teal,
+                child: const Icon(
+                  Icons.question_mark,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const YardimScreen()),
-                );
-              },
-              tooltip: 'Yardım',
-              backgroundColor: Colors.teal,
-              child: const Icon(
-                Icons.question_mark,
-                color: Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );
