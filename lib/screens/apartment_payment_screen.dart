@@ -42,7 +42,7 @@ class ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: true,)));
+              Navigator.pop(context);
             },
           ),
           actions: [
