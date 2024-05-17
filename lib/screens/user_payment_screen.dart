@@ -128,6 +128,24 @@ class _UserPaymentScreenState extends State<UserPaymentScreen> {
           );
         },
       ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
+      ),
     ) :
     Scaffold(
       appBar: AppBar(

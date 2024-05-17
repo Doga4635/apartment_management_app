@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/order_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class AlimScreen extends StatefulWidget {
@@ -576,6 +577,24 @@ class AlimScreenState extends State<AlimScreen> {
               ),
             ],
           ),
+        ),
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: "btn2",
+              onPressed: () {Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const YardimScreen()),
+              );},
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
+
         ),
       ),
     );
