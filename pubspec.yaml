@@ -56,8 +56,9 @@ flutter:
   uses-material-design: true
 
   assets:
-    - images/kapıcı.jpg
+    - images/kapıcı.png
     - images/apartcom.png
     - images/background.jpg
+    - images/payment.png
     - images/çöpüm_var.png
     - images/çöpüm_yok.png

@@ -67,6 +67,7 @@ class FlatScreenState extends State<FlatScreen> {
     balance = await getBalanceWithFlatId(flatId);
     doormanBalance = balance!*(-1);
 
+
     orders.clear();
 
     try {
@@ -209,7 +210,6 @@ class FlatScreenState extends State<FlatScreen> {
           ),
         )
             : Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
               child: Scrollbar(
@@ -230,7 +230,7 @@ class FlatScreenState extends State<FlatScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(order.name, style: const TextStyle(fontSize: 18)),
+                                  Text(' ${order.name}', style: const TextStyle(fontSize: 18)),
                                 ],
                               ),
                             ),
@@ -321,19 +321,10 @@ class FlatScreenState extends State<FlatScreen> {
                 fetchBalance(widget.flatId); // Call fetchBalance with the flatId
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal, // background color
+                backgroundColor: Colors.teal,
+                minimumSize: Size(320,40)// background color
               ),
               child: const Text('Bakiye Hesapla', style: TextStyle(color: Colors.white)),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                'Bakiye: ${doormanBalance!.abs()} TL',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: doormanBalance!.isNegative ? Colors.red : Colors.green,
-                ),
-              ),
             ),
           ],
         ),
@@ -361,6 +352,16 @@ class FlatScreenState extends State<FlatScreen> {
                   icon: Icon(
                     _isDelivered ? Icons.check : Icons.close,
                     color: Colors.white,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Bakiye: ${doormanBalance!.abs()} TL',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: doormanBalance!.isNegative ? Colors.red : Colors.green,
                   ),
                 ),
               ),

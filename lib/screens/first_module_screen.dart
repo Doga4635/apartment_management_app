@@ -1,5 +1,4 @@
 import 'package:apartment_management_app/screens/grocery_list_screen.dart';
-import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/trash_tracking_screen.dart';
 import 'package:apartment_management_app/screens/user_profile_screen.dart';
 import 'package:apartment_management_app/screens/welcome_screen.dart';
@@ -119,16 +118,17 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         height: 80.0,
                       ),
                       Container(
-                        height: 180,
-                        decoration: const BoxDecoration(
+                        height: 200,
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(20)),
+                          border: Border.all(color: Colors.teal, width: 1.0),
                         ),
                         child: Image.asset(
-                          "images/kapıcı.jpg",
-                          fit: BoxFit.contain,
+                          "images/kapıcı.png",
+                            fit: BoxFit.cover
                         ),
                       ),
-                      const SizedBox(height: 80),
+                      const SizedBox(height: 100),
                       ElevatedButton(
                         onPressed: () {
                           if(userRole == "Kapıcı") {
@@ -145,6 +145,10 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
+                          minimumSize: Size(320,50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0), // Sharp edges
+                          ),
                         ),
                         child: const Text(
                           'Kapıcıya Alışveriş Listesi',
@@ -167,6 +171,10 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.teal,
+                          minimumSize: Size(280,60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0), // Sharp edges
+                          ),
                         ),
                         child: const Text(
                           'Çöp Takibi',
@@ -178,11 +186,11 @@ class FirstModuleScreenState extends State<FirstModuleScreen> {
                         ),
                       )
                           : Container(
-                        height: 45.0,
-                        width: 300.0,
+                        height: 50.0,
+                        width: 320.0,
                         decoration: const BoxDecoration(
                           color: Colors.teal,
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
                         child: FutureBuilder<bool>(
                           future: ap.getGarbage('garbage'),

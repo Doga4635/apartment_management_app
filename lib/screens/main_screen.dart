@@ -9,10 +9,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import '../models/payment_model.dart';
 import 'ana_menü_yardım_screen.dart';
 import 'annoucement_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
@@ -157,28 +155,42 @@ class MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (
-                            context) => const ApartmentPaymentScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      minimumSize: const Size(300, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    child: const Text(
-                      "Bireysel Ödeme İşlemleri",
-                      style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600),
-                    ),
+                  FutureBuilder(
+                    future: getRoleForFlat(ap.userModel.uid),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Center(child: CircularProgressIndicator(
+          color: Colors.teal,
+        ));
+      } else if (snapshot.hasError) {
+        return Text('Error: ${snapshot.error}');
+      } else {
+        String userRole = snapshot.data ?? '';
+        return userRole == 'Kapıcı' ? Container(width: 0,height: 0,) : ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const ApartmentPaymentScreen()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.teal,
+            minimumSize: const Size(320, 50),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+          ),
+          child: const Text(
+            "Bireysel Ödeme İşlemleri",
+            style: TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+                fontWeight: FontWeight.w600),
+          ),
+        );
+      }
+    }
                   ),
                   const SizedBox(height: 30),
                 ],
@@ -299,53 +311,6 @@ class MainScreenState extends State<MainScreen> {
       });
       print(value);
     });
-  }
-
-  Future<void> checkPaymentsAndNotifyResidents() async {
-    DateTime now = DateTime.now();
-    DateTime thresholdDate = now.add(const Duration(days: 2));
-
-    try {
-      // Fetch payments from Firestore
-      QuerySnapshot paymentSnapshot = await FirebaseFirestore.instance.collection('paymentss').get();
-
-      for (var paymentDoc in paymentSnapshot.docs) {
-        PaymentModel payment = PaymentModel(
-          id: paymentDoc['id'],
-          name: paymentDoc['name'],
-          apartmentId: paymentDoc['apartmentId'],
-          description: paymentDoc['description'],
-          price: paymentDoc['price'],
-          flatNo: paymentDoc['flatNo'],
-          paid: paymentDoc['paid'],
-          dueDate: paymentDoc['dueDate'].toDate(),
-        );
-
-        Timestamp now = Timestamp.now();
-        final int daysInMilliseconds = 2 * 24 * 60 * 60 * 1000;
-        Timestamp twoDaysBeforeDueDate = Timestamp.fromMillisecondsSinceEpoch(
-            payment.dueDate.millisecondsSinceEpoch - daysInMilliseconds);
-        // Check if the payment is not paid and the due date is within 2 days
-        if (!payment.paid && twoDaysBeforeDueDate.compareTo(now) < 0) {
-    // Fetch the flat information
-    QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
-        .collection('flats')
-        .where('flatNo', isEqualTo: payment.flatNo)
-        .where('apartmentId', isEqualTo: payment.apartmentId)
-        .where('uid',isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        .get();
-
-    if (flatSnapshot.docs.isNotEmpty) {
-    String flatId = flatSnapshot.docs.first['flatId'];
-    // Send notification to the flat
-    String formattedDueDate = DateFormat('dd-MM-yyyy').format(payment.dueDate as DateTime);
-    sendNotificationToResident(flatId, '${payment.name} ödemesinin tarihi yaklaşıyor: $formattedDueDate');
-    }
-    }
-    }
-    } catch (e) {
-    print('Error checking payments and sending notifications: $e');
-    }
   }
 
 }
