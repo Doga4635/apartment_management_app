@@ -536,7 +536,7 @@ void getApartments() async {
                     if (selectedRoleValue == 'Kapıcı') {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => const FirstModuleScreen()),
+                        MaterialPageRoute(builder: (context) => const MainScreen(isAllowed: false,)),
                             (route) => false,
                       );
                     } else {

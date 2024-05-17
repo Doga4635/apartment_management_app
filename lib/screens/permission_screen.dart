@@ -159,7 +159,7 @@ class PermissionScreenState extends State<PermissionScreen> {
     );
   }
 
-  void _removeFlat(String flatId, bool isAllowed) {
+  Future<void> _removeFlat(String flatId, bool isAllowed) async {
     if(isAllowed) {
       FirebaseFirestore.instance.collection('flats').doc(flatId).update({
         'isAllowed': isAllowed,
@@ -173,11 +173,16 @@ class PermissionScreenState extends State<PermissionScreen> {
       });
     }
     else {
-      FirebaseFirestore.instance.collection('flats').doc(flatId).delete().then((value) {
+      String uid = await fetchUid(flatId);
+      FirebaseFirestore.instance.collection('flats').doc(flatId).delete().then((value) async {
         setState(() {
           showSnackBar('Dairenin kaydı reddedildi.');
         });
-        sendNotificationToResident(flatId, 'Dairenizin kaydı reddedildi.');
+        String newFlatId = await fetchFlatId(uid);
+        FirebaseFirestore.instance.collection('flats').doc(newFlatId).update({
+          'selectedFlat': true,
+        });
+        sendNotificationToResident(newFlatId, 'Dairenizin kaydı reddedildi.');
       }).catchError((error) {
         showSnackBar('Kayıt onaylamasında sorun oluştu.');
       });

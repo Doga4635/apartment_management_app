@@ -386,6 +386,28 @@ Future<String> fetchFlatId(String userUid) async {
   return ''; // Return an empty string if flatId is not valid or not found
 }
 
+Future<String> fetchUid(String flatId) async {
+  try {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('flats')
+        .where('flatId', isEqualTo: flatId)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final flatModel = FlatModel.fromSnapshot(snapshot.docs.first);
+      final fetchedUid = flatModel.uid;
+
+
+        return fetchedUid;
+    }
+  } catch (error) {
+    showSnackBar('Daire alınırken hata oluştu: $error');
+  }
+
+  return ''; // Return an empty string if flatId is not valid or not found
+}
+
 Future<bool> validateFlatId(String flatId) async {
   try {
     final snapshot = await FirebaseFirestore.instance

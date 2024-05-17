@@ -357,7 +357,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
               onPressed: () => _selectDate(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
-            minimumSize: const Size(200, 50),
+            minimumSize: const Size(400, 50),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
