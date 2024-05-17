@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment_model.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 
 class UserPaymentDoneScreen extends StatefulWidget {
   const UserPaymentDoneScreen({Key? key}) : super(key: key);
@@ -119,6 +120,24 @@ class UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
           );
         },
       ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
+      ),
     ) :
     Scaffold(
       appBar: AppBar(
@@ -195,6 +214,26 @@ class UserPaymentDoneScreenState extends State<UserPaymentDoneScreen> {
             ],
           );
         },
+      ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+
+          FloatingActionButton(
+            heroTag: "btn2",
+            onPressed: () {Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const YardimScreen()),
+            );},
+            tooltip: 'Yardım',
+            backgroundColor: Colors.teal,
+            child: const Icon(Icons.question_mark,
+              color: Colors.white,
+            ),
+          ),
+        ],
+
       ),
     );
   }

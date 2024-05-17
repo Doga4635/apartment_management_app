@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/order_model.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
+import 'ana_menü_yardım_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class AlimScreen extends StatefulWidget {
@@ -119,34 +120,34 @@ class AlimScreenState extends State<AlimScreen> {
 
                   productsDetailsMap.forEach((productName, orders) {
 
-                      List<Widget> orderWidgets = [];
-                      for (var order in orders) {
-                        orderWidgets.add(
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0,
-                                    top: 8.0,
-                                    right: 16.0,
-                                    bottom: 8.0),
-                                child: Text('${order['details']}: ${order['amount']}',
-                                    style: const TextStyle(fontSize: 14)),
+                    List<Widget> orderWidgets = [];
+                    for (var order in orders) {
+                      orderWidgets.add(
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 8.0,
+                                  top: 8.0,
+                                  right: 16.0,
+                                  bottom: 8.0),
+                              child: Text('${order['details']}: ${order['amount']}',
+                                  style: const TextStyle(fontSize: 14)),
+                            ),
+                            SizedBox(
+                              width: 40,
+                              // Adjust width according to your preference
+                              height: 15,
+                              child: TextField(
+                                controller: priceControllersMap[order['details']],
+                                keyboardType: TextInputType.number,
+                                style: const TextStyle(fontSize: 14),
                               ),
-                              SizedBox(
-                                width: 40,
-                                // Adjust width according to your preference
-                                height: 15,
-                                child: TextField(
-                                  controller: priceControllersMap[order['details']],
-                                  keyboardType: TextInputType.number,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                              const Text(' TL '),
-                            ],
-                          ),
-                        );
-                      }
+                            ),
+                            const Text(' TL '),
+                          ],
+                        ),
+                      );
+                    }
                     productWidgets.add(
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,6 +577,24 @@ class AlimScreenState extends State<AlimScreen> {
               ),
             ],
           ),
+        ),
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: "btn2",
+              onPressed: () {Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const YardimScreen()),
+              );},
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
+
         ),
       ),
     );

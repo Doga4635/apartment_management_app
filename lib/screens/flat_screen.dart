@@ -78,7 +78,7 @@ class FlatScreenState extends State<FlatScreen> {
           .where('isDelivered', isEqualTo: false)
           .get();
 
-          orders = orderSnapshot.docs
+      orders = orderSnapshot.docs
           .map((doc) => OrderModel.fromSnapshot(doc))
           .where((order) => order.days.contains(_currentDay)
           || order.days.contains('Bir kez') // Filter out payments where paid is true
@@ -109,10 +109,10 @@ class FlatScreenState extends State<FlatScreen> {
           .doc(flatId)
           .update({'balance': flatBalance});
 
-setState(() {
-  balance = flatBalance;
-  doormanBalance = balance! * (-1);
-});
+      setState(() {
+        balance = flatBalance;
+        doormanBalance = balance! * (-1);
+      });
 
       print('Balance updated successfully in Firestore.');
     } catch (error) {
@@ -192,7 +192,7 @@ setState(() {
                 context,
                 MaterialPageRoute(builder: (context) => const DagitimScreen()),
               );
-              },
+            },
           ),
         ),
         body: _isLoading == true
@@ -384,9 +384,9 @@ setState(() {
             ],
           ),
         ),
-        ),
+      ),
     );
-    }
+  }
 
 
   double calculateTotalPrice() {
@@ -411,4 +411,3 @@ setState(() {
     }
   }
 }
-
