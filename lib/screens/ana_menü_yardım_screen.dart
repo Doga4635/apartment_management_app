@@ -19,30 +19,6 @@ class YardimScreen extends StatefulWidget {
 }
 
 class YardimScreenState extends State<YardimScreen> {
-  final String _helpText = '''
-Uygulamamıza Hoş Geldiniz...
-
-Bu uygulama, apartman yöneticilerinin ve konut sahiplerinin kollektif bir ortamda yaşadıkları sorunları çözmelerini ve iletişim kurmalarını sağlayan bir araçtır.
-
-Apartman Yöneticisi:
-- Yeni bir kullanıcı oluşturabilir veya mevcut bir kullanıcıyı yönetebilir.
-- Yapılan tüm mesajları görüntüleyebilir.
-- Yeni bir mesaj gönderebilir.
-
-Konut Sahibi:
-- Yapılan tüm mesajları görüntüleyebilir.
-- Çöp bildirimi yapabilir.
-- Günlük,haftalık ve aylık periyotlarda market,manav,fırın ve diğer siparişlerini oluşturup kapıcıya yönlendirebilir.
-
-Uygulama nasıl kullanılır:
-1. Kullanıcı adı ve şifre ile oturum açın.
-2. Ana sayfada görüntülenen mesajları görüntüleyin.
-3. Yeni bir mesaj göndermek için, yazı kutusuna mesajınızı yazıp "Gönder" butonuna basın.
-4. Mesajınız gönderildikten sonra, yanıt aldığınızda bildirim alacaksınız.
-
-Bize ulaşmak için:
-[EFE DOĞA ÖZLEM ERDEM DURU]
-''';
 
   final List<String> _buttonTexts = [
     'Apartman Sakini',
@@ -52,8 +28,8 @@ Bize ulaşmak için:
 
   final List<List<String>> _nestedButtonTexts = [
     ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü', 'Ödeme İşlemleri' ],
-    ['Genel Bilgiler','Alışveriş Modülü', 'Çöp Modülü', 'Ödeme İşlemleri'],
-    ['Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü', 'Ödeme İşlemleri'],
+    ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modülü', 'Çöp Modülü', 'Ödeme İşlemleri'],
+    ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü', 'Ödeme İşlemleri'],
   ];
 
   final List<List<Widget>> _nestedTextContents = [
@@ -120,7 +96,8 @@ Bize ulaşmak için:
                   child: Text(
                     'Bu uygulamada, apartman sakini, günlük ve haftalık periyotlarda market, manav, fırın '
                         've diğer siparişlerini oluşturup kapıcıya yönlendirebilir. Kapıcıya çöpü olduğunu '
-                        'bildirebilir. Apartman içi duyurulardan haberdar olup, yönetici tarafından oluşturulan, apartman içi oylama etkinliklerine '
+                        'bildirebilir. Apartman içi duyurulardan haberdar olup, yönetici tarafından '
+                        'oluşturulan, apartman içi oylama etkinliklerine '
                         'katılabilir. Yapması gereken ve yaptığı ödemeleri görüntüleyebilir.',
                     style: TextStyle(fontSize: 16),
                     softWrap: true, // Allow the text to wrap to the next line
@@ -211,13 +188,49 @@ Bize ulaşmak için:
 
       ),
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.2', style: TextStyle(fontSize: 16)),
-        ],
+      // Apartman Sakini Alışveriş Modülü
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman sakini, kapıcıya sipariş vermek için ilk olarak ',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Uygulamaya daha önce kayıt yapmış bir kullanıcı, telefon numarasını ve'
+                        ' telefonuna sms olarak gelen kodu girerek uygulamaya giriş yapabilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
       ),
+
+      // Apartman Sakini Çöp Modülü
 
       Row(
         children: [
@@ -226,6 +239,8 @@ Bize ulaşmak için:
           Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
         ],
       ),
+
+      // Apartman Sakini Ödeme İşlemleri
 
       Row(
         children: [
@@ -237,13 +252,183 @@ Bize ulaşmak için:
 
     ],
     [
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.1', style: TextStyle(fontSize: 16)),
-        ],
+
+      // Apartman Yöneticisi Kayıt Olma Giriş Yapma
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kayıt olmak için, apartman yöneticisi, ilk olarak cep telefon numarasını tuşlamalı'
+                        ' ve telefonuna gelen kodu girmelidir. Daha sonra açılan ekranda, apartmandaki'
+                        ' rolünü seçip bir apartman oluşturmalıdır. Oturduğu kat ve daireyi de seçtikten sonra '
+                        'kayıt işlemini tamamlamak için "Kayıt Ol" tuşuna basmalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Uygulamaya daha önce kayıt yapmış bir kullanıcı, telefon numarasını ve'
+                        ' telefonuna sms olarak gelen kodu girerek uygulamaya giriş yapabilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
       ),
+
+      // Apartman Yöneticisi Genel Bilgiler
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Bu uygulamada, apartman yöneticisi, günlük ve haftalık periyotlarda market, manav, fırın '
+                        've diğer siparişlerini oluşturup kapıcıya yönlendirebilir. Kapıcıya çöpü olduğunu '
+                        'bildirebilir. Apartman içi duyurular ve oylama etkinlikleri oluşturabilir.  '
+                        'Apartman Sakinlerine ödemeleri için ödemeler oluşturabilir, ödemelerin durumlarını '
+                        'takip edebilir, ödemesi yapılan ödemeleri onaylayabilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.verified_user,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman yöneticisi, yukarıda gösterilen ve ekranın sağ üst kısmında bulunan '
+                            'butonu kullanarak onay bekleyen, yeni kayıt yapmış apartman sakinleri ve kapıcıların'
+                            'kayıt bilgilerini kontrol ederek, uygulamaya girişlerini onaylayabilir. Eğer sakin veya kapıcı'
+                            'yanlış bilgilerle kayıt olmuşsa kayıtlarını reddederek baştan yapmalarını sağlayabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.person,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman yöneticisi, yukarıda gösterilen ve ekranın sağ üst kısmında bulunan '
+                            'butonu kullanarak profil ekranına ulaşabilir. Kullanıcının sahip '
+                            'olduğu birden fazla dairesi var ise, bu ekrandan "Daire Ekle" butonuna basarak'
+                            ' ve açılan ekranda eklemek istediği dairesindeki rolünü, apartmanın adını,'
+                            ' dairenin bulundaki katı ve daire numarasını seçerek sahip olduğu daireleri '
+                            'uygulamaya ekleyebilir. Profil ekranında bu daireler görüntülenir. '
+                            'İstenilen daireye tıklanarak, uygulama içinde, '
+                            'konutlar arası geçiş yapılabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.exit_to_app,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman yöneticisi, yukarıda gösterilen ve ekranın sağ üst kısmında bulunan '
+                            'butonu kullanarak profilinden çıkış yapabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.announcement,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman yöneticisi, yukarıda gösterilen ve ekranın sağ alt kısmında bulunan '
+                            'butonu kullanarak apartman sakinlerine ve kapıcıya duyurular ve oylama etkinlikleri oluşturabilir.'
+                            'Ayrıca bu ekrandan, yayınladığı duyuruları ve oluşturduğu oylama etkinliklerinin'
+                            'sonuçlarını görüntüleyebilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+
+
+
+          ],
+        ),
+
+      ),
+
+      // Apartman Yöneticisi Alışveriş Modülü
 
       Row(
         children: [
@@ -252,6 +437,9 @@ Bize ulaşmak için:
           Text('Content for Nested Button 1.2', style: TextStyle(fontSize: 16)),
         ],
       ),
+
+      // Apartman Yöneticisi Çöp Modülü
+
       Row(
         children: [
           Icon(Icons.circle, size: 12, color: Colors.black),
@@ -259,6 +447,9 @@ Bize ulaşmak için:
           Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
         ],
       ),
+
+      // Apartman Yöneticisi Ödeme İşlemleri
+
       Row(
         children: [
           Icon(Icons.circle, size: 12, color: Colors.black),
@@ -267,14 +458,168 @@ Bize ulaşmak için:
         ],
       ),
     ],
+
+
     [
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.1', style: TextStyle(fontSize: 16)),
-        ],
+
+      // Kapıcı kayıt olma giriş yapma
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kayıt olmak için, kapıcı, ilk olarak cep telefon numarasını tuşlamalı'
+                        ' ve telefonuna gelen kodu girmelidir. Daha sonra açılan ekranda, apartmandaki'
+                        ' rol, apartman, kat ve daire numarası bilgilerini doldurmalı ve kayıt olma işlemini '
+                        'tamamlamak için "Kayıt Ol" tuşuna basmalıdır. Kapıcı uygulamaya kayıt '
+                        'olduktan sonra uygulamayı kullanabilmek için apartman yöneticisinin onayını beklemelidir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Uygulamaya daha önce kayıt yapmış bir kullanıcı, telefon numarasını ve'
+                        ' telefonuna sms olarak gelen kodu girerek uygulamaya giriş yapabilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
       ),
+
+      // Kapıcı Genel bilgiler
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Bu uygulamada, kapıcı, apartman sakinlerinin ve yöneticilerin oluşturduğu,'
+                        ' günlük ve haftalık periyotlardaki market, manav, fırın ve diğer siparişlerini '
+                        'görüntüleyebilir. Satın alım yaparken, ürünlerin fiyatlarını girerek kendisine ve sipariş sahibine '
+                        'ödeme kısmında zaman kazandırarak, yanlış ödemeleri ortadan kaldırabilir. '
+                        'Her katın ve dairenin çöp durumunu kontrol edebilir, çöp toplama zamanında yalnız çöpü olan '
+                        'dairelere giderek zaman kazanabilir. '
+                        'Apartman içi duyurulardan haberdar olup, yönetici tarafından '
+                        'oluşturulan, apartman içi oylama etkinliklerine '
+                        'katılabilir. Yapması gereken ve yaptığı ödemeleri görüntüleyebilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.person,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Kapıcı, yukarıda gösterilen ve ekranın sağ üst kısmında bulunan '
+                            'butonu kullanarak profil ekranına ulaşabilir. Sahip '
+                            'olduğu birden fazla dairesi var ise, bu ekrandan "Daire Ekle" butonuna basarak'
+                            ' ve açılan ekranda eklemek istediği dairesindeki rolünü, apartmanın adını,'
+                            ' dairenin bulundaki katı ve daire numarasını seçerek sahip olduğu daireleri '
+                            'uygulamaya ekleyebilir. Profil ekranında bu daireler görüntülenir. '
+                            'İstenilen daireye tıklanarak, uygulama içinde, '
+                            'konutlar arası geçiş yapılabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.exit_to_app,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Kapıcı, yukarıda gösterilen ve ekranın sağ üst kısmında bulunan '
+                            'butonu kullanarak profilinden çıkış yapabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.announcement,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Kapıcı, yukarıda gösterilen ve ekranın sağ alt kısmında bulunan '
+                            'butonu kullanarak apartman yöneticisinin yayınladığı duyuruları '
+                            'görüntüleyebilir. Eğer yönetici bir konu üzerine oylama etkinliği '
+                            'başlatmış ise, apartman sakini bu ekrandan oyunu kullanabilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+
+
+
+          ],
+        ),
+
+      ),
+
+      // Kapıcı Alışveriş Modülü
+
       Row(
         children: [
           Icon(Icons.circle, size: 12, color: Colors.black),
@@ -282,6 +627,9 @@ Bize ulaşmak için:
           Text('Content for Nested Button 1.2', style: TextStyle(fontSize: 16)),
         ],
       ),
+
+      // Kapıcı Çöp Modülü
+
       Row(
         children: [
           Icon(Icons.circle, size: 12, color: Colors.black),
@@ -289,6 +637,9 @@ Bize ulaşmak için:
           Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
         ],
       ),
+
+      // Kapıcı Ödeme İşlemleri
+
       Row(
         children: [
           Icon(Icons.circle, size: 12, color: Colors.black),
