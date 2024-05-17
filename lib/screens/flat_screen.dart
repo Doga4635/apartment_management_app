@@ -344,35 +344,41 @@ setState(() {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              FloatingActionButton.extended(
-                onPressed: () {
-                  markOrdersAsDelivered();
-                  setState(() {
-                    _isDelivered = true;
-                  });
-                  fetchOrders(widget.apartmentId, widget.floorNo, widget.flatNo);
-                  sendNotificationToResident(widget.flatId, 'Siparişiniz teslim edildi.');
-                },
-                tooltip: 'Teslim Edildi',
-                backgroundColor: Colors.teal,
-                label: Text(_isDelivered ? "Teslim Edildi" : "Teslim Et", style: const TextStyle(color: Colors.white),),
-                icon: Icon(
-                  _isDelivered ? Icons.check : Icons.close,
-                  color: Colors.white,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FloatingActionButton.extended(
+                  onPressed: () {
+                    markOrdersAsDelivered();
+                    setState(() {
+                      _isDelivered = true;
+                    });
+                    fetchOrders(widget.apartmentId, widget.floorNo, widget.flatNo);
+                    sendNotificationToResident(widget.flatId, 'Siparişiniz teslim edildi.');
+                  },
+                  tooltip: 'Teslim Edildi',
+                  backgroundColor: Colors.teal,
+                  label: Text(_isDelivered ? "Teslim Edildi" : "Teslim Et", style: const TextStyle(color: Colors.white),),
+                  icon: Icon(
+                    _isDelivered ? Icons.check : Icons.close,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              FloatingActionButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const YardimScreen()),
-                  );
-                },
-                tooltip: 'Yardım',
-                backgroundColor: Colors.teal,
-                child: const Icon(
-                  Icons.question_mark,
-                  color: Colors.white,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const YardimScreen()),
+                    );
+                  },
+                  tooltip: 'Yardım',
+                  backgroundColor: Colors.teal,
+                  child: const Icon(
+                    Icons.question_mark,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
