@@ -158,7 +158,10 @@ class WelcomeScreenState extends State<WelcomeScreen> {
 
           if (flatSnapshot.docs.isNotEmpty) {
             String flatId = flatSnapshot.docs.first['flatId'];
-            sendNotificationToResident(flatId, '${payment.name} ödemesinin son tarihine 2 günden az zaman kaldı.');
+            DateTime dueDate = payment.dueDate.toDate();
+            String formattedDueDate =
+            DateFormat('dd-MM-yyyy').format(dueDate);
+            sendNotificationToResident(flatId, '${payment.name} ödemesinin son tarihi yaklaşıyor: ${formattedDueDate}');
           }
         }
       }
