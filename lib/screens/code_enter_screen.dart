@@ -1,3 +1,4 @@
+import 'package:apartment_management_app/screens/ana_men%C3%BC_yard%C4%B1m_screen.dart';
 import 'package:apartment_management_app/screens/main_screen.dart';
 import 'package:apartment_management_app/screens/register_flat_screen.dart';
 import 'package:apartment_management_app/services/auth_supplier.dart';
@@ -133,7 +134,10 @@ class CodeEnterScreenState extends State<CodeEnterScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const YardimScreen()),
+          );},
           tooltip: 'Help',
           backgroundColor: Colors.teal,
           child: const Icon(Icons.question_mark,

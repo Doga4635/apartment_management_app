@@ -445,7 +445,7 @@ class AlimScreenState extends State<AlimScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Alışveriş Listesi'),
+          title: const Text('Alım'),
           backgroundColor: Colors.teal,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
