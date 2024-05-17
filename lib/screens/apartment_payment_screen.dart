@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import '../services/auth_supplier.dart';
 import '../utils/utils.dart';
 import 'ana_menü_yardım_screen.dart';
-import 'main_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class ApartmentPaymentScreen extends StatefulWidget {
@@ -123,104 +122,113 @@ class ApartmentPaymentScreenState extends State<ApartmentPaymentScreen> {
                 icon: const Icon(Icons.exit_to_app)),
           ],
         ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('images/payment.png'),
+              fit: BoxFit.fitHeight,
+              opacity: 0.3,
+            ),
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
 
-                FutureBuilder<String>(
-                  future: ap.getField('role'),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      if(snapshot.data == 'Apartman Yöneticisi') {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (
-                                    context) => const DefinePaymentScreen()));
-                          },
-                          child: Container(
-                            width: 300,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.teal,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Ödeme Tanımlama Ekranı',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
+                  FutureBuilder<String>(
+                    future: ap.getField('role'),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        if(snapshot.data == 'Apartman Yöneticisi') {
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (
+                                      context) => const DefinePaymentScreen()));
+                            },
+                            child: Container(
+                              width: 320,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.teal,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  'Ödeme Tanımlama Ekranı',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                  ),
                                 ),
                               ),
                             ),
+                          );
+                        }
+                        else {
+                          return const SizedBox(width: 2,height: 2,);
+                        }
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => const UserPaymentScreen()));
+                    },
+                    child: Container(
+                      width: 320,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Ödeme Takip Ekranı',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
                           ),
-                        );
-                      }
-                      else {
-                        return const SizedBox(width: 2,height: 2,);
-                      }
-                    }
-                  },
-                ),
-                const SizedBox(height: 20),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const UserPaymentScreen()));
-                  },
-                  child: Container(
-                    width: 300,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Ödeme Takip Ekranı',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
                         ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const UserPaymentDoneScreen()));
-                    // Add your functionality here
-                  },
-                  child: Container(
-                    width: 300,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.teal,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        'Yapılmış Ödemeler',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
+                  const SizedBox(height: 20),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => const UserPaymentDoneScreen()));
+                      // Add your functionality here
+                    },
+                    child: Container(
+                      width: 320,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.teal,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Yapılmış Ödemeler',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

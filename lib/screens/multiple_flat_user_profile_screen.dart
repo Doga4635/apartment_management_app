@@ -331,7 +331,10 @@ class MultipleFlatUserProfileScreenState extends State<MultipleFlatUserProfileSc
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    minimumSize: const Size(210, 50),
+                    minimumSize: const Size(300, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0), // Sharp edges
+                    ),
                   ),
                   child: const Text(
                     "Daire Ekle",

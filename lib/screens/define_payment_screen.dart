@@ -26,6 +26,7 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
   String selectedFlat = '';
   String? currentUserApartmentId;
   List<String> _selectedFlats = [];
+  List<String> displayedFlats = ['Tüm Daireler'];
   List<String> flats = [];
   DateTime? _selectedDate;
   String? dueDate;
@@ -53,7 +54,6 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
 
   void getFlats() async {
     currentUserApartmentId = await getApartmentIdForUser(FirebaseAuth.instance.currentUser!.uid);
-
     QuerySnapshot flatSnapshot = await FirebaseFirestore.instance
         .collection('flats')
         .where('apartmentId', isEqualTo: currentUserApartmentId)
@@ -63,6 +63,19 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
     if (flatSnapshot.docs.isNotEmpty) {
       for (DocumentSnapshot flat in flatSnapshot.docs) {
         flats.add(flat['flatNo']); // Assuming 'flatNo' is the field containing flat numbers
+        displayedFlats.add(flat['flatNo']);
+
+        if (displayedFlats.length > 1) {
+          // Extract the first element
+          var firstElement = displayedFlats[0];
+
+          // Sort the rest of the list
+          var remainingElements = displayedFlats.sublist(1);
+          remainingElements.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+
+    // Combine the first element with the sorted remaining elements
+    displayedFlats = [firstElement, ...remainingElements];
+  }
       }
 
     }
@@ -487,11 +500,18 @@ class DefinePaymentScreenState extends State<DefinePaymentScreen> {
           title: Text('Daireleri Seçiniz'),
           cancelText: Text('Kapat',style: TextStyle(color: Colors.teal),),
           confirmText: Text('Kaydet',style: TextStyle(color: Colors.teal),),
-          items: flats.map((day) {
+          items: displayedFlats.map((day) {
             return MultiSelectItem<String>(day, day);
           }).toList(),
           initialValue: _selectedFlats,
           selectedColor: Colors.teal,
+          onSelectionChanged: (value) {
+            setState(() {
+              if(value.contains('Tüm Daireler')) {
+                value.clear();
+                value.addAll(flats);
+              }
+            });},
         );
       },
     );

@@ -53,7 +53,7 @@ class WelcomeScreenState extends State<WelcomeScreen> {
               image: DecorationImage(
                 image: AssetImage('images/background.jpg'),
                 fit: BoxFit.cover,
-                opacity: 0.5,
+                opacity: 0.4,
               ),
             ),
             child: Center(
