@@ -29,7 +29,7 @@ class YardimScreenState extends State<YardimScreen> {
   final List<List<String>> _nestedButtonTexts = [
     ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü', 'Ödeme İşlemleri' ],
     ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modülü', 'Çöp Modülü', 'Ödeme İşlemleri'],
-    ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü', 'Ödeme İşlemleri'],
+    ['Kayıt Olma / Giriş Yapma','Genel Bilgiler','Alışveriş Modulü', 'Çöp Modulü'],
   ];
 
   final List<List<Widget>> _nestedTextContents = [
@@ -200,7 +200,8 @@ class YardimScreenState extends State<YardimScreen> {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Apartman sakini, kapıcıya sipariş vermek için ilk olarak ',
+                    'Apartman sakini, kapıcıya sipariş vermek için ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                        'butonuna, daha sonra da açılan sayfada "Kapıcıya Alışveriş Listesi" butonuna tıklamalıdır. ',
                     style: TextStyle(fontSize: 16),
                     softWrap: true, // Allow the text to wrap to the next line
                   ),
@@ -216,8 +217,312 @@ class YardimScreenState extends State<YardimScreen> {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Uygulamaya daha önce kayıt yapmış bir kullanıcı, telefon numarasını ve'
-                        ' telefonuna sms olarak gelen kodu girerek uygulamaya giriş yapabilir.',
+                    '"Listeler" ekranını görüntüleyen kullanıcı, eğer daha önce hiç liste oluşturmadıysa '
+                        '"Liste Oluştur" butonuna tıkladıktan sonra, '
+                        'listeye isim vererek, "Zaman Seçiniz" butonuyla siparişin tekrarlanma sıklığını '
+                        'istenilen günleri seçerek belirleyip "Oluştur" butonuna tıklayıp alışveriş listesini oluşturabilir. ',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    ' "Yeni Liste" ekranında kullanıcı, uygulamaya tanımlanmış istediği ürünün adını seçebilir ya da "Diğer" '
+                        'seçeneğine tıklayarak istediği ürünü çıkan boşluğa yazabilir. "+", "-" tuşlarıyla ürün adedi '
+                        'belirlenir. Eğer kullanıcının kapıcıya belirtmek istediği bir detay varsa "Not" kısmına yazabilir. '
+                        'Kullanıcı ürününün belli bir yerden alınmasını istiyor ise "Yeri Seçiniz" kısmından uygulamaya tanımlanmış '
+                        'yerlerden birini seçebilir veya "Diğer" seçeneğine tıklayarak açılan boşluğa alışveriş yerini yazabilir. "Listeye Ekle" '
+                        'butonuyla ürün listeye eklenir. Daha sonra istenilen diğer ürünler için kullanıcı aynı işlemleri tekrarlamalıdır.'
+                        ' Tüm ürünler eklendikten sonra "Liste Oluştur" butonuna tıklayarak kullanıcı alışveriş listesini oluşturmayı tamamlar. '
+                        'Oluşturulan listeler "Listeler" ekranında sipariş gününe göre gösterilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.delete,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman sakini, yukarıda gösterilen ve "Listeler" ekranında oluşturulmuş her listenin '
+                            'yanında bulunan butona tıklayarak listeleri silebilir. Eğer liste birkaç gün için oluşturulmuşsa '
+                            've bir günden silindiyse diğer günlerden silinmez. Listeyi oluşturulan her günden silmek için'
+                            ' silme işlemi her gün için ayrı ayrı yapılmalıdır.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.edit,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                          'Daha önce oluşturulmuş bir listeyi görüntülemek veya düzenlemek için, "Listeler" ekranından düzenlenmek istenen listenin'
+                          ' üzerine tıklanmalıdır. Açılan ekranda, yukarıda gösterilen ve her ürün bilgisi kutucuğunun yanında '
+                              'bulunan butona tıklanılarak değiştirilmek istenilen ürün bilgisi değiştirilebilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.check,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ürün bilgileri değiştirildikten sonra yukarıda gösterilen ve değiştirilen ürün bilgisi kutucuğunun yanında '
+                            'bulunan butona tıklayarak değişiklikler kayıt edilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Listeler" ekranının alt kısmında sakin anlık bütçesini görüntüleyebilir. '
+                        'Kapıcı dağıtım esnasında, sakinden aldığı ücreti uygulamaya girer. Eğer sakin eksik ödeme yaptıysa '
+                        '"bütçeniz" kısmında "kırmızı" renkte kapıcıya olan borcunu görüntüler. Eğer sakin sonraki alışverişler '
+                        'için kapıcıya ekstra para verdiyse, "bütçeniz" kısmında "yeşil" renkte var olan parasını görüntüleyebilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+
+          ],
+        ),
+
+      ),
+
+      // Apartman Sakini Çöp Modülü
+
+       Expanded(
+        child: Column(
+          children: [
+
+            Column(
+              children: [
+                Container(
+                  height: 80,
+                  width: 250,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Image.asset(
+                    "images/çöpüm_var.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman Sakini, çöpü olduğunu kapıcıya bildirmek için, ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                            'butonuna basmalıdır. Açılan sayfada, yukarıdaki resimde gösterildiği gibi '
+                            '"Çöpüm var" kısmında "Evet" kısmına tıklamalıdır.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+  
+            Divider(),
+
+            Column(
+              children: [
+                Container(
+                  height: 80,
+                  width: 250,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Image.asset(
+                    "images/çöpüm_yok.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman Sakini, kapıcı çöpünü attığında bir bildirim alır ve yukarda gösterildiği gibi,'
+                            ' tekrardan, "Çöpüm var" '
+                            'butonunu "Hayır" seçeneğinde görüntüleyecektir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
+      ),
+
+      // Apartman Sakini Ödeme İşlemleri
+
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Sakini yöneticiye ödemesi gereken tutarları görüntülemek için ilk olarak ana ekranda '
+                        '"Bireysel Ödeme İşlemleri" butonuna, daha sonra "Ödeme Takip Ekranı" butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Ödeme Takip Ekranı" açıldığında ekranın en üst kısmında kullanıcının apartmana olan '
+                        'kendi toplam borcu görüntülenir. '
+                        'Toplam borcun altında, ayrı ayrı ödemeler, sebepleri, ödemeye ait açıklama, miktar  ve '
+                        'son ödeme tarihleri listelenir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kullanıcı son ödeme tarihine 2 gün kala hala ödemeyi yapmamışsa uygulamaya girdiğinde '
+                        'bu konu hakkında bir bildirim alır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Sakini ödemeyi yaptıktan sonra, ödemesinin durumunun "Ödendi" durumuna geçmesi için '
+                        'yönetici onayını beklemelidir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Sakini yöneticiye yaptığı geçmiş ödemeleri görüntülemek için ilk olarak ana ekranda '
+                        '"Bireysel Ödeme İşlemleri" butonuna, daha sonra "Yapılmış Ödemeler" butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Yapılmış Ödemeler" ekranı açıldığında ekranın en üst kısmında kullanıcının apartmana '
+                        'yaptığı ödemelerin toplam tutarı görüntülenir. '
+                        'Toplam tutarın altında, ayrı ayrı ödemeler, sebepleri, ödemeye adit açıklamalar listelenir.',
                     style: TextStyle(fontSize: 16),
                     softWrap: true, // Allow the text to wrap to the next line
                   ),
@@ -228,26 +533,6 @@ class YardimScreenState extends State<YardimScreen> {
           ],
         ),
 
-      ),
-
-      // Apartman Sakini Çöp Modülü
-
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
-        ],
-      ),
-
-      // Apartman Sakini Ödeme İşlemleri
-
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.4', style: TextStyle(fontSize: 16)),
-        ],
       ),
 
     ],
@@ -430,32 +715,358 @@ class YardimScreenState extends State<YardimScreen> {
 
       // Apartman Yöneticisi Alışveriş Modülü
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.2', style: TextStyle(fontSize: 16)),
-        ],
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman yöneticisi, kapıcıya sipariş vermek için ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                        'butonuna, daha sonra da açılan sayfada "Kapıcıya Alışveriş Listesi" butonuna tıklamalıdır. ',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Listeler" ekranını görüntüleyen yönetici, eğer daha önce hiç liste oluşturmadıysa '
+                        '"Liste Oluştur" butonuna tıkladıktan sonra, '
+                        'listeye isim vererek, "Zaman Seçiniz" butonuyla siparişin tekrarlanma sıklığını '
+                        'istenilen günleri seçerek belirleyip "Oluştur" butonuna tıklayıp alışveriş listesini oluşturabilir. ',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    ' "Yeni Liste" ekranında kullanıcı, uygulamaya tanımlanmış istediği ürünün adını seçebilir ya da "Diğer" '
+                        'seçeneğine tıklayarak istediği ürünü çıkan boşluğa yazabilir. "+", "-" tuşlarıyla ürün adedi '
+                        'belirlenir. Eğer kullanıcının kapıcıya belirtmek istediği bir detay varsa "Not" kısmına yazabilir. '
+                        'Kullanıcı ürününün belli bir yerden alınmasını istiyor ise "Yeri Seçiniz" kısmından uygulamaya tanımlanmış '
+                        'yerlerden birini seçebilir veya "Diğer" seçeneğine tıklayarak açılan boşluğa alışveriş yerini yazabilir. "Listeye Ekle" '
+                        'butonuyla ürün listeye eklenir. Daha sonra istenilen diğer ürünler için kullanıcı aynı işlemleri tekrarlamalıdır.'
+                        ' Tüm ürünler eklendikten sonra "Liste Oluştur" butonuna tıklayarak kullanıcı alışveriş listesini oluşturmayı tamamlar. '
+                        'Oluşturulan listeler "Listeler" ekranında sipariş gününe göre gösterilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.delete,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman yöneticisi, yukarıda gösterilen ve "Listeler" ekranında oluşturulmuş her listenin '
+                            'yanında bulunan butona tıklayarak listeleri silebilir. Eğer liste birkaç gün için oluşturulmuşsa '
+                            've bir günden silindiyse diğer günlerden silinmez. Listeyi oluşturulan her günden silmek için'
+                            ' silme işlemi her gün için ayrı ayrı yapılmalıdır.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.edit,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Daha önce oluşturulmuş bir listeyi görüntülemek veya düzenlemek için, "Listeler" ekranından düzenlenmek istenen listenin'
+                            ' üzerine tıklanmalıdır. Açılan ekranda, yukarıda gösterilen ve her ürün bilgisi kutucuğunun yanında '
+                            'bulunan butona tıklanılarak değiştirilmek istenilen ürün bilgisi değiştirilebilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.check,color: Colors.red,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Ürün bilgileri değiştirildikten sonra yukarıda gösterilen ve değiştirilen ürün bilgisi kutucuğunun yanında '
+                            'bulunan butona tıklayarak değişiklikler kayıt edilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Listeler" ekranının alt kısmında yönetici anlık bütçesini görüntüleyebilir. '
+                        'Kapıcı dağıtım esnasında, yöneticiden aldığı ücreti uygulamaya girer. Eğer yönetici eksik ödeme yaptıysa '
+                        '"bütçeniz" kısmında "kırmızı" renkte kapıcıya olan borcunu görüntüler. Eğer yönetici sonraki alışverişler '
+                        'için kapıcıya ekstra para verdiyse, "bütçeniz" kısmında "yeşil" renkte var olan parasını görüntüleyebilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+
+          ],
+        ),
+
       ),
 
       // Apartman Yöneticisi Çöp Modülü
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
-        ],
+      Expanded(
+        child: Column(
+          children: [
+
+            Column(
+              children: [
+                Container(
+                  height: 80,
+                  width: 250,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Image.asset(
+                    "images/çöpüm_var.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman Yöneticisi, çöpü olduğunu kapıcıya bildirmek için, ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                            'butonuna basmalıdır. Açılan sayfada, yukarıdaki resimde gösterildiği gibi '
+                            '"Çöpüm var" kısmında "Evet" kısmına tıklamalıdır.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+
+            Divider(),
+
+            Column(
+              children: [
+                Container(
+                  height: 80,
+                  width: 250,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  child: Image.asset(
+                    "images/çöpüm_yok.png",
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Apartman Yöneticisi, kapıcı çöpünü attığında bir bildirim alır ve  yukarda gösterildiği gibi, '
+                            'tekrardan, "Çöpüm var" '
+                            'butonunu "Hayır" seçeneğinde görüntüleyecektir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
       ),
 
       // Apartman Yöneticisi Ödeme İşlemleri
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.4', style: TextStyle(fontSize: 16)),
-        ],
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Yöneticisi, sakinlere ödeme tanımlamak için ilk olarak ana ekranda '
+                        '"Bireysel Ödeme İşlemleri" butonuna, daha sonra "Ödeme Tanımlama Ekranı" butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Ödeme Tanımlama Ekranı" açıldığında yönetici, sırasıyla ödeme ismi, ödeme miktarı, ödeme açıklaması, '
+                        'ödemeyi yapacak daireler ve son ödeme tarihi kısımlarını doldurmalı, '
+                        'eğer ödemeyi tüm daireye tanımlayacaksa "tüm daireler" seçeneğini seçmeli '
+                        've tanımlamayı bitirdiğinde "Kaydet"'
+                        ' butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Yöneticisi, sakinlerin ödemelerini takip etmek için ilk olarak ana ekranda '
+                        '"Bireysel Ödeme İşlemleri" butonuna, daha sonra "Ödeme Takip Ekranı" butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Ödeme Takip Ekranı" açıldığında yönetici en üstte apartmanın genel borcunu, '
+                        'alt kısımda da her dairenin bütün ödemelerini listelenmiş olarak, isimlerini, '
+                        'ödemenin hangi dairelere ait olduğunu, ödemelerin son ödeme tarihlerini, miktarlarını '
+                        've açıklamalarını görüntüler.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.check,color: Colors.green,),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '"Ödeme Takip Ekranı" ekranında her ödemenin altında yukarıda gösterilen buton bulunur. '
+                            'Apartman sakinleri ödemeyi yaptığında yönetici bu butona tıklayarak ödemeleri onaylar. ',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Apartman Yöneticisi, sakinlerin yaptığı geçmiş ödemeleri görüntülemek için ilk olarak ana ekranda '
+                        '"Bireysel Ödeme İşlemleri" butonuna, daha sonra "Yapılmış Ödemeler" butonuna tıklamalıdır. Bu '
+                        'ekranda eski ödemeler, sebepleri, açıklamaları, miktarları ve ödemeleri yapan daireler görüntülenir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+          ],
+        ),
+
       ),
     ],
 
@@ -620,33 +1231,262 @@ class YardimScreenState extends State<YardimScreen> {
 
       // Kapıcı Alışveriş Modülü
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.2', style: TextStyle(fontSize: 16)),
-        ],
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kapıcı, verilen siparişleri görüntülemek için ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                        'butonuna, açılan sayfada "Kapıcıya Alışveriş Listesi" butonuna ve daha sonra da "Alım" '
+                        'butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Alım" ekranında kapıcı hangi alışveriş yerinde olduğuna göre'
+                        '"Market", "Fırın", "Manav" ve "Diğer" seçeneklerinden birini seçer. Yer seçimi yapan kapıcı açılan sayfada, '
+                        'seçilen yere göre alması gereken ürünler, ürünlerin adedi ve ürüne ait notları görüntüler. '
+                        'Kapıcı bu sayfada aldığı ürünlerin birim fiyatlarını girmeli ve "Fiyatları Kaydet" butonuna tıklamalıdır.'
+                        'Sayfadan çıkmak için "Kapat" butonuna tıklanır. Kapıcı bu şekilde sırasıyla bütün alışveriş yerlerindeki'
+                        ' ürünleri görüntüleyip sırasıyla alıp fiyatlarını girmelidir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kapıcı, alınan ürünleri dağıtmak için ilk olarak ana ekrandan "Kapıcı İşlemleri" '
+                        'butonuna, açılan sayfada "Kapıcıya Alışveriş Listesi" butonuna ve daha sonra da "Dağıtım" '
+                        'butonuna tıklamalıdır.  ',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle,color: Colors.green,),
+                    SizedBox(height: 20),
+                    Icon(Icons.close,color: Colors.red,),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '"Dağıtım ekranında" kapıcı sipariş bekleyen dairelerin olduğu katların yanında "yeşil" işaret,'
+                            ' sipariş bekleyen daire olmayan katları "kırmızı" işaretli olarak görüntüler. Ekranın en alt kısmında '
+                            'kapıcı anlık bütçesini görebilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.check_circle,color: Colors.green,),
+
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Sipariş bekleyen dairelerin olduğu kata tıklayan kapıcı, kattaki dairelerin listesini '
+                            'görüntürler. Sipariş bekleyen daireler, yukarıda gösterilen ve her sipariş bekleyen dairenin'
+                            'yanında bulunan yeşil işaretle diğer dairelerden ayrılır. Bir dairenin ekranına tıklandığında '
+                            'o dairenin kapıcıyla olan anlık bütçe durumu görüntülenebilir.'
+                            ' Siparişi olan dairenin butonuna tıklayınca,'
+                            ' kapıcı sakine vermesi gereken ürünleri, adetlerini,'
+                            'ürünlerin fiyatları, toplam sipariş ücretini görüntüler.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.edit,color: Colors.red,),
+
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Eğer kapıcı ürün yetersizliği nedeni ile siparişi eksik aldıysa, yukarıda gösterilen ve '
+                            'ürün adedinin yanında bulunan butona tıklayarak kullanıcıya verdiği ürün adedini değiştirebilir. '
+                            'Kapıcı değişikliği kayıt etmek için aynı butona tekrar tıklamalıdır.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kapıcı siparişi teslim edince, sakinden aldığı ücreti "verilen tutar" boşluğuna yazıp "Bakiye Hesapla" '
+                        'butonuna tıklarsa ekranın aşağısında bulunan "Bakiye" bölümünden anlık bakiyesini görüntüleyebilir. '
+                        'Eğer sakinden eksik ücret aldıysa bu kısım "yeşil" renkte, eğer sonraki siparişler için de kullanmak için'
+                        ' ekstra ücret aldıysa bu kısım "kırmızı" gözükür.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '"Daire Siparişi" ekranının en alt kısmında bulunan "Teslim Et" butonuna basarak kapıcı teslim ettiği bilgisini'
+                        ' uygulamaya işler. Bu daire artık kapıcıya siparişi yok olarak gösterilir.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+
+          ],
+        ),
+
       ),
 
       // Kapıcı Çöp Modülü
 
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.3', style: TextStyle(fontSize: 16)),
-        ],
+      const Expanded(
+        child: Column(
+          children: [
+
+            Row(
+              children: [
+                Icon(Icons.circle, size: 12, color: Colors.black),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kapıcı, apartman sakinlerinin ve yöneticilerinin çöp durumlarını görüntülemek için ilk olarak '
+                        'ana ekrandan "Kapıcı İşlemleri" butonuna, daha sonra açılan sayfada "Çöp Takibi" butonuna tıklamalıdır.',
+                    style: TextStyle(fontSize: 16),
+                    softWrap: true, // Allow the text to wrap to the next line
+                  ),
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.check_circle,color: Colors.green,),
+
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '"Çöp Takibi" ekranında kapıcı apartman katlarının listesini görüntüler. Çöpü olan dairelerin'
+                            ' katlarının yanında yukarıda gösterilen "yeşil" işaret bulunur.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            Divider(),
+
+            Column(
+              children: [
+                Icon(Icons.delete_forever,color: Colors.red,),
+
+                Row(
+                  children: [
+                    Icon(Icons.circle, size: 12, color: Colors.black),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '"Çöp Takibi" ekranında kapıcı, çöp olan katlardan birine tıkladığında o kattaki çöpü olan'
+                            ' dairelerin listesini görüntüler. Kapıcı çöpü attıktan sonra, yukarda gösterilen ve listede her '
+                            'dairenin yanında bulunan butona tıklayarak, ilgili dairenin çöpünü attığını uygulamaya işler. '
+                            'Bu işlemden sonra sakin ve yöneticilere çöplerinin atıldığına dair bildirim gönderilir.',
+                        style: TextStyle(fontSize: 16),
+                        softWrap: true, // Allow the text to wrap to the next line
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+
       ),
 
-      // Kapıcı Ödeme İşlemleri
-
-      Row(
-        children: [
-          Icon(Icons.circle, size: 12, color: Colors.black),
-          SizedBox(width: 8),
-          Text('Content for Nested Button 1.4', style: TextStyle(fontSize: 16)),
-        ],
-      ),
     ],
   ];
 
@@ -846,6 +1686,74 @@ class YardimScreenState extends State<YardimScreen> {
             ),
           ),
         ),
+      ),
+
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+
+          SizedBox(
+            width: 130,  // Adjust the width as needed
+            height: 60,  // Adjust the height as needed
+            child: FloatingActionButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Bize Ulaşın'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min, // Adjusts the column to the size of its children
+                        children: [
+                          SizedBox(height: 10.0), // Adds spacing between texts
+                          Text('Özlem Sevinç Ergül',style: TextStyle(fontWeight: FontWeight.bold),),
+                          SizedBox(height: 5.0), // Adds spacing between texts
+                          Text('ozlemergul0@gmail.com'),
+                          SizedBox(height: 10.0), // Adds spacing between texts
+                          Text('Doğa Ünal',style: TextStyle(fontWeight: FontWeight.bold),),
+                          SizedBox(height: 5.0), // Adds spacing between texts
+                          Text('doga.unal4635@gmail.com'),
+                          SizedBox(height: 10.0), // Adds spacing between texts
+                          Text('Duru Maye Acar',style: TextStyle(fontWeight: FontWeight.bold),),
+                          SizedBox(height: 5.0), // Adds spacing between texts
+                          Text('duru.maye.acar@gmail.com'),
+                          SizedBox(height: 10.0), // Adds spacing between texts
+                          Text('Erdem Kılıç',style: TextStyle(fontWeight: FontWeight.bold),),
+                          SizedBox(height: 5.0), // Adds spacing between texts
+                          Text('erdemkilic.iue@gmail.com'),
+                          SizedBox(height: 10.0), // Adds spacing between texts
+                          Text('Efe Furkan Aykut',style: TextStyle(fontWeight: FontWeight.bold),),
+                          SizedBox(height: 5.0), // Adds spacing between texts
+                          Text('aykutefefurkan@gmail.com'),
+                          // Add more Text widgets or any other widgets as needed
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Close'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              tooltip: 'Bize Ulaşın',
+              backgroundColor: Colors.teal,
+              child: const Text(
+                'Bize Ulaşın',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+
+          )
+
+
+
+        ],
+
       ),
     );
   }

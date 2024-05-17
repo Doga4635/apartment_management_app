@@ -9,6 +9,7 @@ import '../models/flat_model.dart';
 import '../models/user_model.dart';
 import '../utils/utils.dart';
 import '../services/auth_supplier.dart';
+import 'ana_menü_yardım_screen.dart';
 import 'multiple_flat_user_profile_screen.dart';
 
 class TrashTrackingScreen extends StatefulWidget {
@@ -107,6 +108,26 @@ class TrashTrackingScreenState extends State<TrashTrackingScreen> {
               ],
             ),
           ),
+        ),
+
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+
+            FloatingActionButton(
+              heroTag: "btn2",
+              onPressed: () {Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const YardimScreen()),
+              );},
+              tooltip: 'Yardım',
+              backgroundColor: Colors.teal,
+              child: const Icon(Icons.question_mark,
+                color: Colors.white,
+              ),
+            ),
+          ],
+
         ),
       ),
     );
